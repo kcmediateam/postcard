@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 
 // Change this to your real support inbox.
-const SUPPORT_EMAIL = "hello@postcard.app";
+const SUPPORT_EMAIL = "hello@radiatepost.com";
 
 export default function ContactPage() {
   const [name, setName] = useState("");

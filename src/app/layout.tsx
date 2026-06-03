@@ -18,10 +18,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://radiatepost.com";
+const TITLE = "Radiate — targeted direct mail, done for you";
+const DESCRIPTION =
+  "Design, mail, and measure postcard campaigns for real estate agents. Verified addresses, QR scan tracking, and per-piece pricing — self-service or full-service.";
+
 export const metadata: Metadata = {
-  title: "Radiate — targeted direct mail, done for you",
-  description:
-    "Design, mail, and measure postcard campaigns for real estate agents. Verified addresses, QR scan tracking, and per-piece pricing — self-service or full-service.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s · Radiate",
+  },
+  description: DESCRIPTION,
+  applicationName: "Radiate",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Radiate",
+    url: SITE_URL,
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
