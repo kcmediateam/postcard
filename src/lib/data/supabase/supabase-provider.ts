@@ -449,6 +449,33 @@ export const supabaseProvider: DataProvider = {
 
   async createCampaign(input: CreateCampaignInput): Promise<Campaign> {
     if (!input.name.trim()) throw new Error("Campaign name is required.");
+
+    // Immediate send → server route that creates real Lob postcards (QR +
+    // metadata) and debits credits. Scheduled → DB RPC (no send/debit yet).
+    if (input.send_now) {
+      const res = await fetch("/api/campaigns/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: input.name.trim(),
+          design_id: input.design_id,
+          contact_list_id: input.contact_list_id,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (json.error === "insufficient_credits") {
+          throw new InsufficientCreditsError(json.required, json.available);
+        }
+        if (json.error === "no_deliverable_contacts")
+          throw new Error("This list has no deliverable (verified) addresses to mail.");
+        if (json.error === "no_return_address")
+          throw new Error("Set your return address before sending.");
+        throw new Error(json.error || "Send failed.");
+      }
+      return json.campaign as Campaign;
+    }
+
     const { data, error } = await sb().rpc("create_campaign", {
       p_name: input.name.trim(),
       p_design_id: input.design_id,
