@@ -14,7 +14,12 @@ export default function LoginPage() {
   const router = useRouter();
   const { session, loading, signIn, signUp } = useData();
 
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(() =>
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("mode") === "signup"
+      ? "signup"
+      : "signin"
+  );
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +28,7 @@ export default function LoginPage() {
 
   // Already signed in? Send them into the app.
   useEffect(() => {
-    if (!loading && session) router.replace("/");
+    if (!loading && session) router.replace("/dashboard");
   }, [loading, session, router]);
 
   function switchMode(next: Mode) {
@@ -41,7 +46,7 @@ export default function LoginPage() {
       } else {
         await signIn(email, password);
       }
-      router.replace("/");
+      router.replace("/dashboard");
     } catch (err) {
       setError(
         err instanceof AuthError
@@ -79,9 +84,9 @@ export default function LoginPage() {
             ))}
           </ul>
         </div>
-        <p className="text-xs text-brand-200">
-          Mock preview — no real accounts, billing, or mail yet.
-        </p>
+        <a href="/" className="text-xs text-brand-200 hover:text-white">
+          ← Back to postcard.app
+        </a>
       </aside>
 
       {/* Form panel */}
@@ -166,11 +171,11 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Demo credentials helper (mock only) */}
-          <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-xs text-zinc-500">
-            <span className="font-medium text-zinc-600">Demo login:</span>{" "}
-            agent@demo.com · password
-          </div>
+          <p className="mt-6 text-center text-xs text-zinc-400">
+            <a href="/" className="hover:text-zinc-600">
+              ← Back to home
+            </a>
+          </p>
         </div>
       </main>
     </div>

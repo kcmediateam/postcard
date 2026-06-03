@@ -46,7 +46,7 @@ export default function OnboardingPage() {
       return;
     }
     if (hasReturnAddress(session.profile)) {
-      router.replace("/");
+      router.replace("/dashboard");
       return;
     }
     const p = session.profile;
@@ -89,7 +89,7 @@ export default function OnboardingPage() {
         return_zip: form.return_zip.trim(),
       });
       await refresh();
-      router.replace("/");
+      router.replace("/dashboard");
     } catch {
       setSubmitting(false);
     }
