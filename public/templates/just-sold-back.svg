@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" font-family="Geist, Arial, sans-serif">
+  <rect width="600" height="400" fill="#ffffff"/>
+  <rect x="0" y="0" width="600" height="10" fill="#0f766e"/>
+  <text x="40" y="70" fill="#15181e" font-size="24" font-weight="700">Just sold nearby</text>
+  <text x="40" y="104" fill="#52525b" font-size="16">I just helped a neighbor sell. If you're curious what</text>
+  <text x="40" y="128" fill="#52525b" font-size="16">your home is worth, a quick estimate is on me.</text>
+  <line x1="40" y1="170" x2="320" y2="170" stroke="#e4e4e7"/>
+  <text x="40" y="206" fill="#71717a" font-size="13" letter-spacing="2" font-weight="600">RETURN ADDRESS</text>
+  <text x="40" y="230" fill="#3f3f46" font-size="14">Jordan Avery · Avery Realty Group</text>
+  <text x="40" y="250" fill="#3f3f46" font-size="14">120 Market St, Austin, TX 78701</text>
+  <line x1="330" y1="40" x2="330" y2="360" stroke="#e4e4e7" stroke-dasharray="4 4"/>
+  <rect x="470" y="40" width="90" height="64" fill="none" stroke="#d4d4d8" stroke-dasharray="5 4"/>
+  <text x="515" y="78" text-anchor="middle" fill="#a1a1aa" font-size="12">STAMP</text>
+  <text x="360" y="200" fill="#3f3f46" font-size="15">[ Recipient address ]</text>
+  <text x="360" y="224" fill="#a1a1aa" font-size="13">Printed per contact at send</text>
+  <g transform="translate(360,270)">
+    <rect width="80" height="80" fill="#15181e"/>
+    <rect x="10" y="10" width="60" height="60" fill="#ffffff"/>
+    <rect x="18" y="18" width="44" height="44" fill="#15181e"/>
+    <rect x="28" y="28" width="24" height="24" fill="#ffffff"/>
+  </g>
+  <text x="452" y="318" fill="#71717a" font-size="13">Lob QR — scan</text>
+  <text x="452" y="336" fill="#71717a" font-size="13">tracking enabled</text>
+</svg>

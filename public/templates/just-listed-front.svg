@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" font-family="Geist, Arial, sans-serif">
+  <defs>
+    <linearGradient id="jl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2249c9"/>
+      <stop offset="1" stop-color="#1c326c"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#jl)"/>
+  <rect x="0" y="0" width="600" height="400" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="16"/>
+  <text x="48" y="96" fill="#bcd2ff" font-size="22" letter-spacing="6" font-weight="600">AVERY REALTY GROUP</text>
+  <text x="46" y="190" fill="#ffffff" font-size="74" font-weight="800" letter-spacing="-2">JUST LISTED</text>
+  <text x="48" y="240" fill="#d9e6ff" font-size="26" font-weight="500">123 Maple Avenue · 4 bd · 3 ba</text>
+  <g transform="translate(48,280)">
+    <rect width="220" height="56" rx="28" fill="#ffffff"/>
+    <text x="110" y="36" text-anchor="middle" fill="#1c326c" font-size="20" font-weight="700">See the listing →</text>
+  </g>
+  <g transform="translate(430,250)" fill="none" stroke="#8eb4ff" stroke-width="6" stroke-linejoin="round">
+    <path d="M10 70 L70 20 L130 70" />
+    <rect x="28" y="70" width="84" height="60" />
+    <rect x="58" y="96" width="24" height="34" fill="#8eb4ff"/>
+  </g>
+</svg>

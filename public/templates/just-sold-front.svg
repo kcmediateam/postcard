@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" font-family="Geist, Arial, sans-serif">
+  <defs>
+    <linearGradient id="js" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#134e4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#js)"/>
+  <g transform="rotate(-8 300 110)">
+    <rect x="120" y="70" width="360" height="86" rx="8" fill="#f59e0b"/>
+    <text x="300" y="130" text-anchor="middle" fill="#3a2300" font-size="58" font-weight="800" letter-spacing="2">SOLD</text>
+  </g>
+  <text x="300" y="232" text-anchor="middle" fill="#ffffff" font-size="30" font-weight="700">Another home sold in your neighborhood</text>
+  <text x="300" y="272" text-anchor="middle" fill="#99f6e4" font-size="22" font-weight="500">Curious what yours is worth?</text>
+  <g transform="translate(190,300)">
+    <rect width="220" height="56" rx="28" fill="#ffffff"/>
+    <text x="110" y="36" text-anchor="middle" fill="#134e4a" font-size="20" font-weight="700">Get a free estimate</text>
+  </g>
+  <text x="300" y="382" text-anchor="middle" fill="#5eead4" font-size="16" letter-spacing="4" font-weight="600">AVERY REALTY GROUP</text>
+</svg>
