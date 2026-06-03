@@ -140,13 +140,12 @@ export default function HomePage() {
       {/* Comparison */}
       <section className="bg-zinc-50">
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
-          <div className="mx-auto mb-10 max-w-xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">
-              Why agents switch to Radiate
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <h2 className="text-4xl font-bold tracking-tight text-zinc-900">
+              How Radiate compares
             </h2>
             <p className="mt-3 text-lg text-zinc-600">
-              One platform for design, mailing, tracking, and automation — without
-              the hidden fees or per-list charges.
+              Radiate vs. the platforms agents leave behind.
             </p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-medium text-brand-700">
               <span className="bg-radiate size-2 rounded-full" />
@@ -157,9 +156,25 @@ export default function HomePage() {
             <CompareTable />
           </div>
           <p className="mt-4 text-center text-xs text-zinc-400">
-            Based on publicly available information and customer feedback;
-            competitor offerings may change.
+            Competitor columns reflect publicly available information and quotes
+            verified June 2026. Where a capability couldn&apos;t be confirmed, it&apos;s
+            marked as such rather than assumed.
           </p>
+
+          {/* Simple, rolling credits */}
+          <div className="bg-radiate mx-auto mt-14 max-w-3xl rounded-2xl px-8 py-10 text-center text-white shadow-lg">
+            <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
+              Simple, rolling credits
+            </p>
+            <h3 className="mt-2 text-3xl font-bold tracking-tight">
+              One credit. One postcard. Everything included.
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/90">
+              Every credit covers First-Class printing, postage, premium UV stock,
+              and address verification. Credits are granted monthly and roll over —
+              unused credits stay in your wallet.
+            </p>
+          </div>
         </div>
       </section>
 

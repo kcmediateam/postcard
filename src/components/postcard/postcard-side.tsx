@@ -26,6 +26,13 @@ interface Colors {
   highlight: string;
   footerBg: string;
   footerText: string;
+  // bold blocking
+  headerBg: string;
+  headerText: string;
+  chipBg: string;
+  chipText: string;
+  priceBg: string;
+  priceText: string;
 }
 
 function themeColors(theme: DesignTheme, accent: string): Colors {
@@ -42,6 +49,12 @@ function themeColors(theme: DesignTheme, accent: string): Colors {
       highlight: accent,
       footerBg: accent,
       footerText: "#15181e",
+      headerBg: accent,
+      headerText: "#15181e",
+      chipBg: "#15181e",
+      chipText: accent,
+      priceBg: accent,
+      priceText: "#15181e",
     };
   }
   if (theme === "bold") {
@@ -50,13 +63,19 @@ function themeColors(theme: DesignTheme, accent: string): Colors {
       text: "#ffffff",
       sub: "rgba(255,255,255,0.9)",
       muted: "rgba(255,255,255,0.7)",
-      panel: "rgba(255,255,255,0.14)",
+      panel: "rgba(255,255,255,0.16)",
       line: "rgba(255,255,255,0.28)",
       badgeBg: "#ffffff",
       badgeText: accent,
       highlight: "#ffffff",
-      footerBg: "rgba(0,0,0,0.18)",
+      footerBg: "rgba(0,0,0,0.20)",
       footerText: "#ffffff",
+      headerBg: "rgba(0,0,0,0.18)",
+      headerText: "#ffffff",
+      chipBg: "#ffffff",
+      chipText: accent,
+      priceBg: "#ffffff",
+      priceText: accent,
     };
   }
   return {
@@ -71,6 +90,12 @@ function themeColors(theme: DesignTheme, accent: string): Colors {
     highlight: accent,
     footerBg: accent,
     footerText: "#ffffff",
+    headerBg: accent,
+    headerText: "#ffffff",
+    chipBg: "#ffffff",
+    chipText: accent,
+    priceBg: accent,
+    priceText: "#ffffff",
   };
 }
 
@@ -181,36 +206,95 @@ function Footer({
 }) {
   return (
     <g>
-      <rect x={0} y={356} width={600} height={44} fill={c.footerBg} />
-      <text x={28} y={374} fill={c.footerText} fontSize="13" fontWeight="700">
+      <rect x={0} y={352} width={600} height={48} fill={c.footerBg} />
+      <text x={28} y={376} fill={c.footerText} fontSize="16" fontWeight="800">
         {f.agent_name || "Your name"}
       </text>
-      <text x={28} y={390} fill={c.footerText} fontSize="11" opacity="0.85">
+      <text x={28} y={392} fill={c.footerText} fontSize="12" opacity="0.88" fontWeight="500">
         {[f.agent_phone, f.agent_email].filter(Boolean).join("   ·   ")}
       </text>
       {f.logo_url ? (
         <>
           <clipPath id={`lg-${uid}`}>
-            <rect x={500} y={363} width={76} height={30} />
+            <rect x={496} y={361} width={80} height={32} />
           </clipPath>
           <image
             href={f.logo_url}
-            x={500}
-            y={363}
-            width={76}
-            height={30}
+            x={496}
+            y={361}
+            width={80}
+            height={32}
             preserveAspectRatio="xMidYMid meet"
             clipPath={`url(#lg-${uid})`}
           />
         </>
       ) : (
         f.cta && (
-          <text x={572} y={382} textAnchor="end" fill={c.footerText} fontSize="11.5" fontWeight="600">
-            {f.cta}
+          <text x={572} y={381} textAnchor="end" fill={c.footerText} fontSize="13" fontWeight="700">
+            {f.cta} →
           </text>
         )
       )}
     </g>
+  );
+}
+
+function FullBleedPhotos({
+  photos,
+  top,
+  bottom,
+  c,
+  uid,
+}: {
+  photos: string[];
+  top: number;
+  bottom: number;
+  c: Colors;
+  uid: string;
+}) {
+  const cols = Math.min(3, photos.length || 1);
+  const gap = cols > 1 ? 6 : 0;
+  const h = bottom - top;
+  const wEach = (600 - gap * (cols - 1)) / cols;
+  return (
+    <>
+      {Array.from({ length: cols }).map((_, i) => {
+        const x = i * (wEach + gap);
+        const url = photos[i] ?? null;
+        if (!url) {
+          return (
+            <g key={i}>
+              <rect x={x} y={top} width={wEach} height={h} fill={c.panel} />
+              <path
+                d={`M${x + wEach / 2 - 18} ${top + h / 2 + 8} l18 -16 l18 16`}
+                fill="none"
+                stroke={c.muted}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx={x + wEach / 2 + 14} cy={top + h / 2 - 14} r={5} fill={c.muted} opacity={0.6} />
+            </g>
+          );
+        }
+        return (
+          <g key={i}>
+            <clipPath id={`fb-${uid}-${i}`}>
+              <rect x={x} y={top} width={wEach} height={h} />
+            </clipPath>
+            <image
+              href={url}
+              x={x}
+              y={top}
+              width={wEach}
+              height={h}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath={`url(#fb-${uid}-${i})`}
+            />
+          </g>
+        );
+      })}
+    </>
   );
 }
 
@@ -227,95 +311,102 @@ function ShowcaseFront({
 }) {
   const badge = KIND_LABEL[kind].toUpperCase();
   const hasHeadshot = Boolean(f.headshot_url);
-  const headlineLines = wrapText(f.headline || KIND_LABEL[kind], hasHeadshot ? 16 : 22, 2);
   const isMarket = kind === "market_update";
+  const isOpen = kind === "open_house";
+  const headlineLines = wrapText(
+    f.headline || KIND_LABEL[kind],
+    hasHeadshot ? 13 : 18,
+    2
+  );
+  const twoLine = headlineLines.length > 1;
+  const bandH = twoLine ? 134 : 104;
 
   const photos = [f.property_photo_url, f.property_photo_url_2, f.property_photo_url_3].filter(Boolean) as string[];
-  const cols = isMarket ? 0 : Math.min(3, photos.length || 1);
 
   return (
     <>
       <rect width="600" height="400" fill={c.bg} />
 
-      {/* header */}
-      <g>
-        <rect x={28} y={26} width={badge.length * 8.5 + 22} height={26} rx={13} fill={c.badgeBg} />
-        <text x={39} y={43} fill={c.badgeText} fontSize="12" fontWeight="700" letterSpacing="1.5">
-          {badge}
-        </text>
-      </g>
-      <text x={28} y={92} fill={c.text} fontSize="34" fontWeight="800" fontFamily={SERIF} letterSpacing="-0.5">
+      {/* ── header color block ── */}
+      <rect x={0} y={0} width={600} height={bandH} fill={c.headerBg} />
+      <rect x={28} y={22} width={badge.length * 9 + 28} height={28} rx={14} fill={c.chipBg} />
+      <text x={42} y={41} fill={c.chipText} fontSize="13" fontWeight="800" letterSpacing="2">
+        {badge}
+      </text>
+      <text
+        x={28}
+        fill={c.headerText}
+        fontSize="40"
+        fontWeight="800"
+        fontFamily={SERIF}
+        letterSpacing="-0.8"
+      >
         {headlineLines.map((l, i) => (
-          <tspan key={i} x={28} dy={i === 0 ? 0 : 36}>
+          <tspan key={i} x={28} y={twoLine ? 80 + i * 42 : 88}>
             {l}
           </tspan>
         ))}
       </text>
-      {f.subhead && (
-        <text x={28} y={headlineLines.length > 1 ? 132 : 116} fill={c.sub} fontSize="13.5">
-          {wrapText(f.subhead, hasHeadshot ? 44 : 60, 1)[0]}
-        </text>
+      {hasHeadshot && (
+        <Headshot url={f.headshot_url} cx={544} cy={bandH / 2 + 4} r={36} c={c} uid={`hs${uid}`} />
       )}
-      {hasHeadshot && <Headshot url={f.headshot_url} cx={548} cy={62} r={34} c={c} uid={`hs${uid}`} />}
 
-      {/* photo row OR market body */}
+      {/* ── body: market copy OR full-bleed photos ── */}
       {isMarket ? (
-        <text x={28} y={170} fill={c.sub} fontSize="14">
-          {wrapText(f.body, 70, 4).map((l, i) => (
-            <tspan key={i} x={28} dy={i === 0 ? 0 : 22}>
+        <text x={28} y={bandH + 38} fill={c.text} fontSize="17" fontWeight="500">
+          {wrapText(f.body, 56, 4).map((l, i) => (
+            <tspan key={i} x={28} dy={i === 0 ? 0 : 26}>
               {l}
             </tspan>
           ))}
         </text>
       ) : (
-        (() => {
-          const top = 150;
-          const h = 120;
-          const gap = 10;
-          const left = 28;
-          const total = 544;
-          const wEach = (total - gap * (cols - 1)) / cols;
-          return Array.from({ length: cols }).map((_, i) => (
-            <Photo
-              key={i}
-              url={photos[i] ?? null}
-              x={left + i * (wEach + gap)}
-              y={top}
-              w={wEach}
-              h={h}
-              c={c}
-              uid={`${uid}-${i}`}
-            />
-          ));
-        })()
+        <FullBleedPhotos photos={photos} top={bandH} bottom={296} c={c} uid={uid} />
       )}
 
-      {/* info band */}
-      {kind === "open_house" ? (
+      {/* ── chunky info block ── */}
+      {isOpen ? (
         <g>
-          <rect x={28} y={290} width={4} height={48} fill={c.highlight} />
-          <text x={44} y={308} fill={c.text} fontSize="16" fontWeight="700">
-            {f.event_date || "Date"}
+          <rect x={0} y={296} width={600} height={56} fill={c.priceBg} />
+          <text x={28} y={324} fill={c.priceText} fontSize="22" fontWeight="800">
+            {f.event_date || "This weekend"}
           </text>
-          <text x={44} y={330} fill={c.sub} fontSize="13">
-            {f.event_time || "Time"} · {f.property_address}
+          <text x={28} y={344} fill={c.priceText} fontSize="14" fontWeight="600" opacity="0.92">
+            {[f.event_time, f.property_address].filter(Boolean).join("  ·  ")}
           </text>
         </g>
-      ) : (
+      ) : f.price ? (
         <g>
-          {f.price && (
-            <text x={28} y={306} fill={c.highlight} fontSize="30" fontWeight="800">
-              {f.price}
-            </text>
-          )}
+          <rect x={0} y={296} width={258} height={56} fill={c.priceBg} />
+          <text x={28} y={335} fill={c.priceText} fontSize="34" fontWeight="800">
+            {f.price}
+          </text>
           {statsLine(f) && (
-            <text x={28} y={f.price ? 332 : 312} fill={c.sub} fontSize="13.5" fontWeight="600">
+            <text x={278} y={322} fill={c.text} fontSize="16" fontWeight="800">
               {statsLine(f)}
             </text>
           )}
           {f.property_address && (
-            <text x={f.price ? 300 : 28} y={f.price ? 306 : 336} fill={c.muted} fontSize="13">
-              {f.property_address}
+            <text x={278} y={343} fill={c.sub} fontSize="14" fontWeight="500">
+              {wrapText(f.property_address, 24, 1)[0]}
+            </text>
+          )}
+        </g>
+      ) : (
+        <g>
+          <rect x={0} y={296} width={600} height={56} fill={c.priceBg} />
+          {statsLine(f) ? (
+            <text x={28} y={331} fill={c.priceText} fontSize="22" fontWeight="800">
+              {statsLine(f)}
+            </text>
+          ) : (
+            <text x={28} y={331} fill={c.priceText} fontSize="20" fontWeight="800">
+              {wrapText(f.subhead || f.property_address || "", 46, 1)[0]}
+            </text>
+          )}
+          {f.property_address && statsLine(f) && (
+            <text x={572} y={331} textAnchor="end" fill={c.priceText} fontSize="14" fontWeight="600" opacity="0.92">
+              {wrapText(f.property_address, 26, 1)[0]}
             </text>
           )}
         </g>
@@ -336,37 +427,45 @@ function IntroFront({
   uid: string;
 }) {
   const portrait = f.headshot_url || f.property_photo_url;
+  const headLines = wrapText(f.headline || "Hi, I'm your neighbor", 18, 2);
   return (
     <>
       <rect width="600" height="400" fill={c.bg} />
-      {/* portrait left */}
+      {/* portrait left, full bleed */}
       {portrait ? (
         <>
           <clipPath id={`ip-${uid}`}>
-            <rect x={0} y={0} width={232} height={400} />
+            <rect x={0} y={0} width={244} height={400} />
           </clipPath>
-          <image href={portrait} x={0} y={0} width={232} height={400} preserveAspectRatio="xMidYMid slice" clipPath={`url(#ip-${uid})`} />
+          <image href={portrait} x={0} y={0} width={244} height={400} preserveAspectRatio="xMidYMid slice" clipPath={`url(#ip-${uid})`} />
         </>
       ) : (
-        <rect x={0} y={0} width={232} height={400} fill={c.panel} />
+        <rect x={0} y={0} width={244} height={400} fill={c.panel} />
       )}
+      {/* accent spine between photo and text */}
+      <rect x={244} y={0} width={10} height={400} fill={c.headerBg} />
 
-      {/* text right */}
-      <text x={262} y={86} fill={c.text} fontSize="30" fontWeight="800" fontFamily={SERIF} letterSpacing="-0.5">
-        {wrapText(f.headline || "Hi, I'm your neighbor", 22, 2).map((l, i) => (
-          <tspan key={i} x={262} dy={i === 0 ? 0 : 34}>
+      {/* headline */}
+      <text x={276} fill={c.text} fontSize="34" fontWeight="800" fontFamily={SERIF} letterSpacing="-0.6">
+        {headLines.map((l, i) => (
+          <tspan key={i} x={276} y={78 + i * 38}>
             {l}
           </tspan>
         ))}
       </text>
+      {/* subhead chip */}
       {f.subhead && (
-        <text x={262} y={132} fill={c.highlight} fontSize="14" fontWeight="600">
-          {wrapText(f.subhead, 38, 1)[0]}
-        </text>
+        <>
+          <rect x={276} y={headLines.length > 1 ? 132 : 96} width={wrapText(f.subhead, 30, 1)[0].length * 8.2 + 22} height={26} rx={13} fill={c.chipBg} />
+          <text x={288} y={(headLines.length > 1 ? 132 : 96) + 18} fill={c.chipText} fontSize="13" fontWeight="700">
+            {wrapText(f.subhead, 30, 1)[0]}
+          </text>
+        </>
       )}
-      <text x={262} y={170} fill={c.sub} fontSize="13.5">
-        {wrapText(f.body, 40, 7).map((l, i) => (
-          <tspan key={i} x={262} dy={i === 0 ? 0 : 21}>
+      {/* body */}
+      <text x={276} y={headLines.length > 1 ? 184 : 150} fill={c.sub} fontSize="15" fontWeight="500">
+        {wrapText(f.body, 36, 7).map((l, i) => (
+          <tspan key={i} x={276} dy={i === 0 ? 0 : 23}>
             {l}
           </tspan>
         ))}
@@ -402,14 +501,14 @@ function BackCard({
   return (
     <>
       <rect width="600" height="400" fill={c.bg} />
-      <rect x={0} y={0} width={600} height={10} fill={c.badgeBg} />
+      <rect x={0} y={0} width={600} height={14} fill={c.badgeBg} />
 
-      <text x={40} y={58} fill={c.text} fontSize="19" fontWeight="700" fontFamily={SERIF}>
-        {f.subhead || KIND_LABEL[kind]}
+      <text x={40} y={62} fill={c.text} fontSize="22" fontWeight="800" fontFamily={SERIF}>
+        {wrapText(f.subhead || KIND_LABEL[kind], 30, 1)[0]}
       </text>
-      <text x={40} y={88} fill={c.sub} fontSize="14">
+      <text x={40} y={92} fill={c.sub} fontSize="15" fontWeight="500">
         {bodyLines.map((l, i) => (
-          <tspan key={i} x={40} dy={i === 0 ? 0 : 21}>
+          <tspan key={i} x={40} dy={i === 0 ? 0 : 22}>
             {l}
           </tspan>
         ))}

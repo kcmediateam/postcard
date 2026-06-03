@@ -143,8 +143,13 @@ export interface CanvaDesign {
   editUrl: string | null;
 }
 
-export async function listDesigns(accessToken: string): Promise<CanvaDesign[]> {
-  const res = await fetch(`${API}/designs?limit=30`, {
+export async function listDesigns(
+  accessToken: string,
+  query?: string
+): Promise<CanvaDesign[]> {
+  const params = new URLSearchParams({ limit: "30" });
+  if (query && query.trim()) params.set("query", query.trim());
+  const res = await fetch(`${API}/designs?${params.toString()}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const json = await res.json().catch(() => ({}));

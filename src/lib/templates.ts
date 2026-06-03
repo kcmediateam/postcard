@@ -141,7 +141,7 @@ export const TEMPLATES: Template[] = [
     id: "tpl_open_house",
     name: "Open House",
     kind: "open_house",
-    theme: "light",
+    theme: "bold",
     accent: "#b45309",
     active: true,
     defaults: {
@@ -165,7 +165,7 @@ export const TEMPLATES: Template[] = [
     id: "tpl_market_update",
     name: "Market Update",
     kind: "market_update",
-    theme: "light",
+    theme: "bold",
     accent: "#3a63e6",
     active: true,
     defaults: {
