@@ -6,6 +6,7 @@ import type {
   CreditWallet,
   Design,
   DesignFields,
+  MailPiece,
   Profile,
   Session,
   Subscription,
@@ -143,6 +144,9 @@ export interface DataProvider {
   /** Per-campaign rollup of piece statuses + scans (dashboard). */
   getCampaignStats(campaignId: string): Promise<CampaignStats>;
 
+  /** Per-piece rows for a campaign (with recipient name) for the drill-in. */
+  listCampaignPieces(campaignId: string): Promise<CampaignPiece[]>;
+
   /**
    * Demo convenience: populate a realistic completed campaign (with design,
    * verified list, delivered pieces, and scans) for the signed-in agent so the
@@ -158,6 +162,10 @@ export interface CampaignStats {
   returned: number;
   failed: number;
   scans: number;
+}
+
+export interface CampaignPiece extends MailPiece {
+  contact_name: string;
 }
 
 export interface CampaignPreview {

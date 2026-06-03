@@ -625,6 +625,19 @@ export const mockProvider: DataProvider = {
     });
   },
 
+  async listCampaignPieces(campaignId: string) {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const rows = db.mail_pieces
+      .filter((p) => p.campaign_id === campaignId && p.profile_id === userId)
+      .map((p) => ({
+        ...p,
+        contact_name:
+          db.contacts.find((c) => c.id === p.contact_id)?.full_name ?? "—",
+      }));
+    return delay(rows);
+  },
+
   async seedSampleData(): Promise<void> {
     const db = loadDB();
     const userId = requireUserId(db);

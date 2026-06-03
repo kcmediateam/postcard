@@ -516,6 +516,22 @@ export const supabaseProvider: DataProvider = {
     };
   },
 
+  async listCampaignPieces(campaignId: string) {
+    const { data, error } = await sb()
+      .from("mail_pieces")
+      .select("*, contacts(full_name)")
+      .eq("campaign_id", campaignId)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => {
+      const row = r as Record<string, unknown>;
+      const contact = row.contacts as { full_name?: string } | null;
+      const { contacts: _omit, ...piece } = row;
+      void _omit;
+      return { ...piece, contact_name: contact?.full_name ?? "—" };
+    }) as unknown as Awaited<ReturnType<DataProvider["listCampaignPieces"]>>;
+  },
+
   async seedSampleData(): Promise<void> {
     // Server-side RPC (SECURITY DEFINER) so it works under the tightened ledger
     // RLS where clients can't insert credit transactions directly.
