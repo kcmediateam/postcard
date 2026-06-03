@@ -26,7 +26,16 @@ export type SubscriptionStatus =
 export type DesignSource = "uploaded" | "template";
 
 /** Built-in personalizable template layouts. */
-export type TemplateKind = "just_listed" | "just_sold" | "open_house";
+export type TemplateKind =
+  | "just_listed"
+  | "just_sold"
+  | "coming_soon"
+  | "open_house"
+  | "market_update"
+  | "neighbor_intro";
+
+/** Visual theme for a template. */
+export type DesignTheme = "light" | "dark" | "bold";
 
 /**
  * Personalization data for a template-based design. The postcard art is
@@ -40,7 +49,12 @@ export interface DesignFields {
   body: string; // back-of-card message
   cta: string;
   property_photo_url: string | null;
+  property_photo_url_2: string | null;
+  property_photo_url_3: string | null;
   headshot_url: string | null;
+  logo_url: string | null;
+  testimonial: string;
+  testimonial_author: string;
   price: string;
   beds: string;
   baths: string;
@@ -157,11 +171,14 @@ export interface Design {
   created_at: string;
 }
 
-/** templates — built-in personalizable layouts (seed 2–3). */
+/** templates — built-in personalizable layouts. */
 export interface Template {
   id: string;
   name: string;
   kind: TemplateKind;
+  theme: DesignTheme;
+  /** accent hex (overrides the theme default). */
+  accent: string;
   active: boolean;
   /** sample copy/property data to prefill the personalize form. */
   defaults: DesignFields;

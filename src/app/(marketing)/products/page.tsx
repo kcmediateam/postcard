@@ -39,13 +39,15 @@ export default function ProductsPage() {
             <div key={t.id} className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
               <PostcardPreview
                 kind={t.kind}
+                theme={t.theme}
+                accent={t.accent}
                 fields={t.defaults}
                 side="front"
                 profile={null}
               />
               <div className="px-4 py-3">
                 <div className="text-sm font-semibold text-zinc-900">
-                  {KIND_LABEL[t.kind]}
+                  {t.name}
                 </div>
                 <div className="text-xs text-zinc-500">Fully personalizable</div>
               </div>

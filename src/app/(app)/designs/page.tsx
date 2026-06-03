@@ -138,6 +138,8 @@ export default function DesignsPage() {
             <Card key={t.id} className="overflow-hidden">
               <PostcardPreview
                 kind={t.kind}
+                theme={t.theme}
+                accent={t.accent}
                 fields={t.defaults}
                 side="front"
                 profile={null}
@@ -286,6 +288,8 @@ function PersonalizeEditor({
   const { db, session } = useData();
   const profile = session?.profile ?? null;
   const isOpenHouse = template.kind === "open_house";
+  const usesCollage =
+    template.kind !== "neighbor_intro" && template.kind !== "market_update";
 
   const [name, setName] = useState(design?.name ?? template.name);
   const [fields, setFields] = useState<DesignFields>(
@@ -358,7 +362,7 @@ function PersonalizeEditor({
 
           <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
             <ImageDrop
-              label="Property photo"
+              label={usesCollage ? "Property photo 1" : "Photo"}
               value={fields.property_photo_url}
               onChange={(v) => set("property_photo_url", v)}
               maxDim={1400}
@@ -372,6 +376,32 @@ function PersonalizeEditor({
               hint="Square"
             />
           </div>
+
+          {usesCollage && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ImageDrop
+                label="Property photo 2 (optional)"
+                value={fields.property_photo_url_2}
+                onChange={(v) => set("property_photo_url_2", v)}
+                maxDim={1200}
+              />
+              <ImageDrop
+                label="Property photo 3 (optional)"
+                value={fields.property_photo_url_3}
+                onChange={(v) => set("property_photo_url_3", v)}
+                maxDim={1200}
+              />
+            </div>
+          )}
+
+          <ImageDrop
+            label="Brokerage logo (optional)"
+            value={fields.logo_url}
+            onChange={(v) => set("logo_url", v)}
+            maxDim={600}
+            aspect="aspect-[3/1]"
+            hint="Wide logo, transparent PNG works best"
+          />
 
           <TextField
             label="Headline"
@@ -452,6 +482,27 @@ function PersonalizeEditor({
 
           <fieldset className="rounded-lg border border-zinc-200 p-4">
             <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Testimonial (optional, shows on back)
+            </legend>
+            <div className="space-y-3">
+              <textarea
+                rows={2}
+                value={fields.testimonial}
+                onChange={(e) => set("testimonial", e.target.value)}
+                placeholder="Great agent — sold our house in under a month!"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+              />
+              <TextField
+                label="Attribution"
+                placeholder="John, Client"
+                value={fields.testimonial_author}
+                onChange={(e) => set("testimonial_author", e.target.value)}
+              />
+            </div>
+          </fieldset>
+
+          <fieldset className="rounded-lg border border-zinc-200 p-4">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Your contact info
             </legend>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -499,6 +550,8 @@ function PersonalizeEditor({
           <div className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
             <PostcardPreview
               kind={template.kind}
+              theme={template.theme}
+              accent={template.accent}
               fields={fields}
               side={side}
               profile={profile}

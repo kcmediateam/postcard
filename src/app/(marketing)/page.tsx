@@ -58,6 +58,8 @@ export default function HomePage() {
           <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 shadow-xl lg:hidden">
             <PostcardPreview
               kind={byKind("just_listed").kind}
+              theme={byKind("just_listed").theme}
+              accent={byKind("just_listed").accent}
               fields={byKind("just_listed").defaults}
               side="front"
               profile={null}
@@ -184,7 +186,7 @@ function FanCard({ kind, className = "" }: { kind: string; className?: string })
     <div
       className={`absolute w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl ${className}`}
     >
-      <PostcardPreview kind={t.kind} fields={t.defaults} side="front" profile={null} />
+      <PostcardPreview kind={t.kind} theme={t.theme} accent={t.accent} fields={t.defaults} side="front" profile={null} />
     </div>
   );
 }
