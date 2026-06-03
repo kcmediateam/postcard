@@ -38,7 +38,7 @@ export function MarketingFooter() {
       </div>
       <div className="border-t border-zinc-100">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-xs text-zinc-400 sm:flex-row">
-          <span>© {new Date().getFullYear()} Postcard. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Radiate. All rights reserved.</span>
           <span>Built for agents who farm neighborhoods.</span>
         </div>
       </div>

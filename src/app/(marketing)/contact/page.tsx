@@ -16,7 +16,7 @@ export default function ContactPage() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const subject = encodeURIComponent(`Postcard inquiry from ${name || "a visitor"}`);
+    const subject = encodeURIComponent(`Radiate inquiry from ${name || "a visitor"}`);
     const body = encodeURIComponent(`${message}\n\n— ${name}\n${email}`);
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
     setSent(true);

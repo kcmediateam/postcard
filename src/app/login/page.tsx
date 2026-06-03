@@ -60,11 +60,11 @@ export default function LoginPage() {
   return (
     <div className="flex flex-1">
       {/* Brand / marketing panel */}
-      <aside className="relative hidden w-1/2 flex-col justify-between bg-brand-700 p-12 text-white lg:flex">
-        <Logo className="[&_span:last-child]:text-white" />
+      <aside className="bg-radiate relative hidden w-1/2 flex-col justify-between p-12 text-white lg:flex">
+        <Logo variant="light" />
         <div className="max-w-md">
           <h1 className="text-3xl font-semibold leading-tight tracking-tight">
-            Postcard campaigns that prove their worth.
+            Targeted direct mail, done for you.
           </h1>
           <p className="mt-4 text-brand-100">
             Design it, upload your list, and send tracked postcards in minutes.
@@ -84,8 +84,8 @@ export default function LoginPage() {
             ))}
           </ul>
         </div>
-        <a href="/" className="text-xs text-brand-200 hover:text-white">
-          ← Back to postcard.app
+        <a href="/" className="text-xs text-white/70 hover:text-white">
+          ← Back to radiate.app
         </a>
       </aside>
 

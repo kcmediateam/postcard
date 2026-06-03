@@ -10,7 +10,7 @@ import {
 } from "@/lib/billing";
 
 export const metadata: Metadata = {
-  title: "Pricing — Postcard",
+  title: "Pricing — Radiate",
   description:
     "Subscribe monthly for the best per-credit rate, or buy one-time add-on packs. One credit sends one postcard.",
 };
@@ -146,7 +146,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="bg-brand-700">
+      <section className="bg-radiate">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-6 py-14 text-center sm:flex-row sm:text-left">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
             Start with as little as one postcard.

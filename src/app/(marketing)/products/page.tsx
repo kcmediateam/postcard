@@ -5,7 +5,7 @@ import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { TEMPLATES, KIND_LABEL } from "@/lib/templates";
 
 export const metadata: Metadata = {
-  title: "Products — Postcard",
+  title: "Products — Radiate",
   description:
     "Personalizable postcard templates, QR-tracked mail, and flexible credits or subscriptions.",
 };

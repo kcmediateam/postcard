@@ -1,20 +1,25 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
 
-  /* Brand + surface tokens (real-estate SaaS: calm, professional) */
-  --color-brand-50: #eef4ff;
-  --color-brand-100: #d9e6ff;
-  --color-brand-200: #bcd2ff;
-  --color-brand-300: #8eb4ff;
-  --color-brand-400: #598bff;
-  --color-brand-500: #3563e9;
-  --color-brand-600: #2249c9;
-  --color-brand-700: #1c3ba3;
-  --color-brand-800: #1c3585;
-  --color-brand-900: #1c326c;
+  /* Radiate brand — blue anchored on #4A7BF7 (the gradient midpoint / favicon). */
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #dbe6ff;
+  --color-brand-200: #c2d4ff;
+  --color-brand-300: #98b6fe;
+  --color-brand-400: #6f97fb;
+  --color-brand-500: #4a7bf7;
+  --color-brand-600: #3a63e6;
+  --color-brand-700: #2f4ec2;
+  --color-brand-800: #2a429b;
+  --color-brand-900: #25386f;
+
+  /* Radiate gradient stops (135deg: purple -> blue -> teal). */
+  --color-grad-from: #6c3ce1;
+  --color-grad-via: #4a7bf7;
+  --color-grad-to: #2ec4b6;
 }
 
 :root {
@@ -25,6 +30,29 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Radiate signature gradient (logo tile, hero/CTA panels). */
+.bg-radiate {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-grad-from) 0%,
+    var(--color-grad-via) 50%,
+    var(--color-grad-to) 100%
+  );
+}
+
+/* Gradient wordmark/text accent. */
+.text-radiate {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-grad-from) 0%,
+    var(--color-grad-via) 50%,
+    var(--color-grad-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

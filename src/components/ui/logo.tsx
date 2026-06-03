@@ -1,34 +1,56 @@
-export function Logo({ className = "" }: { className?: string }) {
+/** Radiate mark — an envelope with radiating ripples. Uses currentColor. */
+export function RadiateMark({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span className="grid size-8 place-items-center rounded-lg bg-brand-600 text-white shadow-sm">
-        {/* simple postcard glyph */}
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-        >
-          <rect
-            x="3"
-            y="6"
-            width="18"
-            height="12"
-            rx="2"
-            stroke="currentColor"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M13 10h5M13 13h5M7 10.5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        </svg>
-      </span>
-      <span className="text-lg font-semibold tracking-tight text-zinc-900">
-        Postcard
+    <svg
+      viewBox="0 0 40 40"
+      fill="none"
+      stroke="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* radiating ripples */}
+      <circle cx="20" cy="20" r="17" strokeWidth="1.6" opacity="0.25" />
+      <circle cx="20" cy="20" r="13" strokeWidth="1.6" opacity="0.5" />
+      <circle cx="20" cy="20" r="9.2" strokeWidth="1.6" opacity="0.8" />
+      {/* envelope */}
+      <rect x="11" y="14.5" width="18" height="12" rx="2.2" strokeWidth="2" />
+      <path
+        d="M11.6 15.8 20 22l8.4-6.2"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Radiate lockup. `default` = gradient tile + dark wordmark (light backgrounds).
+ * `light` = white mark + white wordmark (for dark / gradient panels).
+ */
+export function Logo({
+  className = "",
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "light";
+}) {
+  const light = variant === "light";
+  return (
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      {light ? (
+        <RadiateMark className="size-8 text-white" />
+      ) : (
+        <span className="bg-radiate grid size-8 place-items-center rounded-[9px] shadow-sm">
+          <RadiateMark className="size-5 text-white" />
+        </span>
+      )}
+      <span
+        className={`text-[19px] font-medium tracking-tight ${
+          light ? "text-white" : "text-zinc-900"
+        }`}
+      >
+        Radiate
       </span>
     </span>
   );

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Services — Postcard",
+  title: "Services — Radiate",
   description:
     "Self-service and full-service postcard campaigns: design, list building, address verification, delivery and QR-scan tracking.",
 };

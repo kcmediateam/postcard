@@ -5,7 +5,7 @@ import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
-  title: "Postcard — tracked direct mail for real estate agents",
+  title: "Radiate — targeted direct mail for real estate agents",
   description:
     "Design, mail, and measure postcard campaigns. Verified addresses, QR scan tracking, and per-piece pricing — self-service or full-service.",
 };
@@ -23,7 +23,7 @@ export default function HomePage() {
               Direct mail that proves its ROI
             </span>
             <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-zinc-900 sm:text-5xl">
-              Postcard campaigns that close deals.
+              Direct mail that closes deals.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-zinc-600">
               Design a postcard, pick (or let us build) your mailing list, and
@@ -136,7 +136,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA band */}
-      <section className="bg-brand-700">
+      <section className="bg-radiate">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-6 py-14 text-center sm:flex-row sm:text-left">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-white">
