@@ -28,6 +28,8 @@ export default function DesignsPage() {
   const [mode, setMode] = useState<Mode>({ type: "list" });
   const [chooserOpen, setChooserOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [canvaOpen, setCanvaOpen] = useState(false);
+  const [flash, setFlash] = useState<string | null>(null);
   const [preview, setPreview] = useState<Design | null>(null);
 
   const reload = useCallback(async () => {
@@ -40,6 +42,33 @@ export default function DesignsPage() {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Returned from the Canva OAuth redirect.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const canva = params.get("canva");
+    if (!canva) return;
+    window.history.replaceState({}, "", "/designs");
+    if (canva === "connected") {
+      setFlash("Canva connected — pick a design to import.");
+      setCanvaOpen(true);
+    } else if (canva === "error") {
+      setFlash("Couldn't connect to Canva. Please try again.");
+    }
+  }, []);
+
+  // Open the Canva picker if connected, else start the OAuth connect flow.
+  async function openCanva() {
+    setChooserOpen(false);
+    try {
+      const res = await fetch("/api/canva/status");
+      const json = await res.json();
+      if (json.connected) setCanvaOpen(true);
+      else window.location.href = "/api/canva/connect";
+    } catch {
+      window.location.href = "/api/canva/connect";
+    }
+  }
 
   async function handleDelete(design: Design) {
     if (!window.confirm(`Delete "${design.name}"?`)) return;
@@ -68,6 +97,12 @@ export default function DesignsPage() {
         description="Personalize a template with your photos and property details, or upload your own art. You'll pick a design when creating a campaign."
         action={<Button onClick={() => setChooserOpen(true)}>New design</Button>}
       />
+
+      {flash && (
+        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-800">
+          {flash}
+        </div>
+      )}
 
       {!loaded ? (
         <div className="mt-10 text-sm text-zinc-400">Loading…</div>
@@ -163,20 +198,25 @@ export default function DesignsPage() {
             </Card>
           ))}
         </div>
-        <div className="mt-5 flex items-center justify-between rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3">
           <span className="text-sm text-zinc-600">
             Already have finished artwork?
           </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setChooserOpen(false);
-              setUploadOpen(true);
-            }}
-          >
-            Upload your own
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" onClick={openCanva}>
+              Import from Canva
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setChooserOpen(false);
+                setUploadOpen(true);
+              }}
+            >
+              Upload your own
+            </Button>
+          </div>
         </div>
       </Modal>
 
@@ -189,8 +229,133 @@ export default function DesignsPage() {
         }}
       />
 
+      <CanvaImportModal
+        open={canvaOpen}
+        onClose={() => setCanvaOpen(false)}
+        onImported={async () => {
+          setCanvaOpen(false);
+          await reload();
+        }}
+      />
+
       <PreviewModal design={preview} onClose={() => setPreview(null)} />
     </div>
+  );
+}
+
+interface CanvaDesignItem {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+}
+
+function CanvaImportModal({
+  open,
+  onClose,
+  onImported,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onImported: () => void | Promise<void>;
+}) {
+  const [designs, setDesigns] = useState<CanvaDesignItem[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setDesigns(null);
+    setError(null);
+    fetch("/api/canva/designs")
+      .then(async (r) => {
+        const j = await r.json();
+        if (!r.ok) {
+          setError(
+            j.error === "not_connected"
+              ? "Not connected to Canva."
+              : "Couldn't load your Canva designs."
+          );
+          setDesigns([]);
+          return;
+        }
+        setDesigns(j.designs ?? []);
+      })
+      .catch(() => {
+        setError("Couldn't load your Canva designs.");
+        setDesigns([]);
+      });
+  }, [open]);
+
+  async function importDesign(d: CanvaDesignItem) {
+    setImporting(d.id);
+    setError(null);
+    try {
+      const r = await fetch("/api/canva/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ designId: d.id, title: d.title }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Import failed");
+      await onImported();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Import failed");
+      setImporting(null);
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Import from Canva" size="lg">
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {!designs ? (
+        <div className="py-8 text-sm text-zinc-400">
+          Loading your Canva designs…
+        </div>
+      ) : designs.length === 0 ? (
+        <div className="py-8 text-sm text-zinc-500">
+          No Canva designs found in your account.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {designs.map((d) => (
+            <Card key={d.id} className="overflow-hidden">
+              {d.thumbnail ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={d.thumbnail}
+                  alt={d.title}
+                  className="aspect-[3/2] w-full bg-zinc-50 object-cover"
+                />
+              ) : (
+                <div className="aspect-[3/2] w-full bg-zinc-100" />
+              )}
+              <div className="px-3 py-3">
+                <div className="truncate text-sm font-medium text-zinc-900">
+                  {d.title}
+                </div>
+                <Button
+                  className="mt-2"
+                  size="sm"
+                  fullWidth
+                  loading={importing === d.id}
+                  onClick={() => importDesign(d)}
+                >
+                  Import
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+      <p className="mt-4 text-xs text-zinc-400">
+        Tip: design a 2-page postcard (front + back) in Canva — page 1 becomes
+        the front, page 2 the back.
+      </p>
+    </Modal>
   );
 }
 
