@@ -140,6 +140,7 @@ export interface CanvaDesign {
   id: string;
   title: string;
   thumbnail: string | null;
+  editUrl: string | null;
 }
 
 export async function listDesigns(accessToken: string): Promise<CanvaDesign[]> {
@@ -152,6 +153,7 @@ export async function listDesigns(accessToken: string): Promise<CanvaDesign[]> {
     id: String(d.id),
     title: (d.title as string) || "Untitled design",
     thumbnail: (d.thumbnail as { url?: string } | undefined)?.url ?? null,
+    editUrl: (d.urls as { edit_url?: string } | undefined)?.edit_url ?? null,
   }));
 }
 

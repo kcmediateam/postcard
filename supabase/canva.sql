@@ -15,3 +15,6 @@ create table if not exists public.canva_connections (
 -- RLS on, with NO policies → clients can't touch tokens; the server uses the
 -- service-role key (which bypasses RLS) for the OAuth + import routes.
 alter table public.canva_connections enable row level security;
+
+-- Store the Canva editor link on imported designs (Edit-in-Canva round-trip).
+alter table public.designs add column if not exists external_edit_url text;

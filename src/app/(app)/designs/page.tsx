@@ -141,6 +141,16 @@ export default function DesignsPage() {
                       Edit
                     </button>
                   )}
+                  {d.external_edit_url && (
+                    <a
+                      href={d.external_edit_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
+                    >
+                      Edit in Canva
+                    </a>
+                  )}
                   <button
                     onClick={() => handleDelete(d)}
                     className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
@@ -247,6 +257,7 @@ interface CanvaDesignItem {
   id: string;
   title: string;
   thumbnail: string | null;
+  editUrl: string | null;
 }
 
 function CanvaImportModal({
@@ -293,7 +304,7 @@ function CanvaImportModal({
       const r = await fetch("/api/canva/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ designId: d.id, title: d.title }),
+        body: JSON.stringify({ designId: d.id, title: d.title, editUrl: d.editUrl }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Import failed");

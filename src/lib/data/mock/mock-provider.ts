@@ -357,6 +357,7 @@ export const mockProvider: DataProvider = {
       template_id: null,
       template_kind: null,
       fields: null,
+      external_edit_url: null,
       created_at: nowIso(),
     };
     db.designs.push(design);
@@ -382,6 +383,7 @@ export const mockProvider: DataProvider = {
       template_id: template.id,
       template_kind: template.kind,
       fields: { ...input.fields },
+      external_edit_url: null,
       created_at: nowIso(),
     };
     db.designs.push(design);
@@ -715,6 +717,7 @@ export const mockProvider: DataProvider = {
         agent_phone: "(512) 555-0142",
         agent_email: profile?.email ?? "",
       },
+      external_edit_url: null,
       created_at,
     };
     db.designs.push(design);

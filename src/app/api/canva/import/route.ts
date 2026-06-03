@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "unauthorized" }, { status: 401 });
 
-  const { designId, title } = await req.json().catch(() => ({}));
+  const { designId, title, editUrl } = await req.json().catch(() => ({}));
   if (!designId) return Response.json({ error: "missing_design" }, { status: 400 });
 
   const token = await getAccessToken(user.id);
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
       template_id: null,
       template_kind: null,
       fields: null,
+      external_edit_url: typeof editUrl === "string" ? editUrl : null,
     })
     .select("*")
     .single();

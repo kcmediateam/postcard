@@ -168,6 +168,8 @@ export interface Design {
   template_id: string | null;
   template_kind: TemplateKind | null;
   fields: DesignFields | null;
+  /** For Canva-imported designs: link back to the Canva editor (round-trip). */
+  external_edit_url: string | null;
   created_at: string;
 }
 
