@@ -13,7 +13,7 @@ import type {
 } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase/client";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
-import { CREDITS_PER_PIECE } from "@/lib/billing";
+import { creditCost } from "@/lib/billing";
 import {
   AuthError,
   InsufficientCreditsError,
@@ -523,7 +523,7 @@ export const supabaseProvider: DataProvider = {
         target_area: input.target_area.trim(),
         requested_quantity: input.quantity,
         piece_count: input.quantity,
-        credit_cost: input.quantity * CREDITS_PER_PIECE.managed,
+        credit_cost: creditCost(input.quantity, "managed"),
       })
       .select("*")
       .single();

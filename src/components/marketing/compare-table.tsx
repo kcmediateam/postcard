@@ -10,8 +10,8 @@ const ROWS: { feature: string; radiate: Cell; others: [Cell, Cell, Cell] }[] = [
   { feature: "Postcard mail tracking + QR scans", radiate: true, others: [false, false, "No tracking"] },
   { feature: "Client dashboard", radiate: true, others: [false, false, false] },
   { feature: "Monthly plans with volume price breaks", radiate: true, others: [false, "Pay-as-you-go only", false] },
-  { feature: "Rollover credits", radiate: true, others: [false, false, false] },
-  { feature: "Save & reuse your lists", radiate: true, others: ["—", "Pay per list, every time", "Pay per address"] },
+  { feature: "Rollover on unused monthly credits", radiate: true, others: [false, false, false] },
+  { feature: "Reusable lists — pay once per radius", radiate: true, others: ["Pay every time", "Pay per list, every time", "Pay per address"] },
   { feature: "Done-for-you list building", radiate: true, others: ["Generic lists", false, false] },
   { feature: "Scheduled & repeat sends", radiate: true, others: ["—", "—", "—"] },
   { feature: "CRM-triggered automation (listing status)", radiate: true, others: [false, false, false] },
@@ -36,13 +36,13 @@ function Cross() {
 function Cell({ v }: { v: Cell }) {
   if (v === true) return <Check />;
   if (v === false) return <Cross />;
-  return <span className="text-xs leading-tight text-zinc-400">{v}</span>;
+  return <span className="text-sm leading-tight text-zinc-400">{v}</span>;
 }
 
 export function CompareTable() {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse text-sm">
+      <table className="w-full min-w-[760px] border-collapse text-base">
         <thead>
           <tr>
             <th className="w-[34%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">

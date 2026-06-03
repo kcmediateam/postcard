@@ -9,7 +9,7 @@ import { TextField } from "@/components/ui/text-field";
 import { PostcardSide } from "@/components/postcard/postcard-side";
 import { useData } from "@/lib/data/data-context";
 import { InsufficientCreditsError } from "@/lib/data";
-import { CREDITS_PER_PIECE, type AudienceTier } from "@/lib/billing";
+import { CREDITS_PER_PIECE, creditCost, type AudienceTier } from "@/lib/billing";
 import type { Campaign, ContactList, Design } from "@/lib/types";
 import type { CampaignPreview } from "@/lib/data/provider";
 
@@ -82,7 +82,7 @@ export default function NewCampaignPage() {
   const selfPieces = preview?.deliverable ?? 0;
   const managedQty = Math.max(0, parseInt(quantity || "0", 10) || 0);
   const pieces = isManaged ? managedQty : selfPieces;
-  const cost = pieces * rate;
+  const cost = creditCost(pieces, audience);
   const remaining = balance - cost;
   const affordable = isManaged || timing === "schedule" || balance >= cost;
   const minDatetime = toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000));

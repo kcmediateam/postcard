@@ -14,7 +14,7 @@ import type {
   Subscription,
   Template,
 } from "@/lib/types";
-import { CREDITS_PER_PIECE, findCreditPack, findPlan } from "@/lib/billing";
+import { creditCost, findCreditPack, findPlan } from "@/lib/billing";
 import { US_STATES } from "@/lib/profile";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
 import {
@@ -640,7 +640,7 @@ export const mockProvider: DataProvider = {
       target_area: input.target_area.trim(),
       requested_quantity: input.quantity,
       piece_count: input.quantity,
-      credit_cost: input.quantity * CREDITS_PER_PIECE.managed,
+      credit_cost: creditCost(input.quantity, "managed"),
       created_at: nowIso(),
     };
     db.campaigns.push(campaign);

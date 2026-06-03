@@ -138,8 +138,8 @@ export default function PricingPage() {
                 We build the list for your target area —{" "}
                 <span className="font-medium text-zinc-900">
                   {CREDITS_PER_PIECE.managed} credits per postcard
-                </span>{" "}
-                for the done-for-you convenience.
+                </span>
+                . Pay once per radius, then re-send to it any time.
               </p>
             </div>
           </div>

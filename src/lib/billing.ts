@@ -72,10 +72,19 @@ export const PLANS: Plan[] = [
  */
 export const CREDITS_PER_PIECE = {
   self_service: 1,
-  managed: 2,
+  managed: 1.5,
 } as const;
 
 export type AudienceTier = keyof typeof CREDITS_PER_PIECE;
+
+/**
+ * Credit cost for a send. Managed (we build the list) is 1.5 credits/piece; the
+ * sourced list is reusable — a one-time fee per targeted radius, then re-send to
+ * it any time. Rounded up so the integer ledger never undercharges.
+ */
+export function creditCost(pieces: number, tier: AudienceTier): number {
+  return Math.ceil(pieces * CREDITS_PER_PIECE[tier]);
+}
 
 /**
  * Volume pricing — $/credit drops as you cross thresholds, so buying more is

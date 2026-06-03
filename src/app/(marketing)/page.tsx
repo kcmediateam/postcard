@@ -29,7 +29,7 @@ export default function HomePage() {
             <h1 className="mt-5 text-5xl font-semibold leading-[1.05] tracking-tight text-zinc-900">
               Mail that <span className="text-radiate">radiates</span> results.
             </h1>
-            <p className="mt-4 max-w-md text-lg text-zinc-600">
+            <p className="mt-4 max-w-md text-xl text-zinc-600">
               Tracked postcards for real estate — design, send, and measure in
               minutes.
             </p>
@@ -142,9 +142,13 @@ export default function HomePage() {
             <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">
               Why agents switch to Radiate
             </h2>
-            <p className="mt-3 text-zinc-600">
+            <p className="mt-3 text-lg text-zinc-600">
               One platform for design, mailing, tracking, and automation — without
               the hidden fees or per-list charges.
+            </p>
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-medium text-brand-700">
+              <span className="bg-radiate size-2 rounded-full" />
+              The only platform that rolls over unused monthly-plan credits
             </p>
           </div>
           <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">

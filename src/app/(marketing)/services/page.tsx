@@ -15,7 +15,7 @@ const SERVICES = [
   },
   {
     title: "Full-service list building",
-    body: "No list? Tell us the ZIP code or neighborhood and how many homes to reach. We source the audience, you approve, and we mail it for you.",
+    body: "No list? Tell us the ZIP or neighborhood and how many homes to reach. We source the audience — pay once per radius and re-send to that list any time, no re-buying.",
   },
   {
     title: "Design & personalization",

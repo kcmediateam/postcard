@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   CREDITS_PER_PIECE,
   BASE_PER_CREDIT,
+  creditCost,
   volumeRate,
   formatUsd,
 } from "@/lib/billing";
@@ -17,10 +18,9 @@ export function PricingCalculator() {
   const [qty, setQty] = useState(1000);
   const [managed, setManaged] = useState(false);
 
-  const rate = managed
-    ? CREDITS_PER_PIECE.managed
-    : CREDITS_PER_PIECE.self_service;
-  const credits = qty * rate;
+  const tier = managed ? "managed" : "self_service";
+  const rate = CREDITS_PER_PIECE[tier];
+  const credits = creditCost(qty, tier);
 
   const { perCredit, next } = volumeRate(credits);
   const cost = credits * perCredit;
@@ -81,9 +81,9 @@ export function PricingCalculator() {
             <span>{MIN}</span>
             <span>{MAX.toLocaleString()}+</span>
           </div>
-          <p className="mt-4 text-xs text-zinc-500">
+          <p className="mt-4 text-sm text-zinc-500">
             {managed
-              ? "We source the audience for your target area and mail it for you."
+              ? "We build your list for the target area — pay once per radius, then re-send to it any time."
               : "You bring the mailing list — the best per-piece rate."}
           </p>
         </div>

@@ -2,7 +2,7 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 import { createLobPostcard, type LobAddress } from "@/lib/lob/server";
 import { postcardFrontHtml, postcardBackHtml } from "@/lib/postcard/render-html";
 import { InsufficientCreditsError } from "@/lib/data/provider";
-import { CREDITS_PER_PIECE } from "@/lib/billing";
+import { creditCost } from "@/lib/billing";
 import type { Campaign, Contact, Design, Profile } from "@/lib/types";
 
 export interface SendOutcome {
@@ -33,7 +33,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   if (!campaignRow) throw new Error("campaign_not_found");
   const campaign = campaignRow as Campaign;
   const uid = campaign.profile_id;
-  const rate = CREDITS_PER_PIECE[campaign.audience_tier ?? "self_service"];
+  const tier = campaign.audience_tier ?? "self_service";
 
   const [{ data: designRow }, { data: profileRow }, { data: contactsData }] =
     await Promise.all([
@@ -84,7 +84,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
       .eq("profile_id", uid)
       .maybeSingle();
     const balance = (wallet?.balance as number) ?? 0;
-    const needed = contacts.length * rate;
+    const needed = creditCost(contacts.length, tier);
     if (balance < needed) {
       await admin.from("campaigns").update({ status: "failed" }).eq("id", campaignId);
       throw new InsufficientCreditsError(needed, balance);
@@ -147,12 +147,13 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   if (newPieces.length) await admin.from("mail_pieces").insert(newPieces);
 
   const totalPieces = done.size + newPieces.length;
+  const totalCost = creditCost(totalPieces, tier);
 
   // single debit per campaign, once there is at least one piece
   if (!existingDebit && totalPieces > 0) {
     await admin.from("credit_transactions").insert({
       profile_id: uid,
-      delta: -(totalPieces * rate),
+      delta: -totalCost,
       reason: "campaign_send",
       reference_id: campaignId,
     });
@@ -161,7 +162,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   const status: Campaign["status"] = totalPieces > 0 ? "sent" : "failed";
   await admin
     .from("campaigns")
-    .update({ status, piece_count: totalPieces, credit_cost: totalPieces * rate })
+    .update({ status, piece_count: totalPieces, credit_cost: totalCost })
     .eq("id", campaignId);
 
   return { sent: newPieces.length, failed, status };
