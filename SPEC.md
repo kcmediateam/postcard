@@ -23,7 +23,7 @@ We are building **frontend-first**. Milestone 1 builds the full UI against a typ
 - Email/password auth + agent accounts (each agent is their own tenant).
 - Stripe billing: per-piece credit purchases AND monthly subscription with credit rollover.
 - A credit/wallet system with a transaction ledger as the source of truth.
-- Upload own postcard design (front + back images), plus 2–3 built-in templates.
+- Upload own postcard design (front + back images), OR personalize a built-in template (2–3 layouts) by adding a headshot, property photo, headline/body copy, and property details (price, beds, baths, sqft, address) plus agent contact — composited onto the layout.
 - Upload contact list via CSV; verify addresses through Lob before sending.
 - Campaign creation with scheduled or immediate send.
 - Lob postcard sending, one piece per contact, with Lob's native QR code enabled per piece.
@@ -45,8 +45,8 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 - **credit_wallets** — id, profile_id, balance (integer credits), updated_at. One per agent.
 - **credit_transactions** — ledger. id, profile_id, delta (+/- integer), reason (enum: purchase, subscription_grant, rollover, campaign_send, refund, adjustment), reference_id, created_at. The wallet balance must always equal the sum of its transactions — never edit balance directly without writing a transaction.
 - **subscriptions** — id, profile_id, stripe_subscription_id, plan, status, current_period_start, current_period_end, monthly_credit_grant.
-- **designs** — id, profile_id, name, source (enum: uploaded, template), front_image_url, back_image_url, template_id (nullable), created_at.
-- **templates** — id, name, front_image_url, back_image_url, active. (Seed 2–3.)
+- **designs** — id, profile_id, name, source (enum: uploaded, template), front_image_url (nullable), back_image_url (nullable), template_id (nullable), template_kind (nullable), fields (jsonb, nullable), created_at. For source=uploaded the image URLs hold the art; for source=template the art is rendered from `fields` (personalization data: headline, subhead, body, cta, property_photo_url, headshot_url, price, beds, baths, sqft, property_address, event_date/time, agent_name/phone/email) onto the chosen `template_kind` layout.
+- **templates** — id, name, kind (enum: just_listed, just_sold, open_house), active, defaults (jsonb sample field values to prefill the personalize form). (Seed 2–3 personalizable layouts.)
 - **contact_lists** — id, profile_id, name, contact_count, created_at.
 - **contacts** — id, list_id, profile_id, full_name, address_line1, address_line2, city, state, zip, lob_verification_status (enum: unverified, verified, undeliverable), created_at.
 - **campaigns** — id, profile_id, name, design_id, contact_list_id, scheduled_at (nullable = send now), status (enum: draft, scheduled, sending, sent, failed, canceled), piece_count, credit_cost, created_at.
@@ -64,7 +64,7 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 
 ### Lob (mail + QR scan tracking)
 - Before a campaign sends, run each contact through Lob **address verification**; mark undeliverable ones and exclude them (don't charge credits for those).
-- On send (immediate or when the scheduler fires a scheduled campaign): for each deliverable contact, create a Lob postcard with the design's front/back and the to/from addresses, **with Lob's QR code feature enabled** on the piece.
+- On send (immediate or when the scheduler fires a scheduled campaign): for each deliverable contact, create a Lob postcard with the design's front/back and the to/from addresses, **with Lob's QR code feature enabled** on the piece. For uploaded designs the front/back are the stored images; for template designs, render the personalized layout (from `fields`) to an image/HTML at send time and use that as the front (the back carries the message + return address + QR).
 - **Stamp each Lob piece with metadata** containing our campaign_id and profile_id, so Lob events come back self-describing and reconciliation is easy.
 - Store the returned Lob id on the mail_piece. Debit one credit per piece created (one `credit_transactions` row total for the campaign, reason=campaign_send, delta = -piece_count).
 - **Use the Lob TEST key during all development** — it does not mail real pieces, and note that test-environment pieces do NOT emit tracking or scan events. Verify webhook wiring in test mode; verify real delivery/scan data only during the pre-launch live check.
@@ -84,7 +84,7 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 1. Sign up / log in.
 2. Onboarding: set return address (required before sending).
 3. Billing page: buy credits or subscribe; show current balance; Stripe customer portal link.
-4. Designs page: upload front/back, or pick a template.
+4. Designs page: personalize a template (upload headshot + property photo, enter headline/body/property details, live preview), or upload your own front/back.
 5. Contacts page: upload CSV, see verification results.
 6. New campaign: pick design + list + send-now or schedule; show credit cost and confirm.
 7. Dashboard: campaigns table with status, pieces, delivered, scans; credit balance widget.

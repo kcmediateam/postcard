@@ -25,6 +25,36 @@ export type SubscriptionStatus =
 
 export type DesignSource = "uploaded" | "template";
 
+/** Built-in personalizable template layouts. */
+export type TemplateKind = "just_listed" | "just_sold" | "open_house";
+
+/**
+ * Personalization data for a template-based design. The postcard art is
+ * rendered from these fields (so the agent's photos, copy, and property data
+ * are composited onto the chosen layout). Photos are stored as (downscaled)
+ * data URLs in the mock; the real backend would store Storage URLs.
+ */
+export interface DesignFields {
+  headline: string;
+  subhead: string;
+  body: string; // back-of-card message
+  cta: string;
+  property_photo_url: string | null;
+  headshot_url: string | null;
+  price: string;
+  beds: string;
+  baths: string;
+  sqft: string;
+  property_address: string;
+  // open house only
+  event_date: string;
+  event_time: string;
+  // agent contact (prefilled from profile, editable)
+  agent_name: string;
+  agent_phone: string;
+  agent_email: string;
+}
+
 export type AddressVerificationStatus =
   | "unverified"
   | "verified"
@@ -104,25 +134,33 @@ export interface Subscription {
   monthly_credit_grant: number;
 }
 
-/** designs — an agent's postcard (uploaded or from a template). */
+/**
+ * designs — an agent's postcard. Either:
+ *  - source "uploaded": front_image_url + back_image_url hold the art.
+ *  - source "template": template_id + template_kind + fields; art is rendered
+ *    from the fields onto the chosen layout.
+ */
 export interface Design {
   id: string;
   profile_id: string;
   name: string;
   source: DesignSource;
-  front_image_url: string;
-  back_image_url: string;
+  front_image_url: string | null;
+  back_image_url: string | null;
   template_id: string | null;
+  template_kind: TemplateKind | null;
+  fields: DesignFields | null;
   created_at: string;
 }
 
-/** templates — built-in designs to pick from (seed 2–3). */
+/** templates — built-in personalizable layouts (seed 2–3). */
 export interface Template {
   id: string;
   name: string;
-  front_image_url: string;
-  back_image_url: string;
+  kind: TemplateKind;
   active: boolean;
+  /** sample copy/property data to prefill the personalize form. */
+  defaults: DesignFields;
 }
 
 /** contact_lists — a named uploaded list. */

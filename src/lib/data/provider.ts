@@ -5,6 +5,7 @@ import type {
   CreditTransaction,
   CreditWallet,
   Design,
+  DesignFields,
   Profile,
   Session,
   Subscription,
@@ -74,21 +75,21 @@ export interface DataProvider {
   /** The agent's saved postcard designs, newest first. */
   listDesigns(): Promise<Design[]>;
 
-  /** Built-in templates available to pick from (active only). */
+  /** Built-in personalizable templates (active only). */
   listTemplates(): Promise<Template[]>;
 
   /**
    * Save an uploaded design (front + back).
    * Real impl: images go to Supabase Storage and the URLs are stored. Mock:
-   * accepts data URLs so the uploaded image is visible immediately.
+   * accepts (downscaled) data URLs so the uploaded image is visible immediately.
    */
   createDesignFromUpload(input: CreateUploadedDesignInput): Promise<Design>;
 
-  /** Create a design from a built-in template. */
-  createDesignFromTemplate(
-    templateId: string,
-    name?: string
-  ): Promise<Design>;
+  /** Create a personalized design from a template + filled fields. */
+  createTemplateDesign(input: CreateTemplateDesignInput): Promise<Design>;
+
+  /** Update a design's name and/or personalization fields. */
+  updateDesign(designId: string, patch: UpdateDesignInput): Promise<Design>;
 
   /** Delete one of the agent's designs. */
   deleteDesign(designId: string): Promise<void>;
@@ -190,6 +191,17 @@ export interface CreateUploadedDesignInput {
   name: string;
   front_image_url: string;
   back_image_url: string;
+}
+
+export interface CreateTemplateDesignInput {
+  name: string;
+  template_id: string;
+  fields: DesignFields;
+}
+
+export interface UpdateDesignInput {
+  name?: string;
+  fields?: DesignFields;
 }
 
 export interface NewContactInput {

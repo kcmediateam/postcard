@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextField } from "@/components/ui/text-field";
-import { PostcardImage } from "@/components/ui/postcard-image";
+import { PostcardSide } from "@/components/postcard/postcard-side";
 import { useData } from "@/lib/data/data-context";
 import { InsufficientCreditsError } from "@/lib/data";
 import type { Campaign, ContactList, Design } from "@/lib/types";
@@ -186,7 +186,7 @@ export default function NewCampaignPage() {
                           : "border-zinc-200 hover:border-zinc-300"
                       }`}
                     >
-                      <PostcardImage src={d.front_image_url} alt={d.name} />
+                      <PostcardSide design={d} side="front" />
                       <div className="truncate px-2.5 py-2 text-xs font-medium text-zinc-800">
                         {d.name}
                       </div>

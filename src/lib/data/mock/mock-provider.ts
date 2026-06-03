@@ -16,6 +16,7 @@ import type {
 } from "@/lib/types";
 import { findCreditPack, findPlan } from "@/lib/billing";
 import { US_STATES } from "@/lib/profile";
+import { TEMPLATES, findTemplate } from "@/lib/templates";
 import {
   AuthError,
   InsufficientCreditsError,
@@ -23,9 +24,11 @@ import {
   type CampaignStats,
   type CreateCampaignInput,
   type CreateContactListInput,
+  type CreateTemplateDesignInput,
   type CreateUploadedDesignInput,
   type DataProvider,
   type SignUpInput,
+  type UpdateDesignInput,
   type VerificationStats,
 } from "../provider";
 import { loadDB, nowIso, persist, uid } from "./store";
@@ -325,8 +328,7 @@ export const mockProvider: DataProvider = {
   },
 
   async listTemplates(): Promise<Template[]> {
-    const db = loadDB();
-    return delay(db.templates.filter((t) => t.active).map((t) => ({ ...t })));
+    return delay(TEMPLATES.filter((t) => t.active).map((t) => ({ ...t })));
   },
 
   async createDesignFromUpload(
@@ -346,6 +348,8 @@ export const mockProvider: DataProvider = {
       front_image_url: input.front_image_url,
       back_image_url: input.back_image_url,
       template_id: null,
+      template_kind: null,
+      fields: null,
       created_at: nowIso(),
     };
     db.designs.push(design);
@@ -353,25 +357,43 @@ export const mockProvider: DataProvider = {
     return delay({ ...design });
   },
 
-  async createDesignFromTemplate(
-    templateId: string,
-    name?: string
+  async createTemplateDesign(
+    input: CreateTemplateDesignInput
   ): Promise<Design> {
     const db = loadDB();
     const userId = requireUserId(db);
-    const template = db.templates.find((t) => t.id === templateId);
+    if (!input.name.trim()) throw new Error("Design name is required.");
+    const template = findTemplate(input.template_id);
     if (!template) throw new Error("Unknown template.");
     const design: Design = {
       id: uid("design"),
       profile_id: userId,
-      name: name?.trim() || template.name,
+      name: input.name.trim(),
       source: "template",
-      front_image_url: template.front_image_url,
-      back_image_url: template.back_image_url,
+      front_image_url: null,
+      back_image_url: null,
       template_id: template.id,
+      template_kind: template.kind,
+      fields: { ...input.fields },
       created_at: nowIso(),
     };
     db.designs.push(design);
+    persist();
+    return delay({ ...design });
+  },
+
+  async updateDesign(
+    designId: string,
+    patch: UpdateDesignInput
+  ): Promise<Design> {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const design = db.designs.find(
+      (d) => d.id === designId && d.profile_id === userId
+    );
+    if (!design) throw new Error("Design not found.");
+    if (patch.name !== undefined) design.name = patch.name.trim();
+    if (patch.fields !== undefined) design.fields = { ...patch.fields };
     persist();
     return delay({ ...design });
   },
@@ -602,16 +624,24 @@ export const mockProvider: DataProvider = {
     const userId = requireUserId(db);
     const created_at = nowIso();
 
-    // sample design (from a template if available)
-    const tpl = db.templates.find((t) => t.active);
+    // sample personalized template design, prefilled with the agent's contact
+    const profile = db.profiles.find((p) => p.id === userId);
+    const tpl = TEMPLATES[0];
     const design: Design = {
       id: uid("design"),
       profile_id: userId,
       name: "Sample · Just Listed",
-      source: tpl ? "template" : "uploaded",
-      front_image_url: tpl?.front_image_url ?? "/templates/just-listed-front.svg",
-      back_image_url: tpl?.back_image_url ?? "/templates/just-listed-back.svg",
-      template_id: tpl?.id ?? null,
+      source: "template",
+      front_image_url: null,
+      back_image_url: null,
+      template_id: tpl.id,
+      template_kind: tpl.kind,
+      fields: {
+        ...tpl.defaults,
+        agent_name: profile?.return_name ?? profile?.full_name ?? "",
+        agent_phone: "(512) 555-0142",
+        agent_email: profile?.email ?? "",
+      },
       created_at,
     };
     db.designs.push(design);

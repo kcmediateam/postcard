@@ -9,7 +9,6 @@ import type {
   Profile,
   Scan,
   Subscription,
-  Template,
 } from "@/lib/types";
 
 /** Mock-only credential record (never part of the real domain model). */
@@ -26,7 +25,6 @@ export interface MockDB {
   transactions: CreditTransaction[];
   subscriptions: Subscription[];
   designs: Design[];
-  templates: Template[];
   contact_lists: ContactList[];
   contacts: Contact[];
   campaigns: Campaign[];
@@ -38,7 +36,7 @@ export interface MockDB {
   current_user_id: string | null;
 }
 
-const STORAGE_KEY = "postcard.mockdb.v1";
+const STORAGE_KEY = "postcard.mockdb.v2";
 
 /** URL-safe-ish unique id. */
 export function uid(prefix = "id"): string {
@@ -105,37 +103,12 @@ function seed(): MockDB {
     },
   ];
 
-  const templates: Template[] = [
-    {
-      id: "tpl_just_listed",
-      name: "Just Listed",
-      front_image_url: "/templates/just-listed-front.svg",
-      back_image_url: "/templates/just-listed-back.svg",
-      active: true,
-    },
-    {
-      id: "tpl_just_sold",
-      name: "Just Sold",
-      front_image_url: "/templates/just-sold-front.svg",
-      back_image_url: "/templates/just-sold-back.svg",
-      active: true,
-    },
-    {
-      id: "tpl_open_house",
-      name: "Open House",
-      front_image_url: "/templates/open-house-front.svg",
-      back_image_url: "/templates/open-house-back.svg",
-      active: true,
-    },
-  ];
-
   return {
     profiles: [demoProfile],
     wallets: [demoWallet],
     transactions: demoTxns,
     subscriptions: [],
     designs: [],
-    templates,
     contact_lists: [],
     contacts: [],
     campaigns: [],
