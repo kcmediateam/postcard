@@ -164,3 +164,14 @@ export function resetDB(): void {
   cache = seed();
   persist();
 }
+
+/**
+ * Bridge for the Supabase provider during the incremental migration: point the
+ * mock store's "current user" at the real auth uid so the not-yet-migrated
+ * mock methods (wallet/designs/contacts/campaigns) operate on that user.
+ */
+export function setCurrentUser(userId: string | null): void {
+  const db = loadDB();
+  db.current_user_id = userId;
+  persist();
+}
