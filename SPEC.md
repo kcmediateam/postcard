@@ -69,6 +69,7 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 - **Stamp each Lob piece with metadata** containing our campaign_id and profile_id, so Lob events come back self-describing and reconciliation is easy.
 - Store the returned Lob id on the mail_piece. Debit one credit per piece created (one `credit_transactions` row total for the campaign, reason=campaign_send, delta = -piece_count).
 - **Use the Lob TEST key during all development** — it does not mail real pieces, and note that test-environment pieces do NOT emit tracking or scan events. Verify webhook wiring in test mode; verify real delivery/scan data only during the pre-launch live check.
+- **Lob test-mode quirk (dev only):** address *verification* returns canned results driven by trigger values (`address_line1`='deliverable'/'undeliverable', zip `11111`), while postcard *creation* still validates the destination address and rejects clearly-invalid ones. So in test mode a trigger-"verified" address can fail at send, and a real address fails verification — no single address satisfies both. On a LIVE key, real addresses verify and send normally. For reviewing the dashboard without a live key, "Load sample data" seeds pieces directly.
 
 ### Tracking & analytics (ingest, then segment in OUR app)
 - Lob does not know our tenant model. Segmentation by client/campaign happens in our app: we match every Lob event on the stored `lob_id` (and/or the metadata we stamped) to the right mail_piece → campaign → agent.
