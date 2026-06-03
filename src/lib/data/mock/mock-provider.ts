@@ -563,6 +563,15 @@ export const mockProvider: DataProvider = {
       throw new Error("Choose a send time.");
     }
 
+    // Require credits up front for scheduled orders too (send-now is guarded below).
+    if (!input.send_now) {
+      const wallet = walletFor(db, userId);
+      const needed = creditCost(piece_count, "self_service");
+      if (wallet.balance < needed) {
+        throw new InsufficientCreditsError(needed, wallet.balance);
+      }
+    }
+
     const created_at = nowIso();
     const campaign: Campaign = {
       id: uid("camp"),
@@ -627,6 +636,12 @@ export const mockProvider: DataProvider = {
     if (!design) throw new Error("Pick a design.");
     if (!input.target_area.trim()) throw new Error("Describe the target area.");
     if (input.quantity < 1) throw new Error("Enter how many to send.");
+
+    const needed = creditCost(input.quantity, "managed");
+    const wallet = walletFor(db, userId);
+    if (wallet.balance < needed) {
+      throw new InsufficientCreditsError(needed, wallet.balance);
+    }
 
     const campaign: Campaign = {
       id: uid("camp"),

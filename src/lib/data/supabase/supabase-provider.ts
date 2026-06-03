@@ -477,6 +477,14 @@ export const supabaseProvider: DataProvider = {
       return json.campaign as Campaign;
     }
 
+    // Scheduled: require the credits up front (charged when it sends).
+    const preview = await this.previewCampaign(input.contact_list_id);
+    const needed = creditCost(preview.deliverable, "self_service");
+    const wallet = await this.getWallet();
+    if (wallet.balance < needed) {
+      throw new InsufficientCreditsError(needed, wallet.balance);
+    }
+
     const { data, error } = await sb().rpc("create_campaign", {
       p_name: input.name.trim(),
       p_design_id: input.design_id,
@@ -510,6 +518,14 @@ export const supabaseProvider: DataProvider = {
     if (!input.name.trim()) throw new Error("Campaign name is required.");
     if (!input.target_area.trim()) throw new Error("Describe the target area.");
     if (input.quantity < 1) throw new Error("Enter how many to send.");
+
+    // Require credits up front (charged when we build & send).
+    const needed = creditCost(input.quantity, "managed");
+    const wallet = await this.getWallet();
+    if (wallet.balance < needed) {
+      throw new InsufficientCreditsError(needed, wallet.balance);
+    }
+
     const { data, error } = await sb()
       .from("campaigns")
       .insert({

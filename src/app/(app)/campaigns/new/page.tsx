@@ -84,7 +84,8 @@ export default function NewCampaignPage() {
   const pieces = isManaged ? managedQty : selfPieces;
   const cost = creditCost(pieces, audience);
   const remaining = balance - cost;
-  const affordable = isManaged || timing === "schedule" || balance >= cost;
+  // Every order requires the credits up front — no placing orders unpaid.
+  const affordable = balance >= cost;
   const minDatetime = toLocalInputValue(new Date(Date.now() + 5 * 60 * 1000));
 
   function validateSelf(): string | null {
@@ -98,7 +99,7 @@ export default function NewCampaignPage() {
       if (new Date(scheduledAt).getTime() <= Date.now())
         return "Schedule a time in the future.";
     }
-    if (timing === "now" && !affordable) return "Not enough credits to send now.";
+    if (!affordable) return "Not enough credits — add credits before ordering.";
     return null;
   }
 
@@ -107,6 +108,7 @@ export default function NewCampaignPage() {
     if (!designId) return "Pick a design.";
     if (!targetArea.trim()) return "Describe the area you want to target.";
     if (managedQty < 1) return "Enter how many postcards to send.";
+    if (!affordable) return "Not enough credits — add credits before ordering.";
     return null;
   }
 
@@ -442,24 +444,27 @@ export default function NewCampaignPage() {
               </div>
             </div>
 
-            {isManaged && (
-              <p className="mt-3 rounded-md bg-brand-50 px-2.5 py-1.5 text-xs text-brand-700">
-                We&rsquo;ll build your list and confirm details. Credits are
-                charged when it&rsquo;s built and sent — nothing now.
-              </p>
-            )}
-            {!isManaged && timing === "schedule" && cost > 0 && (
-              <p className="mt-3 rounded-md bg-brand-50 px-2.5 py-1.5 text-xs text-brand-700">
-                Credits are charged when the campaign sends, not now.
-              </p>
-            )}
-            {!isManaged && timing === "now" && !affordable && cost > 0 && (
+            {cost > 0 && !affordable ? (
               <div className="mt-3 rounded-md bg-red-50 px-2.5 py-1.5 text-xs text-red-700">
-                Not enough credits.{" "}
+                Not enough credits — you need {cost.toLocaleString()}, have{" "}
+                {balance.toLocaleString()}.{" "}
                 <Link href="/billing" className="font-medium underline">
-                  Buy more
+                  Buy credits
                 </Link>
               </div>
+            ) : isManaged ? (
+              <p className="mt-3 rounded-md bg-brand-50 px-2.5 py-1.5 text-xs text-brand-700">
+                {cost.toLocaleString()} credits are reserved now and charged when
+                we build &amp; send your order.
+              </p>
+            ) : (
+              timing === "schedule" &&
+              cost > 0 && (
+                <p className="mt-3 rounded-md bg-brand-50 px-2.5 py-1.5 text-xs text-brand-700">
+                  {cost.toLocaleString()} credits reserved now, charged when it
+                  sends.
+                </p>
+              )
             )}
             {error && (
               <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-xs text-red-700">
@@ -472,6 +477,7 @@ export default function NewCampaignPage() {
               fullWidth
               size="lg"
               loading={submitting}
+              disabled={cost > 0 && !affordable}
               onClick={confirm}
             >
               {isManaged
