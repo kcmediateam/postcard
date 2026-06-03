@@ -66,7 +66,10 @@ export type CampaignStatus =
   | "sending"
   | "sent"
   | "failed"
-  | "canceled";
+  | "canceled"
+  | "awaiting_list"; // managed full-service order, pending admin fulfillment
+
+export type AudienceTier = "self_service" | "managed";
 
 export type MailPieceStatus =
   | "created"
@@ -101,6 +104,7 @@ export interface Profile {
   return_state: string | null;
   return_zip: string | null;
   stripe_customer_id: string | null;
+  is_admin: boolean;
   created_at: string;
 }
 
@@ -193,9 +197,12 @@ export interface Campaign {
   profile_id: string;
   name: string;
   design_id: string;
-  contact_list_id: string;
+  contact_list_id: string | null; // null for managed orders until the list is built
   scheduled_at: string | null; // null = send now
   status: CampaignStatus;
+  audience_tier: AudienceTier;
+  target_area: string | null; // managed: requested ZIP/neighborhood
+  requested_quantity: number | null; // managed: how many to source
   piece_count: number;
   credit_cost: number;
   created_at: string;

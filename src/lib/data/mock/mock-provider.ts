@@ -14,7 +14,7 @@ import type {
   Subscription,
   Template,
 } from "@/lib/types";
-import { findCreditPack, findPlan } from "@/lib/billing";
+import { CREDITS_PER_PIECE, findCreditPack, findPlan } from "@/lib/billing";
 import { US_STATES } from "@/lib/profile";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
 import {
@@ -169,6 +169,7 @@ export const mockProvider: DataProvider = {
       return_state: null,
       return_zip: null,
       stripe_customer_id: null,
+      is_admin: false,
       created_at,
     };
 
@@ -571,6 +572,9 @@ export const mockProvider: DataProvider = {
       contact_list_id: list.id,
       scheduled_at: input.send_now ? null : input.scheduled_at,
       status: input.send_now ? "sending" : "scheduled",
+      audience_tier: "self_service",
+      target_area: null,
+      requested_quantity: null,
       piece_count,
       credit_cost: piece_count,
       created_at,
@@ -605,6 +609,41 @@ export const mockProvider: DataProvider = {
       db.campaigns.push(campaign);
     }
 
+    persist();
+    return delay({ ...campaign });
+  },
+
+  async createManagedCampaign(input: {
+    name: string;
+    design_id: string;
+    target_area: string;
+    quantity: number;
+  }): Promise<Campaign> {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const design = db.designs.find(
+      (d) => d.id === input.design_id && d.profile_id === userId
+    );
+    if (!design) throw new Error("Pick a design.");
+    if (!input.target_area.trim()) throw new Error("Describe the target area.");
+    if (input.quantity < 1) throw new Error("Enter how many to send.");
+
+    const campaign: Campaign = {
+      id: uid("camp"),
+      profile_id: userId,
+      name: input.name.trim(),
+      design_id: design.id,
+      contact_list_id: null,
+      scheduled_at: null,
+      status: "awaiting_list",
+      audience_tier: "managed",
+      target_area: input.target_area.trim(),
+      requested_quantity: input.quantity,
+      piece_count: input.quantity,
+      credit_cost: input.quantity * CREDITS_PER_PIECE.managed,
+      created_at: nowIso(),
+    };
+    db.campaigns.push(campaign);
     persist();
     return delay({ ...campaign });
   },
@@ -703,6 +742,9 @@ export const mockProvider: DataProvider = {
       contact_list_id: list.id,
       scheduled_at: null,
       status: "sent",
+      audience_tier: "self_service",
+      target_area: null,
+      requested_quantity: null,
       piece_count: deliverable.length,
       credit_cost: deliverable.length,
       created_at,

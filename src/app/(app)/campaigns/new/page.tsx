@@ -104,6 +104,7 @@ export default function NewCampaignPage() {
 
   function validateManaged(): string | null {
     if (!name.trim()) return "Give your campaign a name.";
+    if (!designId) return "Pick a design.";
     if (!targetArea.trim()) return "Describe the area you want to target.";
     if (managedQty < 1) return "Enter how many postcards to send.";
     return null;
@@ -114,8 +115,20 @@ export default function NewCampaignPage() {
       const v = validateManaged();
       if (v) return setError(v);
       setError(null);
-      // Managed = address sourcing (out of Phase 1 scope): capture as a request.
-      setManagedDone({ quantity: managedQty, cost });
+      setSubmitting(true);
+      try {
+        // Persisted as a pending order — we build the list and confirm later.
+        await db.createManagedCampaign({
+          name,
+          design_id: designId!,
+          target_area: targetArea,
+          quantity: managedQty,
+        });
+        setManagedDone({ quantity: managedQty, cost });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not submit request.");
+        setSubmitting(false);
+      }
       return;
     }
 

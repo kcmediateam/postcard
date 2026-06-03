@@ -94,10 +94,28 @@ const NAV: NavItem[] = [
   },
 ];
 
-function NavLinks({ pathname }: { pathname: string }) {
+const ADMIN_ITEM: NavItem = {
+  label: "Admin",
+  href: "/admin",
+  enabled: true,
+  icon: icon(
+    <>
+      <path d="M12 3 4 6v6c0 4 3.4 6.9 8 9 4.6-2.1 8-5 8-9V6l-8-3Z" />
+    </>
+  ),
+};
+
+function NavLinks({
+  pathname,
+  isAdmin,
+}: {
+  pathname: string;
+  isAdmin: boolean;
+}) {
+  const items = isAdmin ? [...NAV, ADMIN_ITEM] : NAV;
   return (
     <>
-      {NAV.map((item) => {
+      {items.map((item) => {
         const active =
           pathname === item.href || pathname.startsWith(item.href + "/");
         if (!item.enabled) {
@@ -181,7 +199,7 @@ export default function AppLayout({
           <Logo />
         </div>
         <nav className="mt-4 flex-1 space-y-1">
-          <NavLinks pathname={pathname} />
+          <NavLinks pathname={pathname} isAdmin={session.profile.is_admin} />
         </nav>
         <div className="space-y-3">
           <BalanceWidget balance={balance} />
@@ -223,7 +241,7 @@ export default function AppLayout({
             </div>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-3 pb-2">
-            <NavLinks pathname={pathname} />
+            <NavLinks pathname={pathname} isAdmin={session.profile.is_admin} />
           </nav>
         </header>
 

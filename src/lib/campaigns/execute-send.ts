@@ -2,6 +2,7 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 import { createLobPostcard, type LobAddress } from "@/lib/lob/server";
 import { postcardFrontHtml, postcardBackHtml } from "@/lib/postcard/render-html";
 import { InsufficientCreditsError } from "@/lib/data/provider";
+import { CREDITS_PER_PIECE } from "@/lib/billing";
 import type { Campaign, Contact, Design, Profile } from "@/lib/types";
 
 export interface SendOutcome {
@@ -32,6 +33,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   if (!campaignRow) throw new Error("campaign_not_found");
   const campaign = campaignRow as Campaign;
   const uid = campaign.profile_id;
+  const rate = CREDITS_PER_PIECE[campaign.audience_tier ?? "self_service"];
 
   const [{ data: designRow }, { data: profileRow }, { data: contactsData }] =
     await Promise.all([
@@ -82,9 +84,10 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
       .eq("profile_id", uid)
       .maybeSingle();
     const balance = (wallet?.balance as number) ?? 0;
-    if (balance < contacts.length) {
+    const needed = contacts.length * rate;
+    if (balance < needed) {
       await admin.from("campaigns").update({ status: "failed" }).eq("id", campaignId);
-      throw new InsufficientCreditsError(contacts.length, balance);
+      throw new InsufficientCreditsError(needed, balance);
     }
   }
 
@@ -149,7 +152,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   if (!existingDebit && totalPieces > 0) {
     await admin.from("credit_transactions").insert({
       profile_id: uid,
-      delta: -totalPieces,
+      delta: -(totalPieces * rate),
       reason: "campaign_send",
       reference_id: campaignId,
     });
@@ -158,7 +161,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   const status: Campaign["status"] = totalPieces > 0 ? "sent" : "failed";
   await admin
     .from("campaigns")
-    .update({ status, piece_count: totalPieces, credit_cost: totalPieces })
+    .update({ status, piece_count: totalPieces, credit_cost: totalPieces * rate })
     .eq("id", campaignId);
 
   return { sent: newPieces.length, failed, status };

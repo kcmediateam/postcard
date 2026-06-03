@@ -28,6 +28,7 @@ const STATUS_STYLES: Record<CampaignStatus, string> = {
   sent: "bg-green-100 text-green-700",
   failed: "bg-red-100 text-red-700",
   canceled: "bg-zinc-100 text-zinc-500",
+  awaiting_list: "bg-amber-100 text-amber-700",
 };
 
 export default function DashboardPage() {
@@ -149,7 +150,7 @@ export default function DashboardPage() {
                           <span
                             className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[c.status]}`}
                           >
-                            {c.status}
+                            {c.status.replace("_", " ")}
                           </span>
                         </td>
                         <td className="px-5 py-3 text-right tabular-nums text-zinc-700">
@@ -306,7 +307,7 @@ function CampaignDetail({
           <span
             className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLES[campaign.status]}`}
           >
-            {campaign.status}
+            {campaign.status.replace("_", " ")}
           </span>
         }
       />

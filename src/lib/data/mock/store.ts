@@ -74,6 +74,7 @@ function seed(): MockDB {
     return_state: "TX",
     return_zip: "78701",
     stripe_customer_id: "cus_mock_demo",
+    is_admin: true,
     created_at: createdAt,
   };
 

@@ -141,6 +141,13 @@ export interface DataProvider {
    */
   createCampaign(input: CreateCampaignInput): Promise<Campaign>;
 
+  /**
+   * Create a managed ("build my list for me") order. It is persisted as a
+   * campaign in 'awaiting_list' status — no Lob send, no debit — until an admin
+   * uploads the address list and confirms.
+   */
+  createManagedCampaign(input: CreateManagedCampaignInput): Promise<Campaign>;
+
   /** Per-campaign rollup of piece statuses + scans (dashboard). */
   getCampaignStats(campaignId: string): Promise<CampaignStats>;
 
@@ -183,6 +190,13 @@ export interface CreateCampaignInput {
   /** ISO timestamp to schedule, or null to send now. */
   scheduled_at: string | null;
   send_now: boolean;
+}
+
+export interface CreateManagedCampaignInput {
+  name: string;
+  design_id: string;
+  target_area: string;
+  quantity: number;
 }
 
 /** Thrown by createCampaign when balance < piece_count on an immediate send. */

@@ -35,7 +35,8 @@ We are building **frontend-first**. Milestone 1 builds the full UI against a typ
 - Radius / area-based address sourcing (EDDM). Agents bring their own lists in Phase 1. (The "build my list for me" managed tier shows pricing and records a request, but does NOT auto-source addresses yet — that sourcing engine is the out-of-scope part.)
 - MLS / Zillow link auto-pull of property data.
 - Multi-user teams/organizations. One login = one agent = one tenant.
-- Agent-to-agent sharing, white-labeling, admin super-dashboard.
+- Agent-to-agent sharing, white-labeling.
+- (Added post-Phase-1) A minimal **admin area** now exists: an admin (profiles.is_admin) can view all orders platform-wide and fulfill "build my list for me" (managed) orders by uploading the address list. This is intentionally scoped to orders + full-service fulfillment, not a full super-dashboard.
 - Custom QR redirect / branded landing pages (we use Lob's native QR in Phase 1; revisit later only if we want to control the scan destination).
 
 ## 4. Data model
@@ -90,6 +91,7 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 5. Contacts page: upload CSV, see verification results.
 6. New campaign: choose audience tier (upload my list / build my list for me), pick design, then either a list + send-now/schedule (self-service) or target area + quantity (managed request); show credit cost (pieces × per-piece rate) and confirm.
 7. Dashboard: campaigns table with status, pieces, delivered, scans; credit balance widget.
+8. (Admin only) Admin area: all orders across agents; full-service ("build my list for me") orders sit in `awaiting_list` until the admin uploads the address list and confirms, which pushes them to Lob (debiting the agent at the managed rate).
 
 ## 7. Build order (milestones — build and have me review one at a time)
 

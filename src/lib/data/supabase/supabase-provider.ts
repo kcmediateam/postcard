@@ -13,6 +13,7 @@ import type {
 } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase/client";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
+import { CREDITS_PER_PIECE } from "@/lib/billing";
 import {
   AuthError,
   InsufficientCreditsError,
@@ -50,7 +51,7 @@ async function requireUid(): Promise<string> {
 // ---- mappers (column names already match our domain types) ----------------
 
 const PROFILE_COLS =
-  "id, email, full_name, company_name, return_name, return_line1, return_line2, return_city, return_state, return_zip, stripe_customer_id, created_at";
+  "id, email, full_name, company_name, return_name, return_line1, return_line2, return_city, return_state, return_zip, stripe_customer_id, is_admin, created_at";
 
 function asProfile(r: Record<string, unknown>): Profile {
   return r as unknown as Profile;
@@ -497,6 +498,37 @@ export const supabaseProvider: DataProvider = {
     // rpc returns the row (object) — supabase may return as array or object
     const row = Array.isArray(data) ? data[0] : data;
     return row as unknown as Campaign;
+  },
+
+  async createManagedCampaign(input: {
+    name: string;
+    design_id: string;
+    target_area: string;
+    quantity: number;
+  }): Promise<Campaign> {
+    const uid = await requireUid();
+    if (!input.name.trim()) throw new Error("Campaign name is required.");
+    if (!input.target_area.trim()) throw new Error("Describe the target area.");
+    if (input.quantity < 1) throw new Error("Enter how many to send.");
+    const { data, error } = await sb()
+      .from("campaigns")
+      .insert({
+        profile_id: uid,
+        name: input.name.trim(),
+        design_id: input.design_id,
+        contact_list_id: null,
+        scheduled_at: null,
+        status: "awaiting_list",
+        audience_tier: "managed",
+        target_area: input.target_area.trim(),
+        requested_quantity: input.quantity,
+        piece_count: input.quantity,
+        credit_cost: input.quantity * CREDITS_PER_PIECE.managed,
+      })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return data as unknown as Campaign;
   },
 
   async getCampaignStats(campaignId: string): Promise<CampaignStats> {
