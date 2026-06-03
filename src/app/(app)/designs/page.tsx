@@ -185,6 +185,7 @@ export default function DesignsPage() {
                 kind={t.kind}
                 theme={t.theme}
                 accent={t.accent}
+                layout={t.layout}
                 fields={t.defaults}
                 side="front"
                 profile={null}
@@ -728,6 +729,7 @@ function PersonalizeEditor({
               kind={template.kind}
               theme={template.theme}
               accent={template.accent}
+              layout={template.layout}
               fields={fields}
               side={side}
               profile={profile}

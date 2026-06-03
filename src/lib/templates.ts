@@ -1,4 +1,29 @@
-import type { Design, DesignFields, DesignTheme, Template, TemplateKind } from "./types";
+import type {
+  Design,
+  DesignFields,
+  DesignTheme,
+  PostcardLayout,
+  Template,
+  TemplateKind,
+} from "./types";
+
+/** Default front layout per kind (a template can override via `layout`). */
+export const DEFAULT_LAYOUT: Record<TemplateKind, PostcardLayout> = {
+  just_listed: "showcase",
+  just_sold: "showcase",
+  coming_soon: "showcase",
+  open_house: "showcase",
+  market_update: "showcase",
+  neighbor_intro: "intro",
+};
+
+/** Resolve the front layout for a (template, kind) pair. */
+export function layoutFor(
+  tpl: Template | undefined,
+  kind: TemplateKind
+): PostcardLayout {
+  return tpl?.layout ?? DEFAULT_LAYOUT[kind];
+}
 
 /** Default accent per kind (templates can override via `accent`). */
 export const KIND_ACCENT: Record<TemplateKind, string> = {
@@ -47,6 +72,24 @@ export function emptyFields(): DesignFields {
 }
 
 export const TEMPLATES: Template[] = [
+  {
+    id: "tpl_elegant_split",
+    name: "Buy or Sell · Elegant",
+    kind: "neighbor_intro",
+    theme: "light",
+    accent: "#9a7b4f",
+    layout: "elegant_split",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      headline: "Looking to buy or sell your home?",
+      subhead: "Let's turn your dreams into reality.",
+      body: "Whether you're ready to make a move or just curious what your home is worth today, I'd love to help. Reach out anytime for a free, no-pressure consultation.",
+      cta: "Scan to start the conversation",
+      agent_name: "Kimberly Nguyen",
+      agent_phone: "(512) 555-0142",
+    },
+  },
   {
     id: "tpl_just_listed",
     name: "Just Listed",
@@ -207,6 +250,7 @@ export function resolveStyle(design: Design): {
   kind: TemplateKind;
   theme: DesignTheme;
   accent: string;
+  layout: PostcardLayout;
 } {
   const kind = design.template_kind ?? "just_listed";
   const tpl = design.template_id ? findTemplate(design.template_id) : undefined;
@@ -214,5 +258,6 @@ export function resolveStyle(design: Design): {
     kind,
     theme: tpl?.theme ?? "light",
     accent: tpl?.accent ?? KIND_ACCENT[kind],
+    layout: layoutFor(tpl, kind),
   };
 }

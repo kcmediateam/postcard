@@ -38,6 +38,13 @@ export type TemplateKind =
 export type DesignTheme = "light" | "dark" | "bold";
 
 /**
+ * Front-art layout family — decoupled from `kind` so a template can pick a
+ * distinct composition (e.g. an elegant diagonal split) regardless of its
+ * marketing kind. The back always renders the functional QR/address card.
+ */
+export type PostcardLayout = "showcase" | "intro" | "elegant_split";
+
+/**
  * Personalization data for a template-based design. The postcard art is
  * rendered from these fields (so the agent's photos, copy, and property data
  * are composited onto the chosen layout). Photos are stored as (downscaled)
@@ -181,6 +188,8 @@ export interface Template {
   theme: DesignTheme;
   /** accent hex (overrides the theme default). */
   accent: string;
+  /** front-art layout family (defaults by kind when omitted). */
+  layout?: PostcardLayout;
   active: boolean;
   /** sample copy/property data to prefill the personalize form. */
   defaults: DesignFields;

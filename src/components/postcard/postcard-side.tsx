@@ -5,10 +5,11 @@ import type {
   Design,
   DesignFields,
   DesignTheme,
+  PostcardLayout,
   Profile,
   TemplateKind,
 } from "@/lib/types";
-import { KIND_LABEL, resolveStyle } from "@/lib/templates";
+import { DEFAULT_LAYOUT, KIND_LABEL, resolveStyle } from "@/lib/templates";
 import { useData } from "@/lib/data/data-context";
 import { PostcardImage } from "@/components/ui/postcard-image";
 
@@ -476,6 +477,106 @@ function IntroFront({
   );
 }
 
+/**
+ * Elegant diagonal split — cream panel + serif headline on the left, a
+ * property photo behind a diagonal edge on the right. Warm taupe (accent)
+ * for the serif + rule; an italic-serif tagline echoes a script flourish.
+ * Ignores theme palette by design (always the warm cream/taupe look).
+ */
+function ElegantSplitFront({
+  f,
+  accent,
+  uid,
+}: {
+  f: DesignFields;
+  accent: string;
+  uid: string;
+}) {
+  const cream = "#f7f3ea";
+  const ink = "#262a33";
+  const taupe = accent;
+  const photo = f.property_photo_url;
+  // photo trapezoid: narrower at top (x≥470), wider at bottom (x≥300).
+  const poly = "470,0 600,0 600,400 300,400";
+
+  const headLines = wrapText(
+    (f.headline || "Looking to buy or sell your home?").toUpperCase(),
+    12,
+    4
+  );
+  const startY = 132 - (headLines.length - 1) * 19;
+  const ruleY = startY + (headLines.length - 1) * 38 + 30;
+  const tagLines = wrapText(
+    f.subhead || "Let's turn your dreams into reality.",
+    30,
+    2
+  );
+
+  return (
+    <>
+      <rect width="600" height="400" fill={cream} />
+
+      {/* diagonal photo on the right */}
+      <clipPath id={`es-${uid}`}>
+        <polygon points={poly} />
+      </clipPath>
+      {photo ? (
+        <image
+          href={photo}
+          x={250}
+          y={0}
+          width={350}
+          height={400}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath={`url(#es-${uid})`}
+        />
+      ) : (
+        <g clipPath={`url(#es-${uid})`}>
+          <rect x={250} y={0} width={350} height={400} fill="#e8e1d2" />
+          <path
+            d="M422 214 l72 -56 l72 56"
+            fill="none"
+            stroke={taupe}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.5"
+          />
+          <rect x={450} y={210} width={88} height={74} fill="none" stroke={taupe} strokeWidth="3" opacity="0.5" />
+        </g>
+      )}
+
+      {/* serif headline, taupe, uppercase */}
+      <text fontFamily={SERIF} fill={taupe} fontSize="30" fontWeight="500" letterSpacing="0.5">
+        {headLines.map((l, i) => (
+          <tspan key={i} x={44} y={startY + i * 38}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+
+      {/* thin rule */}
+      <line x1={44} y1={ruleY} x2={250} y2={ruleY} stroke={taupe} strokeWidth="1.5" />
+
+      {/* italic-serif tagline (script flourish) */}
+      <text x={44} y={ruleY + 34} fill={ink} fontFamily={SERIF} fontStyle="italic" fontSize="19" fontWeight="500">
+        {tagLines.map((l, i) => (
+          <tspan key={i} x={44} dy={i === 0 ? 0 : 24}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+
+      {/* slim contact line (front carries no footer band) */}
+      {(f.agent_name || f.agent_phone) && (
+        <text x={44} y={384} fill={ink} fontSize="11.5" fontWeight="600" opacity="0.72">
+          {[f.agent_name, f.agent_phone].filter(Boolean).join("   ·   ")}
+        </text>
+      )}
+    </>
+  );
+}
+
 function BackCard({
   kind,
   f,
@@ -579,6 +680,7 @@ function Layout({
   fields,
   side,
   profile,
+  layout,
 }: {
   kind: TemplateKind;
   theme: DesignTheme;
@@ -586,11 +688,13 @@ function Layout({
   fields: DesignFields;
   side: "front" | "back";
   profile: Profile | null;
+  layout: PostcardLayout;
 }) {
   const uid = useId().replace(/:/g, "");
   const c = themeColors(theme, accent);
   if (side === "back") return <BackCard kind={kind} f={fields} c={c} profile={profile} />;
-  if (kind === "neighbor_intro") return <IntroFront f={fields} c={c} uid={uid} />;
+  if (layout === "elegant_split") return <ElegantSplitFront f={fields} accent={accent} uid={uid} />;
+  if (layout === "intro") return <IntroFront f={fields} c={c} uid={uid} />;
   return <ShowcaseFront kind={kind} f={fields} c={c} uid={uid} />;
 }
 
@@ -631,7 +735,7 @@ export function PostcardSide({
 
   const fields = design.fields;
   if (!fields) return <div className={`aspect-[3/2] w-full bg-zinc-100 ${className}`} />;
-  const { kind, theme, accent } = resolveStyle(design);
+  const { kind, theme, accent, layout } = resolveStyle(design);
 
   return (
     <div className={className}>
@@ -643,6 +747,7 @@ export function PostcardSide({
           fields={fields}
           side={side}
           profile={session?.profile ?? null}
+          layout={layout}
         />
       </Svg>
     </div>
@@ -657,6 +762,7 @@ export function PostcardPreview({
   fields,
   side,
   profile,
+  layout,
 }: {
   kind: TemplateKind;
   theme: DesignTheme;
@@ -664,10 +770,12 @@ export function PostcardPreview({
   fields: DesignFields;
   side: "front" | "back";
   profile: Profile | null;
+  layout?: PostcardLayout;
 }) {
+  const resolved = layout ?? DEFAULT_LAYOUT[kind];
   return (
     <Svg label={`${KIND_LABEL[kind]} ${side}`}>
-      <Layout kind={kind} theme={theme} accent={accent} fields={fields} side={side} profile={profile} />
+      <Layout kind={kind} theme={theme} accent={accent} fields={fields} side={side} profile={profile} layout={resolved} />
     </Svg>
   );
 }

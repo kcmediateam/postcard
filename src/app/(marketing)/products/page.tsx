@@ -41,6 +41,7 @@ export default function ProductsPage() {
                 kind={t.kind}
                 theme={t.theme}
                 accent={t.accent}
+                layout={t.layout}
                 fields={t.defaults}
                 side="front"
                 profile={null}
