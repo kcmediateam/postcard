@@ -42,7 +42,7 @@ export function authorizeUrl(state: string, challenge: string): string {
     redirect_uri: redirectUri(),
     scope: CANVA_SCOPES,
     code_challenge: challenge,
-    code_challenge_method: "S256",
+    code_challenge_method: "s256",
     state,
   });
   return `${AUTH_URL}?${p.toString()}`;
