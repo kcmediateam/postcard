@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { PricingCalculator } from "@/components/marketing/pricing-calculator";
 import { CompareTable } from "@/components/marketing/compare-table";
+import { Reveal, CountUp } from "@/components/marketing/motion";
 import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
@@ -19,9 +20,10 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="bg-radiate pointer-events-none absolute -right-40 -top-40 size-[34rem] rounded-full opacity-20 blur-3xl" />
+        <div className="bg-radiate-anim pointer-events-none absolute -right-40 -top-40 size-[34rem] rounded-full opacity-20 blur-3xl" />
+        <div className="bg-radiate-anim pointer-events-none absolute -left-32 top-40 size-[24rem] rounded-full opacity-10 blur-3xl" />
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 py-20 lg:grid-cols-2 lg:py-24">
-          <div>
+          <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
               <span className="bg-radiate size-2 rounded-full" />
               Targeted direct mail, done for you
@@ -43,16 +45,13 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
-          </div>
+          </Reveal>
 
-          {/* Fanned postcards */}
+          {/* Fanned postcards — gently floating */}
           <div className="relative mx-auto hidden h-[380px] w-full max-w-md lg:block">
-            <FanCard kind="just_sold" className="left-0 top-10 -rotate-[8deg]" />
-            <FanCard kind="open_house" className="right-0 top-14 rotate-[8deg]" />
-            <FanCard
-              kind="just_listed"
-              className="left-1/2 top-0 z-10 -translate-x-1/2 shadow-2xl"
-            />
+            <FanCard kind="just_sold" pos="left-0 top-10" base="rotate(-8deg)" floatClass="animate-float-slow" />
+            <FanCard kind="open_house" pos="right-0 top-14" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
+            <FanCard kind="just_listed" pos="left-1/2 top-0 z-10 shadow-2xl" base="translateX(-50%)" floatClass="animate-float" delay={0.5} />
           </div>
           {/* mobile: single */}
           <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 shadow-xl lg:hidden">
@@ -72,30 +71,32 @@ export default function HomePage() {
       <section className="border-y border-zinc-100 bg-white">
         <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-6 px-6 py-8 sm:grid-cols-4">
           {[
-            ["1:1", "credit per postcard"],
-            ["QR", "tracked, every piece"],
-            ["100%", "addresses verified"],
-            ["Mins", "design to mailbox"],
-          ].map(([big, small]) => (
-            <div key={small} className="text-center">
-              <div className="text-2xl font-semibold text-radiate">{big}</div>
-              <div className="mt-0.5 text-xs text-zinc-500">{small}</div>
-            </div>
+            { big: <>1:1</>, small: "credit per postcard" },
+            { big: <>QR</>, small: "tracked, every piece" },
+            { big: <CountUp value={100} suffix="%" />, small: "addresses verified" },
+            { big: <>Mins</>, small: "design to mailbox" },
+          ].map((s, i) => (
+            <Reveal key={s.small} delay={i * 90} className="text-center">
+              <div className="text-2xl font-semibold text-radiate">{s.big}</div>
+              <div className="mt-0.5 text-xs text-zinc-500">{s.small}</div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Pricing calculator */}
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <div className="mx-auto mb-10 max-w-xl text-center">
+        <Reveal className="mx-auto mb-10 max-w-xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">
             Transparent, credit-based pricing
           </h2>
           <p className="mt-3 text-zinc-600">
             Slide to size your campaign. Toggle done-for-you on or off.
           </p>
-        </div>
-        <PricingCalculator />
+        </Reveal>
+        <Reveal delay={120}>
+          <PricingCalculator />
+        </Reveal>
       </section>
 
       {/* How it works */}
@@ -103,7 +104,7 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-16">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
-              <div key={s.title} className="text-center">
+              <Reveal key={s.title} delay={i * 110} className="text-center">
                 <div className="bg-radiate mx-auto flex size-12 items-center justify-center rounded-2xl text-white shadow-sm">
                   {s.icon}
                 </div>
@@ -114,7 +115,7 @@ export default function HomePage() {
                   {s.title}
                 </h3>
                 <p className="mt-1 text-sm text-zinc-500">{s.body}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -123,8 +124,12 @@ export default function HomePage() {
       {/* Value props */}
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="grid gap-6 sm:grid-cols-3">
-          {VALUE.map((v) => (
-            <div key={v.title} className="rounded-2xl border border-zinc-200 p-6">
+          {VALUE.map((v, i) => (
+            <Reveal
+              key={v.title}
+              delay={i * 110}
+              className="rounded-2xl border border-zinc-200 p-6 transition-shadow duration-300 hover:shadow-lg"
+            >
               <div className="grid size-10 place-items-center rounded-lg bg-brand-50 text-brand-700">
                 {v.icon}
               </div>
@@ -132,7 +137,7 @@ export default function HomePage() {
                 {v.title}
               </h3>
               <p className="mt-1 text-sm text-zinc-500">{v.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -140,7 +145,7 @@ export default function HomePage() {
       {/* Comparison */}
       <section className="bg-zinc-50">
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
-          <div className="mx-auto mb-10 max-w-2xl text-center">
+          <Reveal className="mx-auto mb-10 max-w-2xl text-center">
             <h2 className="text-4xl font-bold tracking-tight text-zinc-900">
               How Radiate compares
             </h2>
@@ -151,10 +156,10 @@ export default function HomePage() {
               <span className="bg-radiate size-2 rounded-full" />
               The only platform that rolls over unused monthly-plan credits
             </p>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          </Reveal>
+          <Reveal delay={100} className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <CompareTable />
-          </div>
+          </Reveal>
           <p className="mt-4 text-center text-xs text-zinc-400">
             Competitor columns reflect publicly available information and quotes
             verified June 2026. Where a capability couldn&apos;t be confirmed, it&apos;s
@@ -162,7 +167,7 @@ export default function HomePage() {
           </p>
 
           {/* Simple, rolling credits */}
-          <div className="bg-radiate mx-auto mt-14 max-w-3xl rounded-2xl px-8 py-10 text-center text-white shadow-lg">
+          <Reveal className="bg-radiate-anim mx-auto mt-14 max-w-3xl rounded-2xl px-8 py-10 text-center text-white shadow-lg">
             <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
               Simple, rolling credits
             </p>
@@ -174,12 +179,12 @@ export default function HomePage() {
               and address verification. Credits are granted monthly and roll over —
               unused credits stay in your wallet.
             </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* CTA band */}
-      <section className="bg-radiate">
+      <section className="bg-radiate-anim">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-6 py-16 text-center sm:flex-row sm:text-left">
           <h2 className="text-3xl font-semibold tracking-tight text-white">
             Put your name in every mailbox.
@@ -195,11 +200,26 @@ export default function HomePage() {
   );
 }
 
-function FanCard({ kind, className = "" }: { kind: string; className?: string }) {
+function FanCard({
+  kind,
+  pos = "",
+  base = "translateY(0)",
+  floatClass = "animate-float",
+  delay = 0,
+}: {
+  kind: string;
+  pos?: string;
+  base?: string;
+  floatClass?: string;
+  delay?: number;
+}) {
   const t = byKind(kind);
   return (
     <div
-      className={`absolute w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl ${className}`}
+      className={`absolute w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl ${pos} ${floatClass}`}
+      style={
+        { "--float-base": base, animationDelay: `${delay}s` } as React.CSSProperties
+      }
     >
       <PostcardPreview kind={t.kind} theme={t.theme} accent={t.accent} fields={t.defaults} side="front" profile={null} />
     </div>

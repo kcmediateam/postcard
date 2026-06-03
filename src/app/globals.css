@@ -61,3 +61,71 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* ── Premium subtle motion ───────────────────────────────────────── */
+
+/* Slowly drifting gradient (hero / CTA panels). */
+.bg-radiate-anim {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-grad-from) 0%,
+    var(--color-grad-via) 50%,
+    var(--color-grad-to) 100%
+  );
+  background-size: 200% 200%;
+  animation: grad-drift 14s ease-in-out infinite;
+}
+@keyframes grad-drift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Gentle float for the fanned hero postcards. */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-float-slow {
+  animation: float 8s ease-in-out infinite;
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: var(--float-base, translateY(0));
+  }
+  50% {
+    transform: var(--float-base, translateY(0)) translateY(-14px);
+  }
+}
+
+/* Scroll reveal — toggled to .is-in by the Reveal island. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-radiate-anim {
+    animation: none;
+  }
+  .animate-float,
+  .animate-float-slow {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
