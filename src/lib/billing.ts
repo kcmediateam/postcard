@@ -77,6 +77,39 @@ export const CREDITS_PER_PIECE = {
 
 export type AudienceTier = keyof typeof CREDITS_PER_PIECE;
 
+/**
+ * Volume pricing — $/credit drops as you cross thresholds, so buying more is
+ * rewarded (not penalized). Tiers are by total credits. Single source of truth
+ * for the home pricing calculator.
+ */
+export const VOLUME_TIERS: { min: number; per_credit: number }[] = [
+  { min: 0, per_credit: 1.59 },
+  { min: 250, per_credit: 1.49 },
+  { min: 500, per_credit: 1.44 },
+  { min: 1000, per_credit: 1.39 },
+  { min: 2500, per_credit: 1.34 },
+  { min: 5000, per_credit: 1.29 },
+];
+
+export const BASE_PER_CREDIT = VOLUME_TIERS[0].per_credit;
+
+/** Best per-credit rate for a credit quantity, plus the next tier (if any). */
+export function volumeRate(credits: number): {
+  perCredit: number;
+  tierMin: number;
+  next: { min: number; per_credit: number } | null;
+} {
+  let idx = 0;
+  for (let i = 0; i < VOLUME_TIERS.length; i++) {
+    if (credits >= VOLUME_TIERS[i].min) idx = i;
+  }
+  return {
+    perCredit: VOLUME_TIERS[idx].per_credit,
+    tierMin: VOLUME_TIERS[idx].min,
+    next: VOLUME_TIERS[idx + 1] ?? null,
+  };
+}
+
 export function findCreditPack(id: string): CreditPack | undefined {
   return CREDIT_PACKS.find((p) => p.id === id);
 }
