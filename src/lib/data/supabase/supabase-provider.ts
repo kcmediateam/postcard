@@ -1,11 +1,11 @@
 import type {
-  AddressVerificationStatus,
   Campaign,
   Contact,
   ContactList,
   CreditTransaction,
   CreditWallet,
   Design,
+  DesignFields,
   Profile,
   Session,
   Subscription,
@@ -13,7 +13,6 @@ import type {
 } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase/client";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
-import { US_STATES } from "@/lib/profile";
 import {
   AuthError,
   InsufficientCreditsError,
@@ -69,24 +68,45 @@ async function loadProfile(): Promise<Profile> {
   return asProfile(data);
 }
 
-// ---- shared verification (stand-in for Lob; deterministic) ----------------
+/**
+ * Upload a data-URL image to the public `designs` Storage bucket and return its
+ * public URL. Passes through values that are already URLs (unchanged images).
+ */
+async function uploadImage(dataUrl: string, uid: string): Promise<string> {
+  if (!dataUrl.startsWith("data:")) return dataUrl;
+  const blob = await (await fetch(dataUrl)).blob();
+  const ext =
+    blob.type === "image/png"
+      ? "png"
+      : blob.type === "image/svg+xml"
+      ? "svg"
+      : blob.type === "image/webp"
+      ? "webp"
+      : "jpg";
+  const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await sb()
+    .storage.from("designs")
+    .upload(path, blob, { contentType: blob.type, upsert: false });
+  if (error) throw new Error(`Image upload failed: ${error.message}`);
+  return sb().storage.from("designs").getPublicUrl(path).data.publicUrl;
+}
 
-function hashString(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
+/** Upload any data-URL photos inside design fields, returning URL-only fields. */
+async function persistFieldImages(
+  fields: DesignFields,
+  uid: string
+): Promise<DesignFields> {
+  return {
+    ...fields,
+    property_photo_url: fields.property_photo_url
+      ? await uploadImage(fields.property_photo_url, uid)
+      : null,
+    headshot_url: fields.headshot_url
+      ? await uploadImage(fields.headshot_url, uid)
+      : null,
+  };
 }
-function verifyAddress(c: {
-  address_line1: string;
-  state: string;
-  zip: string;
-}): AddressVerificationStatus {
-  const zipOk = /^\d{5}(-\d{4})?$/.test(c.zip.trim());
-  const stateOk = US_STATES.some((s) => s.code === c.state.trim().toUpperCase());
-  if (!c.address_line1.trim() || !zipOk || !stateOk) return "undeliverable";
-  if (hashString(`${c.address_line1}|${c.zip}`) % 12 === 0) return "undeliverable";
-  return "verified";
-}
+
 /** POST to a server route and redirect the browser to the returned Stripe URL. */
 async function redirectToStripe(path: string, payload?: unknown): Promise<never> {
   const res = await fetch(path, {
@@ -255,14 +275,16 @@ export const supabaseProvider: DataProvider = {
     if (!input.name.trim()) throw new Error("Design name is required.");
     if (!input.front_image_url || !input.back_image_url)
       throw new Error("Both front and back images are required.");
+    const front = await uploadImage(input.front_image_url, uid);
+    const back = await uploadImage(input.back_image_url, uid);
     const { data, error } = await sb()
       .from("designs")
       .insert({
         profile_id: uid,
         name: input.name.trim(),
         source: "uploaded",
-        front_image_url: input.front_image_url,
-        back_image_url: input.back_image_url,
+        front_image_url: front,
+        back_image_url: back,
         template_id: null,
         template_kind: null,
         fields: null,
@@ -278,6 +300,7 @@ export const supabaseProvider: DataProvider = {
     if (!input.name.trim()) throw new Error("Design name is required.");
     const template = findTemplate(input.template_id);
     if (!template) throw new Error("Unknown template.");
+    const fields = await persistFieldImages(input.fields, uid);
     const { data, error } = await sb()
       .from("designs")
       .insert({
@@ -288,7 +311,7 @@ export const supabaseProvider: DataProvider = {
         back_image_url: null,
         template_id: template.id,
         template_kind: template.kind,
-        fields: input.fields,
+        fields,
       })
       .select("*")
       .single();
@@ -297,9 +320,11 @@ export const supabaseProvider: DataProvider = {
   },
 
   async updateDesign(designId: string, patch: UpdateDesignInput): Promise<Design> {
+    const uid = await requireUid();
     const update: Record<string, unknown> = {};
     if (patch.name !== undefined) update.name = patch.name.trim();
-    if (patch.fields !== undefined) update.fields = patch.fields;
+    if (patch.fields !== undefined)
+      update.fields = await persistFieldImages(patch.fields, uid);
     const { data, error } = await sb()
       .from("designs")
       .update(update)
@@ -379,43 +404,15 @@ export const supabaseProvider: DataProvider = {
   },
 
   async verifyContactList(listId: string): Promise<VerificationStats> {
-    const { data, error } = await sb()
-      .from("contacts")
-      .select("id, address_line1, state, zip")
-      .eq("list_id", listId);
-    if (error) throw new Error(error.message);
-    const rows = (data ?? []) as {
-      id: string;
-      address_line1: string;
-      state: string;
-      zip: string;
-    }[];
-
-    const verified: string[] = [];
-    const undeliverable: string[] = [];
-    for (const r of rows) {
-      (verifyAddress(r) === "verified" ? verified : undeliverable).push(r.id);
-    }
-    if (verified.length) {
-      const { error: e1 } = await sb()
-        .from("contacts")
-        .update({ lob_verification_status: "verified" })
-        .in("id", verified);
-      if (e1) throw new Error(e1.message);
-    }
-    if (undeliverable.length) {
-      const { error: e2 } = await sb()
-        .from("contacts")
-        .update({ lob_verification_status: "undeliverable" })
-        .in("id", undeliverable);
-      if (e2) throw new Error(e2.message);
-    }
-    return {
-      total: rows.length,
-      verified: verified.length,
-      undeliverable: undeliverable.length,
-      unverified: 0,
-    };
+    // Real Lob US address verification runs server-side (secret key).
+    const res = await fetch("/api/verify-contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listId }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || "Address verification failed.");
+    return json as VerificationStats;
   },
 
   async deleteContactList(listId: string): Promise<void> {

@@ -26,12 +26,13 @@ We are building **frontend-first**. Milestone 1 builds the full UI against a typ
 - Upload own postcard design (front + back images), OR personalize a built-in template (2–3 layouts) by adding a headshot, property photo, headline/body copy, and property details (price, beds, baths, sqft, address) plus agent contact — composited onto the layout.
 - Upload contact list via CSV; verify addresses through Lob before sending.
 - Campaign creation with scheduled or immediate send.
+- Audience tiers at campaign time: **self-service** (agent uploads their own list — base rate, 1 credit/postcard) vs **managed** ("build my list for me" — higher per-piece rate). Self-service is the functional send path; managed captures a request only (address sourcing itself is out of scope — see below). Credits-per-piece is the single pricing lever (see `src/lib/billing.ts` `CREDITS_PER_PIECE`).
 - Lob postcard sending, one piece per contact, with Lob's native QR code enabled per piece.
 - QR scan tracking via Lob's `postcard.viewed` events (no custom redirect to build).
 - Dashboard: campaign list, per-campaign send/delivery/scan counts, credit balance, billing history.
 
 ### Explicitly OUT of scope (do not build, do not stub elaborate placeholders)
-- Radius / area-based address sourcing (EDDM). Agents bring their own lists in Phase 1.
+- Radius / area-based address sourcing (EDDM). Agents bring their own lists in Phase 1. (The "build my list for me" managed tier shows pricing and records a request, but does NOT auto-source addresses yet — that sourcing engine is the out-of-scope part.)
 - MLS / Zillow link auto-pull of property data.
 - Multi-user teams/organizations. One login = one agent = one tenant.
 - Agent-to-agent sharing, white-labeling, admin super-dashboard.
@@ -86,7 +87,7 @@ Use Postgres (via Supabase). The mock data layer in milestone 1 should mirror th
 3. Billing page: buy credits or subscribe; show current balance; Stripe customer portal link.
 4. Designs page: personalize a template (upload headshot + property photo, enter headline/body/property details, live preview), or upload your own front/back.
 5. Contacts page: upload CSV, see verification results.
-6. New campaign: pick design + list + send-now or schedule; show credit cost and confirm.
+6. New campaign: choose audience tier (upload my list / build my list for me), pick design, then either a list + send-now/schedule (self-service) or target area + quantity (managed request); show credit cost (pieces × per-piece rate) and confirm.
 7. Dashboard: campaigns table with status, pieces, delivered, scans; credit balance widget.
 
 ## 7. Build order (milestones — build and have me review one at a time)

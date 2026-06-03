@@ -138,8 +138,13 @@ export function parseContactsCsv(text: string): ParsedContacts {
   };
 }
 
+// NOTE: Lob TEST keys don't verify real addresses — they return canned results
+// driven by `address_line1` ("deliverable" / "undeliverable") with zip "11111".
+// This sample uses those triggers so the upload -> verify flow yields a realistic
+// mix in test mode. Swap in real addresses once you're on a Lob LIVE key.
 export const SAMPLE_CSV = `full_name,address_line1,address_line2,city,state,zip
-Maria Lopez,742 Evergreen Ter,,Austin,TX,78704
-Sam Chen,88 Lakeview Dr,Apt 4,Round Rock,TX,78664
-Priya Patel,1200 Congress Ave,Suite 210,Austin,TX,78701
+Maria Lopez,deliverable,,Austin,TX,11111
+Sam Chen,deliverable,,Round Rock,TX,11111
+Priya Patel,deliverable,,Austin,TX,11111
+Alex Rivera,undeliverable,,Austin,TX,11111
 `;

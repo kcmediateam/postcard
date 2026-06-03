@@ -64,6 +64,19 @@ export const PLANS: Plan[] = [
   },
 ];
 
+/**
+ * Credits consumed per postcard, by how the mailing list is sourced.
+ * Self-service (agent uploads their own list) is the base rate; managed
+ * (we build the list for them) costs more per piece. One credit = one postcard
+ * at the self-service rate. Adjust freely — this is the single source of truth.
+ */
+export const CREDITS_PER_PIECE = {
+  self_service: 1,
+  managed: 2,
+} as const;
+
+export type AudienceTier = keyof typeof CREDITS_PER_PIECE;
+
 export function findCreditPack(id: string): CreditPack | undefined {
   return CREDIT_PACKS.find((p) => p.id === id);
 }
