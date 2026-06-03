@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { PricingCalculator } from "@/components/marketing/pricing-calculator";
+import { CompareTable } from "@/components/marketing/compare-table";
 import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
@@ -131,6 +132,28 @@ export default function HomePage() {
               <p className="mt-1 text-sm text-zinc-500">{v.body}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Comparison */}
+      <section className="bg-zinc-50">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+          <div className="mx-auto mb-10 max-w-xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">
+              Why agents switch to Radiate
+            </h2>
+            <p className="mt-3 text-zinc-600">
+              One platform for design, mailing, tracking, and automation — without
+              the hidden fees or per-list charges.
+            </p>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <CompareTable />
+          </div>
+          <p className="mt-4 text-center text-xs text-zinc-400">
+            Based on publicly available information and customer feedback;
+            competitor offerings may change.
+          </p>
         </div>
       </section>
 
