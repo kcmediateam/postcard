@@ -12,7 +12,6 @@ import type {
   Template,
 } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase/client";
-import { findCreditPack, findPlan } from "@/lib/billing";
 import { TEMPLATES, findTemplate } from "@/lib/templates";
 import { US_STATES } from "@/lib/profile";
 import {
@@ -88,6 +87,22 @@ function verifyAddress(c: {
   if (hashString(`${c.address_line1}|${c.zip}`) % 12 === 0) return "undeliverable";
   return "verified";
 }
+/** POST to a server route and redirect the browser to the returned Stripe URL. */
+async function redirectToStripe(path: string, payload?: unknown): Promise<never> {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload ?? {}),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.url) {
+    throw new Error(json.error || "Could not start Stripe checkout.");
+  }
+  window.location.assign(json.url as string);
+  // never resolves — the page navigates away
+  return new Promise<never>(() => {});
+}
+
 function statsFromStatuses(rows: { lob_verification_status: string }[]): VerificationStats {
   return {
     total: rows.length,
@@ -203,73 +218,21 @@ export const supabaseProvider: DataProvider = {
   },
 
   async purchaseCreditPack(packId: string): Promise<void> {
-    const uid = await requireUid();
-    const pack = findCreditPack(packId);
-    if (!pack) throw new Error("Unknown credit pack.");
-    const { error } = await sb().from("credit_transactions").insert({
-      profile_id: uid,
-      delta: pack.credits,
-      reason: "purchase",
-      reference_id: `cs_mock_${Math.random().toString(36).slice(2)}`,
-    });
-    if (error) throw new Error(error.message);
+    // Real Stripe Checkout — credits are granted by the verified webhook.
+    await redirectToStripe("/api/checkout/credits", { packId });
   },
 
   async subscribeToPlan(planId: string): Promise<void> {
-    const uid = await requireUid();
-    const plan = findPlan(planId);
-    if (!plan) throw new Error("Unknown plan.");
-    const now = new Date();
-    const end = new Date(now);
-    end.setMonth(end.getMonth() + 1);
-
-    const { data: existing } = await sb()
-      .from("subscriptions")
-      .select("id")
-      .neq("status", "canceled")
-      .limit(1)
-      .maybeSingle();
-
-    if (existing) {
-      const { error } = await sb()
-        .from("subscriptions")
-        .update({
-          plan: plan.id,
-          monthly_credit_grant: plan.monthly_credits,
-          status: "active",
-          current_period_start: now.toISOString(),
-          current_period_end: end.toISOString(),
-        })
-        .eq("id", (existing as { id: string }).id);
-      if (error) throw new Error(error.message);
-    } else {
-      const { error } = await sb().from("subscriptions").insert({
-        profile_id: uid,
-        stripe_subscription_id: `sub_mock_${Math.random().toString(36).slice(2)}`,
-        plan: plan.id,
-        status: "active",
-        current_period_start: now.toISOString(),
-        current_period_end: end.toISOString(),
-        monthly_credit_grant: plan.monthly_credits,
-      });
-      if (error) throw new Error(error.message);
-    }
-    // first month's grant on top of the existing balance (rollover)
-    const { error: txErr } = await sb().from("credit_transactions").insert({
-      profile_id: uid,
-      delta: plan.monthly_credits,
-      reason: "subscription_grant",
-      reference_id: plan.id,
-    });
-    if (txErr) throw new Error(txErr.message);
+    await redirectToStripe("/api/checkout/subscription", { planId });
   },
 
   async cancelSubscription(): Promise<void> {
-    const { error } = await sb()
-      .from("subscriptions")
-      .update({ status: "canceled" })
-      .neq("status", "canceled");
-    if (error) throw new Error(error.message);
+    // Cancellation happens in the Stripe customer portal.
+    await redirectToStripe("/api/portal");
+  },
+
+  async openBillingPortal(): Promise<void> {
+    await redirectToStripe("/api/portal");
   },
 
   // ---- designs + templates ----------------------------------------------
@@ -530,121 +493,9 @@ export const supabaseProvider: DataProvider = {
   },
 
   async seedSampleData(): Promise<void> {
-    const uid = await requireUid();
-    const profile = await loadProfile();
-    const tpl = TEMPLATES[0];
-
-    // sample personalized design
-    const { data: design, error: dErr } = await sb()
-      .from("designs")
-      .insert({
-        profile_id: uid,
-        name: "Sample · Just Listed",
-        source: "template",
-        template_id: tpl.id,
-        template_kind: tpl.kind,
-        fields: {
-          ...tpl.defaults,
-          agent_name: profile.return_name ?? profile.full_name ?? "",
-          agent_phone: "(512) 555-0142",
-          agent_email: profile.email,
-        },
-      })
-      .select("id")
-      .single();
-    if (dErr) throw new Error(dErr.message);
-
-    // sample contact list + contacts
-    const { data: list, error: lErr } = await sb()
-      .from("contact_lists")
-      .insert({ profile_id: uid, name: "Sample · 78704 neighborhood", contact_count: 40 })
-      .select("id")
-      .single();
-    if (lErr) throw new Error(lErr.message);
-    const listId = (list as { id: string }).id;
-
-    const contactRows = Array.from({ length: 40 }, (_, i) => ({
-      list_id: listId,
-      profile_id: uid,
-      full_name: `Sample Resident ${i + 1}`,
-      address_line1: `${100 + i} Sample St`,
-      address_line2: null,
-      city: "Austin",
-      state: "TX",
-      zip: "78704",
-      lob_verification_status: i % 12 === 0 ? "undeliverable" : "verified",
-    }));
-    const { data: contacts, error: cErr } = await sb()
-      .from("contacts")
-      .insert(contactRows)
-      .select("id, lob_verification_status");
-    if (cErr) throw new Error(cErr.message);
-    const deliverable = (contacts ?? []).filter(
-      (c: { lob_verification_status: string }) => c.lob_verification_status === "verified"
-    ) as { id: string }[];
-
-    // grant some credits so the demo send leaves a positive balance
-    const { error: gErr } = await sb().from("credit_transactions").insert({
-      profile_id: uid,
-      delta: 500,
-      reason: "purchase",
-      reference_id: "cs_mock_sample",
-    });
-    if (gErr) throw new Error(gErr.message);
-
-    // a completed campaign
-    const { data: campaign, error: campErr } = await sb()
-      .from("campaigns")
-      .insert({
-        profile_id: uid,
-        name: "Sample · Spring farming",
-        design_id: (design as { id: string }).id,
-        contact_list_id: listId,
-        scheduled_at: null,
-        status: "sent",
-        piece_count: deliverable.length,
-        credit_cost: deliverable.length,
-      })
-      .select("id")
-      .single();
-    if (campErr) throw new Error(campErr.message);
-    const campaignId = (campaign as { id: string }).id;
-
-    // pieces: ~80% delivered, ~1/3 of delivered scanned
-    const pieceRows = deliverable.map((c, i) => {
-      const delivered = i % 5 !== 0;
-      return {
-        campaign_id: campaignId,
-        contact_id: c.id,
-        profile_id: uid,
-        lob_id: `psc_mock_${Math.random().toString(36).slice(2, 14)}`,
-        status: delivered ? "delivered" : "in_transit",
-        scan_count: delivered && i % 3 === 0 ? 1 : 0,
-        delivered_at: delivered ? new Date().toISOString() : null,
-      };
-    });
-    const { data: pieces, error: pErr } = await sb()
-      .from("mail_pieces")
-      .insert(pieceRows)
-      .select("id, scan_count");
-    if (pErr) throw new Error(pErr.message);
-
-    // scan rows matching scan_counts
-    const scanRows = (pieces ?? [])
-      .filter((p: { scan_count: number }) => p.scan_count > 0)
-      .map((p: { id: string }) => ({ mail_piece_id: p.id, source: "lob", raw_event: null }));
-    if (scanRows.length) {
-      const { error: sErr } = await sb().from("scans").insert(scanRows);
-      if (sErr) throw new Error(sErr.message);
-    }
-
-    // debit the send (trigger keeps balance = sum)
-    const { error: debErr } = await sb().from("credit_transactions").insert({
-      profile_id: uid,
-      delta: -deliverable.length,
-      reason: "campaign_send",
-      reference_id: campaignId,
-    });
-    if (debErr) throw new Error(debErr.message);
+    // Server-side RPC (SECURITY DEFINER) so it works under the tightened ledger
+    // RLS where clients can't insert credit transactions directly.
+    const { error } = await sb().rpc("seed_sample_data");
+    if (error) throw new Error(error.message);
   },
 };

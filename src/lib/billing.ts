@@ -23,36 +23,44 @@ export interface Plan {
   popular?: boolean;
 }
 
-/** One-time credit purchases. */
+/** One-time add-on packs. Priced above every subscription rate. */
 export const CREDIT_PACKS: CreditPack[] = [
-  { id: "pack_100", credits: 100, price_usd: 89 },
-  { id: "pack_500", credits: 500, price_usd: 399, popular: true },
-  { id: "pack_1000", credits: 1000, price_usd: 699 },
+  { id: "pack_small", credits: 100, price_usd: 159 },
+  { id: "pack_medium", credits: 250, price_usd: 385 },
+  { id: "pack_large", credits: 500, price_usd: 745, popular: true },
+  { id: "pack_jumbo", credits: 1000, price_usd: 1440 },
 ];
 
-/** Monthly subscriptions. Unused credits roll over (added on top, never reset). */
+/** Monthly subscriptions (best rate). Unused credits roll over (added on top). */
 export const PLANS: Plan[] = [
   {
     id: "plan_starter",
     name: "Starter",
-    price_usd: 99,
-    monthly_credits: 150,
-    blurb: "For agents testing the waters.",
+    price_usd: 360,
+    monthly_credits: 250,
+    blurb: "For agents getting started with farming.",
   },
   {
     id: "plan_growth",
     name: "Growth",
-    price_usd: 299,
+    price_usd: 695,
     monthly_credits: 500,
-    blurb: "Steady monthly farming campaigns.",
+    blurb: "Steady monthly neighborhood campaigns.",
     popular: true,
   },
   {
     id: "plan_pro",
     name: "Pro",
-    price_usd: 599,
-    monthly_credits: 1100,
+    price_usd: 1340,
+    monthly_credits: 1000,
     blurb: "High-volume, multi-neighborhood outreach.",
+  },
+  {
+    id: "plan_scale",
+    name: "Scale",
+    price_usd: 3225,
+    monthly_credits: 2500,
+    blurb: "Teams and multi-market farming at scale.",
   },
 ];
 

@@ -57,17 +57,34 @@ export default function BillingPage() {
 
   function showFlash(msg: string) {
     setFlash(msg);
-    window.setTimeout(() => setFlash(null), 3500);
+    window.setTimeout(() => setFlash(null), 6000);
   }
+
+  // Handle return from Stripe Checkout (?status=success|cancel).
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get("status");
+    if (!status) return;
+    window.history.replaceState({}, "", "/billing");
+    if (status === "success") {
+      showFlash("Payment received — your balance will update momentarily.");
+      refreshWallet();
+      reload();
+      // webhook may land a beat after redirect; refresh again shortly
+      const t = window.setTimeout(() => {
+        refreshWallet();
+        reload();
+      }, 2500);
+      return () => window.clearTimeout(t);
+    }
+    if (status === "cancel") showFlash("Checkout canceled — no charge was made.");
+  }, [refreshWallet, reload]);
 
   async function buyPack(pack: CreditPack) {
     setBusy(pack.id);
     try {
-      await db.purchaseCreditPack(pack.id);
-      await refreshWallet();
-      await reload();
-      showFlash(`Added ${pack.credits.toLocaleString()} credits to your wallet.`);
-    } finally {
+      await db.purchaseCreditPack(pack.id); // redirects to Stripe Checkout
+    } catch (e) {
+      showFlash(e instanceof Error ? e.message : "Could not start checkout.");
       setBusy(null);
     }
   }
@@ -75,22 +92,19 @@ export default function BillingPage() {
   async function subscribe(plan: Plan) {
     setBusy(plan.id);
     try {
-      await db.subscribeToPlan(plan.id);
-      await refreshWallet();
-      await reload();
-      showFlash(`Subscribed to ${plan.name}. ${plan.monthly_credits} credits granted.`);
-    } finally {
+      await db.subscribeToPlan(plan.id); // redirects to Stripe Checkout
+    } catch (e) {
+      showFlash(e instanceof Error ? e.message : "Could not start checkout.");
       setBusy(null);
     }
   }
 
-  async function cancel() {
-    setBusy("cancel");
+  async function openPortal() {
+    setBusy("portal");
     try {
-      await db.cancelSubscription();
-      await reload();
-      showFlash("Subscription canceled. Your remaining credits stay in your wallet.");
-    } finally {
+      await db.openBillingPortal(); // redirects to Stripe customer portal
+    } catch (e) {
+      showFlash(e instanceof Error ? e.message : "Could not open the portal.");
       setBusy(null);
     }
   }
@@ -152,11 +166,11 @@ export default function BillingPage() {
           </div>
           {subscription && (
             <button
-              onClick={cancel}
-              disabled={busy === "cancel"}
-              className="mt-4 text-xs font-medium text-zinc-500 underline-offset-2 hover:text-red-600 hover:underline disabled:opacity-60"
+              onClick={openPortal}
+              disabled={busy === "portal"}
+              className="mt-4 text-xs font-medium text-brand-600 underline-offset-2 hover:underline disabled:opacity-60"
             >
-              {busy === "cancel" ? "Canceling…" : "Cancel subscription"}
+              {busy === "portal" ? "Opening…" : "Manage subscription"}
             </button>
           )}
         </Card>
@@ -168,7 +182,7 @@ export default function BillingPage() {
         <p className="mt-1 text-sm text-zinc-500">
           One-time purchase. Credits never expire.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
             <Card
               key={pack.id}
@@ -214,7 +228,7 @@ export default function BillingPage() {
           Credits are granted every month and roll over — unused credits stay
           in your wallet.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => {
             const isCurrent = subscription?.plan === plan.id;
             return (
@@ -270,11 +284,11 @@ export default function BillingPage() {
             description="Every credit movement — the ledger is the source of truth."
             action={
               <button
-                title="Stripe-hosted portal — available once billing is wired"
-                disabled
-                className="cursor-not-allowed rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-400"
+                onClick={openPortal}
+                disabled={busy === "portal"}
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
               >
-                Customer portal (soon)
+                {busy === "portal" ? "Opening…" : "Customer portal"}
               </button>
             }
           />
@@ -326,8 +340,8 @@ export default function BillingPage() {
       </section>
 
       <p className="mt-6 text-center text-xs text-zinc-400">
-        Mock preview — no real charges. Real checkout will use Stripe (test mode)
-        behind this same flow.
+        Stripe test mode — use card 4242 4242 4242 4242, any future expiry &amp;
+        CVC. No real charges.
       </p>
     </div>
   );

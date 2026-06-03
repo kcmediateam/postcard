@@ -317,6 +317,12 @@ export const mockProvider: DataProvider = {
     return delay(undefined);
   },
 
+  async openBillingPortal(): Promise<void> {
+    throw new Error(
+      "The customer portal is available once Stripe billing is connected."
+    );
+  },
+
   async listDesigns(): Promise<Design[]> {
     const db = loadDB();
     const userId = requireUserId(db);

@@ -70,6 +70,9 @@ export interface DataProvider {
   /** Cancel the active subscription (keeps already-granted credits). */
   cancelSubscription(): Promise<void>;
 
+  /** Open the Stripe customer portal (manage/cancel subscription, receipts). */
+  openBillingPortal(): Promise<void>;
+
   // ---- designs & templates (Screen 4: Designs) --------------------------
 
   /** The agent's saved postcard designs, newest first. */
