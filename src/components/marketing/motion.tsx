@@ -62,12 +62,14 @@ export function CountUp({
   prefix = "",
   suffix = "",
   duration = 1400,
+  decimals = 0,
   className = "",
 }: {
   value: number;
   prefix?: string;
   suffix?: string;
   duration?: number;
+  decimals?: number;
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement | null>(null);
@@ -103,7 +105,7 @@ export function CountUp({
       if (!startTs) startTs = ts;
       const p = Math.min(1, (ts - startTs) / duration);
       const eased = 1 - Math.pow(1 - p, 3);
-      setN(Math.round(eased * value));
+      setN(eased * value);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -113,7 +115,7 @@ export function CountUp({
   return (
     <span ref={ref} className={className}>
       {prefix}
-      {n}
+      {n.toFixed(decimals)}
       {suffix}
     </span>
   );

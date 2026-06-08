@@ -81,6 +81,7 @@ export interface DesignFields {
   qr_url: string;
   // return ("FROM") address override — empty falls back to the profile
   return_name: string;
+  return_company: string;
   return_line1: string;
   return_city: string;
   return_state: string;

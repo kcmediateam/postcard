@@ -89,7 +89,7 @@ export function postcardBackHtml(design: Design, profile: Profile): string | nul
   // FROM: per-design override falls back to the profile.
   const ret = [
     f.return_name || profile.return_name,
-    profile.company_name,
+    f.return_company || profile.company_name,
     f.return_line1 || profile.return_line1,
     [
       f.return_city || profile.return_city,

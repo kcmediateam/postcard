@@ -72,6 +72,7 @@ export function emptyFields(): DesignFields {
     font: "",
     qr_url: "",
     return_name: "",
+    return_company: "",
     return_line1: "",
     return_city: "",
     return_state: "",

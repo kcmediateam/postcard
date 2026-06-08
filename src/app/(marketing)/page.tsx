@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { PricingCalculator } from "@/components/marketing/pricing-calculator";
 import { CompareTable } from "@/components/marketing/compare-table";
+import { LogoMarquee } from "@/components/marketing/logo-marquee";
 import { Reveal, CountUp } from "@/components/marketing/motion";
 import { TEMPLATES } from "@/lib/templates";
 
@@ -50,16 +51,18 @@ export default function HomePage() {
           {/* Fanned postcards — gently floating */}
           <div className="relative mx-auto hidden h-[380px] w-full max-w-md lg:block">
             <FanCard kind="just_sold" pos="left-0 top-10" base="rotate(-8deg)" floatClass="animate-float-slow" />
-            <FanCard kind="open_house" pos="right-0 top-14" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
-            <FanCard kind="just_listed" pos="left-1/2 top-0 z-10 shadow-2xl" base="translateX(-50%)" floatClass="animate-float" delay={0.5} />
+            <FanCard kind="market_update" pos="right-0 top-14" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
+            <FanCard kind="neighbor_intro" pos="left-1/2 top-0 z-10 shadow-2xl" base="translateX(-50%)" floatClass="animate-float" delay={0.5} />
           </div>
           {/* mobile: single */}
           <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 shadow-xl lg:hidden">
             <PostcardPreview
-              kind={byKind("just_listed").kind}
-              theme={byKind("just_listed").theme}
-              accent={byKind("just_listed").accent}
-              fields={byKind("just_listed").defaults}
+              kind={byKind("neighbor_intro").kind}
+              theme={byKind("neighbor_intro").theme}
+              accent={byKind("neighbor_intro").defaults.accent || byKind("neighbor_intro").accent}
+              layout={byKind("neighbor_intro").layout}
+              font={byKind("neighbor_intro").defaults.font || undefined}
+              fields={byKind("neighbor_intro").defaults}
               side="front"
               profile={null}
             />
@@ -82,6 +85,62 @@ export default function HomePage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* Brokerage logo marquee */}
+      <LogoMarquee />
+
+      {/* Why postcards work — stats */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-zinc-900">
+            Why the mailbox still wins
+          </h2>
+          <p className="mt-3 text-lg text-zinc-600">
+            For US real-estate farming, showing up in the mailbox — again and
+            again — is how you become the agent people already trust.
+          </p>
+        </Reveal>
+
+        <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+          {STATS.map((s, i) => (
+            <Reveal
+              key={s.label}
+              delay={i * 100}
+              className="rounded-2xl border border-zinc-200 bg-white p-6 text-center shadow-sm transition-shadow duration-300 hover:shadow-lg"
+            >
+              <div className="text-4xl font-bold text-radiate">
+                <CountUp value={s.value} suffix={s.suffix} decimals={s.decimals ?? 0} />
+              </div>
+              <div className="mt-2 text-sm font-semibold text-zinc-900">
+                {s.label}
+              </div>
+              <div className="mt-0.5 text-xs text-zinc-500">{s.sub}</div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal
+          delay={120}
+          className="mx-auto mt-10 max-w-3xl rounded-2xl bg-zinc-50 p-6 text-center"
+        >
+          <p className="text-lg leading-relaxed text-zinc-700">
+            It takes{" "}
+            <span className="font-semibold text-zinc-900">
+              around 7 touches
+            </span>{" "}
+            before a prospect remembers your name — yet most buyers and sellers
+            hire the first agent they think of. Consistent, tracked postcards
+            keep <span className="font-semibold text-zinc-900">you</span> top of
+            mind for that moment.
+          </p>
+        </Reveal>
+
+        <p className="mt-5 text-center text-xs text-zinc-400">
+          Sources: NAR Profile of Home Buyers &amp; Sellers (2025); ANA/DMA
+          Response Rate Report; the marketing &ldquo;Rule of 7.&rdquo; US
+          figures.
+        </p>
       </section>
 
       {/* Pricing calculator */}
@@ -221,7 +280,16 @@ function FanCard({
         { "--float-base": base, animationDelay: `${delay}s` } as React.CSSProperties
       }
     >
-      <PostcardPreview kind={t.kind} theme={t.theme} accent={t.accent} fields={t.defaults} side="front" profile={null} />
+      <PostcardPreview
+        kind={t.kind}
+        theme={t.theme}
+        accent={t.defaults.accent || t.accent}
+        layout={t.layout}
+        font={t.defaults.font || undefined}
+        fields={t.defaults}
+        side="front"
+        profile={null}
+      />
     </div>
   );
 }
@@ -231,6 +299,19 @@ const ic = (path: React.ReactNode) => (
     {path}
   </svg>
 );
+
+const STATS: {
+  value: number;
+  suffix: string;
+  decimals?: number;
+  label: string;
+  sub: string;
+}[] = [
+  { value: 4.4, decimals: 1, suffix: "%", label: "Direct-mail response rate", sub: "vs 0.12% for email" },
+  { value: 7, suffix: "+", label: "Touches to be remembered", sub: "the marketing “Rule of 7”" },
+  { value: 88, suffix: "%", label: "of buyers use an agent", sub: "NAR, 2025" },
+  { value: 91, suffix: "%", label: "of sellers use an agent", sub: "NAR, 2025" },
+];
 
 const STEPS = [
   { title: "Design", body: "Template or upload", icon: ic(<><rect x="3" y="4" width="18" height="14" rx="2" /><path d="m21 15-5-5L5 21" /></>) },

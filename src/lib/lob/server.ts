@@ -4,6 +4,7 @@ const LOB_BASE = "https://api.lob.com/v1";
 
 export interface LobAddress {
   name: string;
+  company?: string;
   address_line1: string;
   address_line2?: string;
   address_city: string;

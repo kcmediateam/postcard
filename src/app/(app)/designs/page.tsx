@@ -843,6 +843,12 @@ function PersonalizeEditor({
                 onChange={(e) => set("return_name", e.target.value)}
               />
               <TextField
+                label="Company / brokerage"
+                placeholder={profile?.company_name ?? "Your brokerage"}
+                value={fields.return_company}
+                onChange={(e) => set("return_company", e.target.value)}
+              />
+              <TextField
                 label="Street address"
                 placeholder={profile?.return_line1 ?? "123 Main St"}
                 value={fields.return_line1}

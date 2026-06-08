@@ -101,6 +101,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   const df = design.fields;
   const from: LobAddress = {
     name: df?.return_name?.trim() || profile.return_name || "",
+    company: df?.return_company?.trim() || profile.company_name || undefined,
     address_line1: df?.return_line1?.trim() || profile.return_line1 || "",
     address_line2: profile.return_line2 ?? undefined,
     address_city: df?.return_city?.trim() || profile.return_city || "",
