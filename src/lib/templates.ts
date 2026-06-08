@@ -134,7 +134,7 @@ export const TEMPLATES: Template[] = [
     kind: "just_listed",
     theme: "light",
     accent: "#2249c9",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Just Listed",
@@ -156,7 +156,7 @@ export const TEMPLATES: Template[] = [
     kind: "just_sold",
     theme: "dark",
     accent: "#caa14a",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "I have just SOLD",
@@ -178,7 +178,7 @@ export const TEMPLATES: Template[] = [
     kind: "just_sold",
     theme: "light",
     accent: "#0f766e",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Just Sold",
@@ -202,7 +202,7 @@ export const TEMPLATES: Template[] = [
     kind: "coming_soon",
     theme: "bold",
     accent: "#0ea5a4",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Coming Soon",
@@ -224,7 +224,7 @@ export const TEMPLATES: Template[] = [
     kind: "open_house",
     theme: "bold",
     accent: "#b45309",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Open House",
@@ -248,7 +248,7 @@ export const TEMPLATES: Template[] = [
     kind: "market_update",
     theme: "bold",
     accent: "#3a63e6",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Your Neighborhood Market Update",
@@ -266,7 +266,7 @@ export const TEMPLATES: Template[] = [
     kind: "neighbor_intro",
     theme: "light",
     accent: "#9a7b4f",
-    active: true,
+    active: false,
     defaults: {
       ...emptyFields(),
       headline: "Hi, I'm your neighbor",
