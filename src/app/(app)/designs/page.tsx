@@ -74,6 +74,7 @@ export default function DesignsPage() {
   const [canvaOpen, setCanvaOpen] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const [preview, setPreview] = useState<Design | null>(null);
+  const [resyncing, setResyncing] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     const [d, t] = await Promise.all([db.listDesigns(), db.listTemplates()]);
@@ -117,6 +118,27 @@ export default function DesignsPage() {
     if (!window.confirm(`Delete "${design.name}"?`)) return;
     await db.deleteDesign(design.id);
     await reload();
+  }
+
+  async function resyncCanva(design: Design) {
+    setResyncing(design.id);
+    try {
+      const res = await fetch("/api/canva/resync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: design.id }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || "resync_failed");
+      await reload();
+      setFlash(`Pulled the latest of "${design.name}" from Canva.`);
+    } catch (e) {
+      setFlash(
+        e instanceof Error ? `Re-sync failed: ${e.message}` : "Re-sync failed."
+      );
+    } finally {
+      setResyncing(null);
+    }
   }
 
   if (mode.type === "editor") {
@@ -185,14 +207,24 @@ export default function DesignsPage() {
                     </button>
                   )}
                   {d.external_edit_url && (
-                    <a
-                      href={d.external_edit_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
-                    >
-                      Edit in Canva
-                    </a>
+                    <>
+                      <a
+                        href={d.external_edit_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
+                      >
+                        Edit in Canva
+                      </a>
+                      <button
+                        onClick={() => resyncCanva(d)}
+                        disabled={resyncing === d.id}
+                        title="Pull the latest version from Canva"
+                        className="rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-60"
+                      >
+                        {resyncing === d.id ? "Syncing…" : "Re-sync"}
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={() => handleDelete(d)}
