@@ -865,6 +865,188 @@ function SummaryFront({
   );
 }
 
+/** Full-bleed photo with a dark overlay + big headline (aerial/brand card). */
+function AerialOverlayFront({
+  f,
+  uid,
+}: {
+  f: DesignFields;
+  uid: string;
+}) {
+  const photo = f.property_photo_url;
+  const headLines = wrapText((f.headline || "We help you find a home").toUpperCase(), 12, 3);
+  return (
+    <>
+      {photo ? (
+        <>
+          <clipPath id={`ae-${uid}`}>
+            <rect width={600} height={400} />
+          </clipPath>
+          <image href={photo} x={0} y={0} width={600} height={400} preserveAspectRatio="xMidYMid slice" clipPath={`url(#ae-${uid})`} />
+        </>
+      ) : (
+        <rect width={600} height={400} fill="#5b6b6e" />
+      )}
+      <rect width={600} height={400} fill="#0c1116" opacity="0.34" />
+      {f.subhead && (
+        <text x={40} y={56} fill="#ffffff" fontSize="16" fontWeight="600" letterSpacing="0.5">
+          {wrapText(f.subhead, 30, 1)[0]}
+        </text>
+      )}
+      <text fill="#ffffff" fontSize="46" fontWeight="800" letterSpacing="1.5">
+        {headLines.map((l, i) => (
+          <tspan key={i} x={40} y={156 + i * 52}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+      {f.logo_url ? (
+        <>
+          <clipPath id={`ael-${uid}`}>
+            <rect x={40} y={332} width={130} height={34} />
+          </clipPath>
+          <image href={f.logo_url} x={40} y={332} width={130} height={34} preserveAspectRatio="xMinYMid meet" clipPath={`url(#ael-${uid})`} />
+        </>
+      ) : null}
+      <text x={40} y={384} fill="#ffffff" fontSize="18" fontWeight="500">
+        {f.agent_name || "Your brokerage"}
+      </text>
+    </>
+  );
+}
+
+/** Open House: 3-photo row, features + stats, description, event band. */
+function OpenHouseFront({
+  f,
+  accent,
+  uid,
+}: {
+  f: DesignFields;
+  accent: string;
+  uid: string;
+}) {
+  const ink = "#3a3530";
+  const photos = [f.property_photo_url, f.property_photo_url_2, f.property_photo_url_3];
+  const gap = 4;
+  const colW = (600 - gap * 2) / 3;
+  const pTop = 12;
+  const pBot = 168;
+  const stats = (
+    [
+      [f.beds, "BDRM"],
+      [f.baths, "BATH"],
+      [f.sqft, "SQFT"],
+    ] as [string, string][]
+  ).filter((s) => s[0]);
+  const words = (f.headline || "Open House").split(/\s+/);
+  const w1 = (words[0] || "Open").toUpperCase();
+  const w2 = words.slice(1).join(" ") || "House";
+
+  return (
+    <>
+      <rect width={600} height={400} fill="#f6f2ee" />
+      <rect x={0} y={0} width={600} height={12} fill={accent} />
+      {[0, 1, 2].map((i) => {
+        const x = i * (colW + gap);
+        const url = photos[i];
+        return url ? (
+          <g key={i}>
+            <clipPath id={`oh-${uid}-${i}`}>
+              <rect x={x} y={pTop} width={colW} height={pBot - pTop} />
+            </clipPath>
+            <image href={url} x={x} y={pTop} width={colW} height={pBot - pTop} preserveAspectRatio="xMidYMid slice" clipPath={`url(#oh-${uid}-${i})`} />
+          </g>
+        ) : (
+          <g key={i}>
+            <rect x={x} y={pTop} width={colW} height={pBot - pTop} fill="#e6ded7" />
+            <path
+              d={`M${x + colW / 2 - 14} ${(pTop + pBot) / 2 + 6} l14 -12 l14 12`}
+              fill="none"
+              stroke="#c3b8ad"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
+        );
+      })}
+      <text x={28} y={202} fill={ink} fontSize="15" fontWeight="700" letterSpacing="3">
+        PROPERTY FEATURES
+      </text>
+      {stats.map((s, i) => (
+        <text key={i} x={332 + i * 90} y={202} fill={ink} fontSize="13" fontWeight="600" letterSpacing="0.5">
+          {s[0]} {s[1]}
+        </text>
+      ))}
+      <text x={28} y={230} fill="#52504c" fontSize="12.5">
+        {wrapText(f.body, 80, 4).map((l, i) => (
+          <tspan key={i} x={28} dy={i === 0 ? 0 : 18}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+      <text x={28} y={318} fill={ink} fontSize="13" fontWeight="700" letterSpacing="0.5">
+        {wrapText(f.property_address, 42, 1)[0]}
+      </text>
+      <text x={572} y={318} textAnchor="end" fill={ink} fontSize="13" fontWeight="700" letterSpacing="0.5">
+        {[f.event_date, f.event_time].filter(Boolean).join(" | ")}
+      </text>
+      <rect x={0} y={332} width={600} height={68} fill={accent} />
+      <text x={28} y={381} fill={ink} fontSize="34" letterSpacing="2">
+        {w1}
+      </text>
+      <text x={188} y={385} fill={ink} fontSize="44" fontStyle="italic" className="pc-display">
+        {w2}
+      </text>
+    </>
+  );
+}
+
+/** Full-bleed photo + white circular name badge + contact band. */
+function BadgeFront({
+  f,
+  accent,
+  uid,
+}: {
+  f: DesignFields;
+  accent: string;
+  uid: string;
+}) {
+  const photo = f.property_photo_url;
+  const ink = "#3a3530";
+  return (
+    <>
+      {photo ? (
+        <>
+          <clipPath id={`bd-${uid}`}>
+            <rect width={600} height={400} />
+          </clipPath>
+          <image href={photo} x={0} y={0} width={600} height={400} preserveAspectRatio="xMidYMid slice" clipPath={`url(#bd-${uid})`} />
+        </>
+      ) : (
+        <rect width={600} height={400} fill="#cdc7bf" />
+      )}
+      <circle cx={360} cy={168} r={132} fill="#ffffff" opacity="0.93" />
+      <text x={360} y={166} textAnchor="middle" fill={ink} fontSize="27" letterSpacing="1.5" className="pc-display">
+        {f.agent_name || "Your Name"}
+      </text>
+      <text x={360} y={192} textAnchor="middle" fill={ink} fontSize="11" letterSpacing="4">
+        REAL ESTATE AGENT
+      </text>
+      <rect x={0} y={330} width={600} height={70} fill={accent} />
+      <text x={28} y={380} fill={ink} fontSize="32" fontStyle="italic" className="pc-display">
+        {f.headline || "Get in Touch"}
+      </text>
+      <text x={336} y={363} fill={ink} fontSize="12.5" letterSpacing="0.5">
+        {f.agent_phone || "(000) 000-0000"}
+      </text>
+      <text x={336} y={384} fill={ink} fontSize="12.5" letterSpacing="0.5">
+        {f.agent_email || "hello@yoursite.com"}
+      </text>
+    </>
+  );
+}
+
 /** Equal Housing Opportunity mark — simplified monochrome (house + "="). */
 function EqualHousingMark({ x, y, s, fill, cut }: { x: number; y: number; s: number; fill: string; cut: string }) {
   return (
@@ -1061,6 +1243,9 @@ function Layout({
   if (layout === "photo_banner") return <PhotoBannerFront f={fields} accent={accent} uid={uid} />;
   if (layout === "triptych") return <TriptychFront f={fields} accent={accent} uid={uid} />;
   if (layout === "summary") return <SummaryFront f={fields} uid={uid} />;
+  if (layout === "aerial") return <AerialOverlayFront f={fields} uid={uid} />;
+  if (layout === "open_house") return <OpenHouseFront f={fields} accent={accent} uid={uid} />;
+  if (layout === "badge") return <BadgeFront f={fields} accent={accent} uid={uid} />;
   if (layout === "elegant_split") return <ElegantSplitFront f={fields} accent={accent} uid={uid} />;
   if (layout === "intro") return <IntroFront f={fields} c={c} uid={uid} />;
   return <ShowcaseFront kind={kind} f={fields} c={c} uid={uid} />;

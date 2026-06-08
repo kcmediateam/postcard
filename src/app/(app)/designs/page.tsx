@@ -35,20 +35,25 @@ function fieldVis(template: Template) {
   const isPhotoBanner = layout === "photo_banner";
   const isTriptych = layout === "triptych";
   const isSummary = layout === "summary";
+  const isAerial = layout === "aerial";
+  const isOpenHouse = layout === "open_house";
+  const isBadge = layout === "badge";
   // Full property listing details (beds/baths/sqft) only render on showcases.
   const showcaseProps = isShowcase && !isMarket;
+  const anyPhoto =
+    isElegant || showcaseProps || isPhotoBanner || isTriptych || isSummary || isAerial || isOpenHouse || isBadge;
   return {
-    photoMain: isElegant || showcaseProps || isPhotoBanner || isTriptych || isSummary,
+    photoMain: anyPhoto,
     // intro renders ONE portrait via the headshot slot; showcase has a headshot
     // in the header band; the rest manage their own imagery.
     headshot: isShowcase || isIntro,
     isIntro, // the intro portrait is a tall photo, not a square headshot
-    collage: showcaseProps || isTriptych, // triptych is a 3-photo row
-    logo: !isElegant && !isPhotoBanner && !isTriptych && !isSummary,
+    collage: showcaseProps || isTriptych || isOpenHouse, // 3-photo rows
+    logo: isShowcase || isIntro || isAerial,
     eventDateTime: template.kind === "open_house",
     price: showcaseProps || isPhotoBanner, // photo_banner shows a price chip
-    stats: showcaseProps, // beds / baths / sqft
-    propertyAddress: showcaseProps || isPhotoBanner || isTriptych,
+    stats: showcaseProps || isOpenHouse, // beds / baths / sqft
+    propertyAddress: showcaseProps || isPhotoBanner || isTriptych || isOpenHouse,
     features: isTriptych || isSummary, // bullet/checklist list
   };
 }

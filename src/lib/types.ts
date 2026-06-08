@@ -48,7 +48,10 @@ export type PostcardLayout =
   | "elegant_split"
   | "photo_banner"
   | "triptych"
-  | "summary";
+  | "summary"
+  | "aerial"
+  | "open_house"
+  | "badge";
 
 /**
  * Personalization data for a template-based design. The postcard art is
