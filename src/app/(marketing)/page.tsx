@@ -50,9 +50,32 @@ export default function HomePage() {
 
           {/* Fanned postcards — gently floating */}
           <div className="relative mx-auto hidden h-[380px] w-full max-w-md lg:block">
-            <FanCard kind="just_sold" pos="left-0 top-10" base="rotate(-8deg)" floatClass="animate-float-slow" />
-            <FanCard kind="market_update" pos="right-0 top-14" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
-            <FanCard kind="neighbor_intro" pos="left-1/2 top-0 z-10 shadow-2xl" base="translateX(-50%)" floatClass="animate-float" delay={0.5} />
+            <FanCard
+              kind="neighbor_intro"
+              accent="#0f766e"
+              headline="Just listed in your neighborhood"
+              subhead="See what your home could sell for."
+              pos="left-0 top-10"
+              base="rotate(-8deg)"
+              floatClass="animate-float-slow"
+            />
+            <FanCard
+              kind="neighbor_intro"
+              accent="#3a63e6"
+              headline="What's your home worth today?"
+              subhead="Get a free, no-pressure estimate."
+              pos="right-0 top-14"
+              base="rotate(8deg)"
+              floatClass="animate-float"
+              delay={1.2}
+            />
+            <FanCard
+              kind="neighbor_intro"
+              pos="left-1/2 top-0 z-10 shadow-2xl"
+              base="translateX(-50%)"
+              floatClass="animate-float"
+              delay={0.5}
+            />
           </div>
           {/* mobile: single */}
           <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 shadow-xl lg:hidden">
@@ -265,14 +288,25 @@ function FanCard({
   base = "translateY(0)",
   floatClass = "animate-float",
   delay = 0,
+  accent,
+  headline,
+  subhead,
 }: {
   kind: string;
   pos?: string;
   base?: string;
   floatClass?: string;
   delay?: number;
+  accent?: string;
+  headline?: string;
+  subhead?: string;
 }) {
   const t = byKind(kind);
+  const fields = {
+    ...t.defaults,
+    ...(headline ? { headline } : {}),
+    ...(subhead ? { subhead } : {}),
+  };
   return (
     <div
       className={`absolute w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl ${pos} ${floatClass}`}
@@ -283,10 +317,10 @@ function FanCard({
       <PostcardPreview
         kind={t.kind}
         theme={t.theme}
-        accent={t.defaults.accent || t.accent}
+        accent={accent || t.defaults.accent || t.accent}
         layout={t.layout}
         font={t.defaults.font || undefined}
-        fields={t.defaults}
+        fields={fields}
         side="front"
         profile={null}
       />
