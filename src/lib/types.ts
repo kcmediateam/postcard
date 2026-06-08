@@ -46,7 +46,9 @@ export type PostcardLayout =
   | "showcase"
   | "intro"
   | "elegant_split"
-  | "photo_banner";
+  | "photo_banner"
+  | "triptych"
+  | "summary";
 
 /**
  * Personalization data for a template-based design. The postcard art is
@@ -92,6 +94,8 @@ export interface DesignFields {
   return_zip: string;
   // compliance: show the REALTOR® mark (Equal Housing always shows)
   nar_member: string; // "yes" = NAR member → render REALTOR® logo
+  // bullet/feature list (one per line) for checklist-style layouts
+  features: string;
 }
 
 export type AddressVerificationStatus =

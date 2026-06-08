@@ -78,6 +78,7 @@ export function emptyFields(): DesignFields {
     return_state: "",
     return_zip: "",
     nar_member: "",
+    features: "",
   };
 }
 
@@ -128,6 +129,48 @@ export const TEMPLATES: Template[] = [
       property_address: "123 Anywhere St., Any City, ST 12345",
       agent_name: "Jordan Avery",
       agent_phone: "(512) 555-0142",
+    },
+  },
+  {
+    id: "tpl_newly_listed",
+    name: "Newly Listed · Triptych",
+    kind: "just_listed",
+    theme: "light",
+    accent: "#1f242e",
+    layout: "triptych",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      headline: "Newly Listed",
+      subhead: "Just listed in your neighborhood",
+      body: "This one won't last long. Scan the code for photos, details, and a private showing.",
+      cta: "Scan for the full listing",
+      property_address: "123 Anywhere St., Any City, ST 12345",
+      features:
+        "2,100 square feet\nlisted at $524,000\n2 bedroom / 2 bath\nhuge outdoor patio\nbrand new appliances\nwalk-in closets",
+      agent_name: "Jordan Avery",
+      agent_phone: "(512) 555-0142",
+    },
+  },
+  {
+    id: "tpl_summary",
+    name: "Listing Summary · Blush",
+    kind: "just_listed",
+    theme: "light",
+    accent: "#b08968",
+    layout: "summary",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      headline: "Summary",
+      subhead: "A beautiful home, just listed",
+      body: "Take a look at the highlights below, then scan the code for the full gallery and details.",
+      cta: "Scan for full details",
+      features:
+        "4 Bedrooms\n3 Bathrooms\n4,256 sqft\nBuilt in 2017\nMountain view\nIn-ground pool\nCentral air\nFreehold",
+      agent_name: "Olivia Wilson",
+      agent_phone: "(512) 555-0142",
+      agent_email: "hello@yoursite.com",
     },
   },
   {

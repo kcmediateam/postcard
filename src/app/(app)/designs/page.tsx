@@ -33,22 +33,23 @@ function fieldVis(template: Template) {
   const isIntro = layout === "intro";
   const isShowcase = layout === "showcase";
   const isPhotoBanner = layout === "photo_banner";
+  const isTriptych = layout === "triptych";
+  const isSummary = layout === "summary";
   // Full property listing details (beds/baths/sqft) only render on showcases.
   const showcaseProps = isShowcase && !isMarket;
   return {
-    // elegant + photo_banner use one home photo; showcase uses property photos;
-    // intro/market use a single portrait (the headshot slot).
-    photoMain: isElegant || showcaseProps || isPhotoBanner,
+    photoMain: isElegant || showcaseProps || isPhotoBanner || isTriptych || isSummary,
     // intro renders ONE portrait via the headshot slot; showcase has a headshot
-    // in the header band; elegant/photo_banner have none.
+    // in the header band; the rest manage their own imagery.
     headshot: isShowcase || isIntro,
     isIntro, // the intro portrait is a tall photo, not a square headshot
-    collage: showcaseProps, // 2nd/3rd photos only on photo showcases
-    logo: !isElegant && !isPhotoBanner,
+    collage: showcaseProps || isTriptych, // triptych is a 3-photo row
+    logo: !isElegant && !isPhotoBanner && !isTriptych && !isSummary,
     eventDateTime: template.kind === "open_house",
     price: showcaseProps || isPhotoBanner, // photo_banner shows a price chip
     stats: showcaseProps, // beds / baths / sqft
-    propertyAddress: showcaseProps || isPhotoBanner,
+    propertyAddress: showcaseProps || isPhotoBanner || isTriptych,
+    features: isTriptych || isSummary, // bullet/checklist list
   };
 }
 
@@ -763,6 +764,24 @@ function PersonalizeEditor({
               value={fields.property_address}
               onChange={(e) => set("property_address", e.target.value)}
             />
+          )}
+
+          {vis.features && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+                Features list
+              </label>
+              <textarea
+                rows={6}
+                value={fields.features}
+                onChange={(e) => set("features", e.target.value)}
+                placeholder={"2,100 square feet\nlisted at $524,000\n2 bedroom / 2 bath"}
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+              />
+              <p className="mt-1 text-xs text-zinc-400">
+                One per line. Shown as a checklist on the card.
+              </p>
+            </div>
           )}
 
           <div>

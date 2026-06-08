@@ -679,6 +679,192 @@ function PhotoBannerFront({
   );
 }
 
+function featureLines(f: DesignFields, max: number): string[] {
+  return (f.features || "")
+    .split(/\n/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, max);
+}
+
+/**
+ * Triptych: centered header ("Newly · key · Listed"), address between rules,
+ * a 3-photo row, a feature checklist (3×2), and an accent footer bar.
+ */
+function TriptychFront({
+  f,
+  accent,
+  uid,
+}: {
+  f: DesignFields;
+  accent: string;
+  uid: string;
+}) {
+  const ink = "#1f242e";
+  const photos = [f.property_photo_url, f.property_photo_url_2, f.property_photo_url_3];
+  const words = (f.headline || "Newly Listed").toUpperCase().split(/\s+/);
+  const w1 = words[0] || "";
+  const w2 = words.slice(1).join(" ");
+  const feats = featureLines(f, 6);
+  const addr = wrapText(f.property_address || "", 46, 1)[0] || "";
+  const gap = 8;
+  const top = 116;
+  const bottom = 290;
+  const colW = (600 - 80 - gap * 2) / 3;
+
+  return (
+    <>
+      <rect width="600" height="400" fill="#ffffff" />
+
+      {/* header: NEWLY [key] LISTED */}
+      <text x={266} y={46} textAnchor="end" fill={ink} fontSize="24" letterSpacing="4" className="pc-display">
+        {w1}
+      </text>
+      <g stroke={accent} strokeWidth="2.5" fill="none" strokeLinecap="round">
+        <circle cx={296} cy={34} r={7} />
+        <line x1={301} y1={40} x2={316} y2={55} />
+        <line x1={309} y1={48} x2={315} y2={42} />
+        <line x1={313} y1={52} x2={319} y2={46} />
+      </g>
+      {w2 && (
+        <text x={336} y={46} fill={ink} fontSize="24" letterSpacing="4" className="pc-display">
+          {w2}
+        </text>
+      )}
+      <line x1={40} y1={64} x2={560} y2={64} stroke={ink} strokeWidth="1" />
+      <text x={300} y={90} textAnchor="middle" fill={ink} fontSize="15" letterSpacing="2">
+        {addr}
+      </text>
+      <line x1={40} y1={106} x2={560} y2={106} stroke={ink} strokeWidth="1" />
+
+      {/* 3-photo row */}
+      {[0, 1, 2].map((i) => {
+        const x = 40 + i * (colW + gap);
+        const url = photos[i];
+        if (!url)
+          return (
+            <g key={i}>
+              <rect x={x} y={top} width={colW} height={bottom - top} fill="#eceae6" />
+              <path
+                d={`M${x + colW / 2 - 14} ${(top + bottom) / 2 + 6} l14 -12 l14 12`}
+                fill="none"
+                stroke="#bcb7ae"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+          );
+        return (
+          <g key={i}>
+            <clipPath id={`tp-${uid}-${i}`}>
+              <rect x={x} y={top} width={colW} height={bottom - top} />
+            </clipPath>
+            <image href={url} x={x} y={top} width={colW} height={bottom - top} preserveAspectRatio="xMidYMid slice" clipPath={`url(#tp-${uid}-${i})`} />
+          </g>
+        );
+      })}
+
+      {/* checklist 3×2 */}
+      {feats.map((line, i) => {
+        const col = i % 3;
+        const row = Math.floor(i / 3);
+        const x = 52 + col * 180;
+        const y = 322 + row * 24;
+        return (
+          <g key={i}>
+            <circle cx={x} cy={y - 4} r={5} fill="none" stroke={accent} strokeWidth="1.5" />
+            <text x={x + 14} y={y} fill={ink} fontSize="12.5">
+              {wrapText(line, 22, 1)[0]}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* footer */}
+      <rect x={0} y={374} width={600} height={26} fill={accent} />
+      <text x={300} y={391} textAnchor="middle" fill="#ffffff" fontSize="12" letterSpacing="1">
+        {[f.agent_name, f.agent_phone].filter(Boolean).join("   ·   ")}
+      </text>
+    </>
+  );
+}
+
+/**
+ * Summary: blush panel with a script-style name, a "Summary:" heading and a
+ * two-column feature list, an angled photo upper-right, and a dark contact bar.
+ */
+function SummaryFront({
+  f,
+  uid,
+}: {
+  f: DesignFields;
+  uid: string;
+}) {
+  const blush = "#f3e9e6";
+  const ink = "#2a2723";
+  const photo = f.property_photo_url;
+  const feats = featureLines(f, 8);
+  const col1 = feats.slice(0, 4);
+  const col2 = feats.slice(4, 8);
+
+  return (
+    <>
+      <rect width="600" height="400" fill={blush} />
+
+      {/* angled photo upper-right */}
+      <clipPath id={`sm-${uid}`}>
+        <polygon points="440,0 600,0 600,300 380,300" />
+      </clipPath>
+      {photo ? (
+        <image href={photo} x={370} y={0} width={230} height={300} preserveAspectRatio="xMidYMid slice" clipPath={`url(#sm-${uid})`} />
+      ) : (
+        <g clipPath={`url(#sm-${uid})`}>
+          <rect x={370} y={0} width={230} height={300} fill="#e4d8d2" />
+          <path d="M470 150 l40 -32 l40 32" fill="none" stroke="#c9b8af" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      )}
+
+      {/* name + caption */}
+      <text x={44} y={72} fill={ink} fontStyle="italic" fontSize="36" className="pc-display">
+        {f.agent_name || "Your Name"}
+      </text>
+      <text x={46} y={98} fill={ink} fontSize="12" letterSpacing="5">
+        REAL ESTATE AGENT
+      </text>
+
+      {/* heading */}
+      <text x={44} y={152} fill={ink} fontSize="30" fontWeight="800" className="pc-display">
+        {f.headline || "Summary"}:
+      </text>
+
+      {/* two-column features */}
+      {col1.map((line, i) => (
+        <text key={`a${i}`} x={44} y={190 + i * 27} fill={ink} fontSize="15">
+          {wrapText(line, 16, 1)[0]}
+        </text>
+      ))}
+      {col2.map((line, i) => (
+        <text key={`b${i}`} x={206} y={190 + i * 27} fill={ink} fontSize="15">
+          {wrapText(line, 16, 1)[0]}
+        </text>
+      ))}
+
+      {/* dark contact bar */}
+      <rect x={0} y={306} width={600} height={94} fill="#1a1a1f" />
+      <text x={40} y={346} fill="#ffffff" fontSize="20" fontWeight="800" className="pc-display">
+        Contact our office for more info:
+      </text>
+      <text x={42} y={376} fill="#ffffff" fontSize="13" letterSpacing="1">
+        {f.agent_phone || "(000) 000-0000"}
+      </text>
+      <text x={300} y={376} fill="#ffffff" fontSize="13" letterSpacing="1">
+        {f.agent_email || "hello@yoursite.com"}
+      </text>
+    </>
+  );
+}
+
 /** Equal Housing Opportunity mark — simplified monochrome (house + "="). */
 function EqualHousingMark({ x, y, s, fill, cut }: { x: number; y: number; s: number; fill: string; cut: string }) {
   return (
@@ -873,6 +1059,8 @@ function Layout({
   const c = themeColors(theme, accent);
   if (side === "back") return <BackCard kind={kind} f={fields} c={c} profile={profile} />;
   if (layout === "photo_banner") return <PhotoBannerFront f={fields} accent={accent} uid={uid} />;
+  if (layout === "triptych") return <TriptychFront f={fields} accent={accent} uid={uid} />;
+  if (layout === "summary") return <SummaryFront f={fields} uid={uid} />;
   if (layout === "elegant_split") return <ElegantSplitFront f={fields} accent={accent} uid={uid} />;
   if (layout === "intro") return <IntroFront f={fields} c={c} uid={uid} />;
   return <ShowcaseFront kind={kind} f={fields} c={c} uid={uid} />;
