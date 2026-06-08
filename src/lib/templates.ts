@@ -68,8 +68,38 @@ export function emptyFields(): DesignFields {
     agent_name: "",
     agent_phone: "",
     agent_email: "",
+    accent: "",
+    font: "",
   };
 }
+
+/**
+ * Font pairings offered in the editor. Values reference the next/font CSS
+ * variables loaded in the root layout. Empty/unknown → DEFAULT_FONT.
+ */
+export const FONTS: Record<
+  string,
+  { label: string; display: string; body: string }
+> = {
+  classic: { label: "Classic", display: "var(--font-serif)", body: "var(--font-outfit)" },
+  modern: { label: "Modern", display: "var(--font-grotesk)", body: "var(--font-grotesk)" },
+  editorial: { label: "Editorial", display: "var(--font-fraunces)", body: "var(--font-outfit)" },
+  geometric: { label: "Geometric", display: "var(--font-outfit)", body: "var(--font-outfit)" },
+};
+export const DEFAULT_FONT = "classic";
+
+/** Accent-color swatches offered in the editor (plus a custom picker). */
+export const ACCENT_PRESETS = [
+  "#4a7bf7",
+  "#2ec4b6",
+  "#6c3ce1",
+  "#0f766e",
+  "#2249c9",
+  "#b45309",
+  "#e11d48",
+  "#9a7b4f",
+  "#111114",
+];
 
 export const TEMPLATES: Template[] = [
   {
@@ -251,13 +281,17 @@ export function resolveStyle(design: Design): {
   theme: DesignTheme;
   accent: string;
   layout: PostcardLayout;
+  font: string;
 } {
   const kind = design.template_kind ?? "just_listed";
   const tpl = design.template_id ? findTemplate(design.template_id) : undefined;
+  const overrideAccent = design.fields?.accent?.trim();
+  const overrideFont = design.fields?.font?.trim();
   return {
     kind,
     theme: tpl?.theme ?? "light",
-    accent: tpl?.accent ?? KIND_ACCENT[kind],
+    accent: overrideAccent || tpl?.accent || KIND_ACCENT[kind],
     layout: layoutFor(tpl, kind),
+    font: overrideFont && FONTS[overrideFont] ? overrideFont : DEFAULT_FONT,
   };
 }

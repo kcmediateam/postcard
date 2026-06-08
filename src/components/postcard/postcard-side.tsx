@@ -9,11 +9,24 @@ import type {
   Profile,
   TemplateKind,
 } from "@/lib/types";
-import { DEFAULT_LAYOUT, KIND_LABEL, resolveStyle } from "@/lib/templates";
+import {
+  DEFAULT_FONT,
+  DEFAULT_LAYOUT,
+  FONTS,
+  KIND_LABEL,
+  resolveStyle,
+} from "@/lib/templates";
 import { useData } from "@/lib/data/data-context";
 import { PostcardImage } from "@/components/ui/postcard-image";
 
-const SERIF = "var(--font-serif), Georgia, serif";
+/** CSS custom properties that pick the design's font pairing. */
+function fontVars(fontKey: string): React.CSSProperties {
+  const f = FONTS[fontKey] ?? FONTS[DEFAULT_FONT];
+  return {
+    ["--pc-display"]: f.display,
+    ["--pc-body"]: f.body,
+  } as React.CSSProperties;
+}
 
 interface Colors {
   bg: string;
@@ -339,7 +352,7 @@ function ShowcaseFront({
         fill={c.headerText}
         fontSize="40"
         fontWeight="800"
-        fontFamily={SERIF}
+        className="pc-display"
         letterSpacing="-0.8"
       >
         {headlineLines.map((l, i) => (
@@ -447,7 +460,7 @@ function IntroFront({
       <rect x={244} y={0} width={10} height={400} fill={c.headerBg} />
 
       {/* headline */}
-      <text x={276} fill={c.text} fontSize="34" fontWeight="800" fontFamily={SERIF} letterSpacing="-0.6">
+      <text x={276} fill={c.text} fontSize="34" fontWeight="800" className="pc-display" letterSpacing="-0.6">
         {headLines.map((l, i) => (
           <tspan key={i} x={276} y={78 + i * 38}>
             {l}
@@ -547,7 +560,7 @@ function ElegantSplitFront({
       )}
 
       {/* serif headline, taupe, uppercase */}
-      <text fontFamily={SERIF} fill={taupe} fontSize="30" fontWeight="500" letterSpacing="0.5">
+      <text className="pc-display" fill={taupe} fontSize="30" fontWeight="500" letterSpacing="0.5">
         {headLines.map((l, i) => (
           <tspan key={i} x={44} y={startY + i * 38}>
             {l}
@@ -559,7 +572,7 @@ function ElegantSplitFront({
       <line x1={44} y1={ruleY} x2={250} y2={ruleY} stroke={taupe} strokeWidth="1.5" />
 
       {/* italic-serif tagline (script flourish) */}
-      <text x={44} y={ruleY + 34} fill={ink} fontFamily={SERIF} fontStyle="italic" fontSize="19" fontWeight="500">
+      <text x={44} y={ruleY + 34} fill={ink} className="pc-display" fontStyle="italic" fontSize="19" fontWeight="500">
         {tagLines.map((l, i) => (
           <tspan key={i} x={44} dy={i === 0 ? 0 : 24}>
             {l}
@@ -604,7 +617,7 @@ function BackCard({
       <rect width="600" height="400" fill={c.bg} />
       <rect x={0} y={0} width={600} height={14} fill={c.badgeBg} />
 
-      <text x={40} y={62} fill={c.text} fontSize="22" fontWeight="800" fontFamily={SERIF}>
+      <text x={40} y={62} fill={c.text} fontSize="22" fontWeight="800" className="pc-display">
         {wrapText(f.subhead || KIND_LABEL[kind], 30, 1)[0]}
       </text>
       <text x={40} y={92} fill={c.sub} fontSize="15" fontWeight="500">
@@ -698,13 +711,21 @@ function Layout({
   return <ShowcaseFront kind={kind} f={fields} c={c} uid={uid} />;
 }
 
-function Svg({ children, label }: { children: React.ReactNode; label: string }) {
+function Svg({
+  children,
+  label,
+  style,
+}: {
+  children: React.ReactNode;
+  label: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <svg
       viewBox="0 0 600 400"
       width="100%"
-      className="block aspect-[3/2] w-full"
-      fontFamily="var(--font-sans), Arial, sans-serif"
+      className="pc-svg block aspect-[3/2] w-full"
+      style={style}
       role="img"
       aria-label={label}
     >
@@ -735,11 +756,11 @@ export function PostcardSide({
 
   const fields = design.fields;
   if (!fields) return <div className={`aspect-[3/2] w-full bg-zinc-100 ${className}`} />;
-  const { kind, theme, accent, layout } = resolveStyle(design);
+  const { kind, theme, accent, layout, font } = resolveStyle(design);
 
   return (
     <div className={className}>
-      <Svg label={`${design.name} ${side}`}>
+      <Svg label={`${design.name} ${side}`} style={fontVars(font)}>
         <Layout
           kind={kind}
           theme={theme}
@@ -763,6 +784,7 @@ export function PostcardPreview({
   side,
   profile,
   layout,
+  font,
 }: {
   kind: TemplateKind;
   theme: DesignTheme;
@@ -771,10 +793,11 @@ export function PostcardPreview({
   side: "front" | "back";
   profile: Profile | null;
   layout?: PostcardLayout;
+  font?: string;
 }) {
   const resolved = layout ?? DEFAULT_LAYOUT[kind];
   return (
-    <Svg label={`${KIND_LABEL[kind]} ${side}`}>
+    <Svg label={`${KIND_LABEL[kind]} ${side}`} style={fontVars(font || DEFAULT_FONT)}>
       <Layout kind={kind} theme={theme} accent={accent} fields={fields} side={side} profile={profile} layout={resolved} />
     </Svg>
   );

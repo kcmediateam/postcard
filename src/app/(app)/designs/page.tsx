@@ -12,22 +12,36 @@ import {
   PostcardSide,
 } from "@/components/postcard/postcard-side";
 import { useData } from "@/lib/data/data-context";
-import { DEFAULT_LAYOUT, emptyFields } from "@/lib/templates";
+import {
+  ACCENT_PRESETS,
+  DEFAULT_FONT,
+  DEFAULT_LAYOUT,
+  FONTS,
+  emptyFields,
+} from "@/lib/templates";
 import type { Design, DesignFields, Profile, Template } from "@/lib/types";
 
 /**
  * Which editor fields to show for a template — gated by the layout/kind that
- * actually renders them, so agents never fill in data that won't appear.
+ * actually renders them, so agents never fill in data that won't appear (and
+ * never see two image slots that silently override each other).
  */
 function fieldVis(template: Template) {
   const layout = template.layout ?? DEFAULT_LAYOUT[template.kind];
   const isMarket = template.kind === "market_update";
   const isElegant = layout === "elegant_split";
+  const isIntro = layout === "intro";
+  const isShowcase = layout === "showcase";
   // Property listing details only render on photo "showcase" cards.
-  const propertyDetails = layout === "showcase" && !isMarket;
+  const propertyDetails = isShowcase && !isMarket;
   return {
-    photoMain: !isMarket, // home/property photo (elegant uses it; market has none)
-    headshot: !isElegant, // elegant front has no headshot slot
+    // elegant uses one home photo; showcase uses property photos; intro/market
+    // use a single portrait (the headshot slot) — so they don't show this.
+    photoMain: isElegant || propertyDetails,
+    // intro renders ONE portrait via the headshot slot; showcase has a headshot
+    // in the header band; elegant has none.
+    headshot: isShowcase || isIntro,
+    isIntro, // the intro portrait is a tall photo, not a square headshot
     collage: propertyDetails, // 2nd/3rd photos only on photo showcases
     logo: !isElegant, // elegant has no logo slot
     eventDateTime: template.kind === "open_house",
@@ -561,6 +575,71 @@ function PersonalizeEditor({
             hint="Just for you — not printed."
           />
 
+          <fieldset className="rounded-lg border border-zinc-200 p-4">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Style
+            </legend>
+
+            <div className="text-sm font-medium text-zinc-700">Accent color</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {[
+                template.accent,
+                ...ACCENT_PRESETS.filter((c) => c !== template.accent),
+              ].map((col) => {
+                const active =
+                  (fields.accent || template.accent).toLowerCase() ===
+                  col.toLowerCase();
+                return (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => set("accent", col)}
+                    aria-label={`Use ${col}`}
+                    className={`size-7 rounded-full transition ${
+                      active
+                        ? "ring-2 ring-zinc-900 ring-offset-2"
+                        : "ring-1 ring-inset ring-black/10 hover:scale-110"
+                    }`}
+                    style={{ background: col }}
+                  />
+                );
+              })}
+              <label
+                className="grid size-7 cursor-pointer place-items-center rounded-full ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50"
+                title="Custom color"
+              >
+                <span className="text-sm text-zinc-500">+</span>
+                <input
+                  type="color"
+                  value={fields.accent || template.accent}
+                  onChange={(e) => set("accent", e.target.value)}
+                  className="sr-only"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 text-sm font-medium text-zinc-700">Font</div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(FONTS).map(([key, opt]) => {
+                const active = (fields.font || DEFAULT_FONT) === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => set("font", key)}
+                    className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                      active
+                        ? "border-brand-500 bg-brand-50 font-medium text-brand-700"
+                        : "border-zinc-300 text-zinc-600 hover:border-zinc-400"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
           {(vis.photoMain || vis.headshot) && (
             <div
               className={`grid gap-4 ${
@@ -577,12 +656,12 @@ function PersonalizeEditor({
               )}
               {vis.headshot && (
                 <ImageDrop
-                  label="Your headshot"
+                  label={vis.isIntro ? "Your photo" : "Your headshot"}
                   value={fields.headshot_url}
                   onChange={(v) => set("headshot_url", v)}
-                  maxDim={500}
-                  aspect="aspect-square"
-                  hint="Square"
+                  maxDim={vis.isIntro ? 1200 : 500}
+                  aspect={vis.isIntro ? "aspect-[3/4]" : "aspect-square"}
+                  hint={vis.isIntro ? "Portrait" : "Square"}
                 />
               )}
             </div>
@@ -768,7 +847,8 @@ function PersonalizeEditor({
             <PostcardPreview
               kind={template.kind}
               theme={template.theme}
-              accent={template.accent}
+              accent={fields.accent || template.accent}
+              font={fields.font || DEFAULT_FONT}
               layout={template.layout}
               fields={fields}
               side={side}

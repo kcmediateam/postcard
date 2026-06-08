@@ -62,6 +62,17 @@ body {
   color: transparent;
 }
 
+/* ── Postcard fonts ──────────────────────────────────────────────────
+   Per-design font pairing comes in as --pc-display / --pc-body (set inline
+   on the <svg>). Applied via CSS (not SVG presentation attributes) so the
+   custom-property var() reliably resolves. Falls back to the brand fonts. */
+.pc-svg text {
+  font-family: var(--pc-body, var(--font-sans)), Arial, sans-serif;
+}
+.pc-svg text.pc-display {
+  font-family: var(--pc-display, var(--font-serif)), Georgia, serif;
+}
+
 /* ── Premium subtle motion ───────────────────────────────────────── */
 
 /* Slowly drifting gradient (hero / CTA panels). */

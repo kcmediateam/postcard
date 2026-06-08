@@ -74,6 +74,9 @@ export interface DesignFields {
   agent_name: string;
   agent_phone: string;
   agent_email: string;
+  // style overrides (empty string = use the template's default)
+  accent: string;
+  font: string;
 }
 
 export type AddressVerificationStatus =

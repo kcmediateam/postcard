@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Outfit, Geist_Mono, Playfair_Display } from "next/font/google";
+import {
+  Outfit,
+  Geist_Mono,
+  Playfair_Display,
+  Fraunces,
+  Space_Grotesk,
+} from "next/font/google";
 import "./globals.css";
 import { DataProviderClient } from "@/lib/data/data-context";
 
@@ -10,6 +16,16 @@ const outfit = Outfit({
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
+  subsets: ["latin"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-grotesk",
   subsets: ["latin"],
 });
 
@@ -60,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${playfair.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${outfit.variable} ${playfair.variable} ${fraunces.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <DataProviderClient>{children}</DataProviderClient>
