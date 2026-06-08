@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const SUPPORT_EMAIL = "hello@radiate.app";
+const SUPPORT_EMAIL = "info@kcmediateam.me";
 const IDLE_MS = 35000;
 
 type Msg = { from: "bot" | "user"; text: string };
