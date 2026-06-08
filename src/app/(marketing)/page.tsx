@@ -1,20 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { PostcardPreview } from "@/components/postcard/postcard-side";
 import { PricingCalculator } from "@/components/marketing/pricing-calculator";
 import { CompareTable } from "@/components/marketing/compare-table";
 import { LogoMarquee } from "@/components/marketing/logo-marquee";
 import { Reveal, CountUp } from "@/components/marketing/motion";
-import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
   title: "Radiate — targeted direct mail for real estate agents",
   description:
     "Design, mail, and measure postcard campaigns. Verified addresses, QR scan tracking, transparent credit pricing — self-serve or done-for-you.",
 };
-
-const byKind = (k: string) => TEMPLATES.find((t) => t.kind === k)!;
 
 export default function HomePage() {
   return (
@@ -49,46 +45,15 @@ export default function HomePage() {
           </Reveal>
 
           {/* Fanned postcards — gently floating */}
-          <div className="relative mx-auto hidden h-[380px] w-full max-w-md lg:block">
-            <FanCard
-              kind="neighbor_intro"
-              accent="#0f766e"
-              headline="Just listed in your neighborhood"
-              subhead="See what your home could sell for."
-              pos="left-0 top-10"
-              base="rotate(-8deg)"
-              floatClass="animate-float-slow"
-            />
-            <FanCard
-              kind="neighbor_intro"
-              accent="#3a63e6"
-              headline="What's your home worth today?"
-              subhead="Get a free, no-pressure estimate."
-              pos="right-0 top-14"
-              base="rotate(8deg)"
-              floatClass="animate-float"
-              delay={1.2}
-            />
-            <FanCard
-              kind="neighbor_intro"
-              pos="left-1/2 top-0 z-10 shadow-2xl"
-              base="translateX(-50%)"
-              floatClass="animate-float"
-              delay={0.5}
-            />
+          <div className="relative mx-auto hidden h-[400px] w-full max-w-md lg:block">
+            <HeroImageCard src="/hero/design-2.jpg" alt="Listing summary postcard" pos="left-0 top-12" base="rotate(-8deg)" floatClass="animate-float-slow" />
+            <HeroImageCard src="/hero/design-3.jpg" alt="Newly listed postcard" pos="right-0 top-16" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
+            <HeroImageCard src="/hero/design-1.jpg" alt="New listing postcard" pos="left-1/2 top-0 z-10" base="translateX(-50%)" floatClass="animate-float" delay={0.5} featured />
           </div>
           {/* mobile: single */}
-          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 shadow-xl lg:hidden">
-            <PostcardPreview
-              kind={byKind("neighbor_intro").kind}
-              theme={byKind("neighbor_intro").theme}
-              accent={byKind("neighbor_intro").defaults.accent || byKind("neighbor_intro").accent}
-              layout={byKind("neighbor_intro").layout}
-              font={byKind("neighbor_intro").defaults.font || undefined}
-              fields={byKind("neighbor_intro").defaults}
-              side="front"
-              profile={null}
-            />
+          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 lg:hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/hero/design-1.jpg" alt="New listing postcard" className="block w-full" />
           </div>
         </div>
       </section>
@@ -282,48 +247,34 @@ export default function HomePage() {
   );
 }
 
-function FanCard({
-  kind,
+function HeroImageCard({
+  src,
+  alt,
   pos = "",
   base = "translateY(0)",
   floatClass = "animate-float",
   delay = 0,
-  accent,
-  headline,
-  subhead,
+  featured = false,
 }: {
-  kind: string;
+  src: string;
+  alt: string;
   pos?: string;
   base?: string;
   floatClass?: string;
   delay?: number;
-  accent?: string;
-  headline?: string;
-  subhead?: string;
+  featured?: boolean;
 }) {
-  const t = byKind(kind);
-  const fields = {
-    ...t.defaults,
-    ...(headline ? { headline } : {}),
-    ...(subhead ? { subhead } : {}),
-  };
   return (
     <div
-      className={`absolute w-64 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl ${pos} ${floatClass}`}
+      className={`absolute w-64 overflow-hidden rounded-2xl ring-1 ring-black/5 ${
+        featured ? "shadow-2xl" : "shadow-xl"
+      } ${pos} ${floatClass}`}
       style={
         { "--float-base": base, animationDelay: `${delay}s` } as React.CSSProperties
       }
     >
-      <PostcardPreview
-        kind={t.kind}
-        theme={t.theme}
-        accent={accent || t.defaults.accent || t.accent}
-        layout={t.layout}
-        font={t.defaults.font || undefined}
-        fields={fields}
-        side="front"
-        profile={null}
-      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} className="block w-full" />
     </div>
   );
 }
