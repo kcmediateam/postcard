@@ -12,8 +12,29 @@ import {
   PostcardSide,
 } from "@/components/postcard/postcard-side";
 import { useData } from "@/lib/data/data-context";
-import { emptyFields } from "@/lib/templates";
+import { DEFAULT_LAYOUT, emptyFields } from "@/lib/templates";
 import type { Design, DesignFields, Profile, Template } from "@/lib/types";
+
+/**
+ * Which editor fields to show for a template — gated by the layout/kind that
+ * actually renders them, so agents never fill in data that won't appear.
+ */
+function fieldVis(template: Template) {
+  const layout = template.layout ?? DEFAULT_LAYOUT[template.kind];
+  const isMarket = template.kind === "market_update";
+  const isElegant = layout === "elegant_split";
+  // Property listing details only render on photo "showcase" cards.
+  const propertyDetails = layout === "showcase" && !isMarket;
+  return {
+    photoMain: !isMarket, // home/property photo (elegant uses it; market has none)
+    headshot: !isElegant, // elegant front has no headshot slot
+    collage: propertyDetails, // 2nd/3rd photos only on photo showcases
+    logo: !isElegant, // elegant has no logo slot
+    eventDateTime: template.kind === "open_house",
+    propertyDetails, // price / beds / baths / sqft
+    propertyAddress: propertyDetails,
+  };
+}
 
 type Mode =
   | { type: "list" }
@@ -464,9 +485,12 @@ function PersonalizeEditor({
 }) {
   const { db, session } = useData();
   const profile = session?.profile ?? null;
-  const isOpenHouse = template.kind === "open_house";
-  const usesCollage =
-    template.kind !== "neighbor_intro" && template.kind !== "market_update";
+  const vis = fieldVis(template);
+  const photoLabel = vis.collage
+    ? "Property photo 1"
+    : (template.layout ?? DEFAULT_LAYOUT[template.kind]) === "elegant_split"
+      ? "Home photo"
+      : "Photo";
 
   const [name, setName] = useState(design?.name ?? template.name);
   const [fields, setFields] = useState<DesignFields>(
@@ -537,24 +561,34 @@ function PersonalizeEditor({
             hint="Just for you — not printed."
           />
 
-          <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-            <ImageDrop
-              label={usesCollage ? "Property photo 1" : "Photo"}
-              value={fields.property_photo_url}
-              onChange={(v) => set("property_photo_url", v)}
-              maxDim={1400}
-            />
-            <ImageDrop
-              label="Your headshot"
-              value={fields.headshot_url}
-              onChange={(v) => set("headshot_url", v)}
-              maxDim={500}
-              aspect="aspect-square"
-              hint="Square"
-            />
-          </div>
+          {(vis.photoMain || vis.headshot) && (
+            <div
+              className={`grid gap-4 ${
+                vis.photoMain && vis.headshot ? "sm:grid-cols-[1fr_8rem]" : ""
+              }`}
+            >
+              {vis.photoMain && (
+                <ImageDrop
+                  label={photoLabel}
+                  value={fields.property_photo_url}
+                  onChange={(v) => set("property_photo_url", v)}
+                  maxDim={1400}
+                />
+              )}
+              {vis.headshot && (
+                <ImageDrop
+                  label="Your headshot"
+                  value={fields.headshot_url}
+                  onChange={(v) => set("headshot_url", v)}
+                  maxDim={500}
+                  aspect="aspect-square"
+                  hint="Square"
+                />
+              )}
+            </div>
+          )}
 
-          {usesCollage && (
+          {vis.collage && (
             <div className="grid gap-4 sm:grid-cols-2">
               <ImageDrop
                 label="Property photo 2 (optional)"
@@ -571,14 +605,16 @@ function PersonalizeEditor({
             </div>
           )}
 
-          <ImageDrop
-            label="Brokerage logo (optional)"
-            value={fields.logo_url}
-            onChange={(v) => set("logo_url", v)}
-            maxDim={600}
-            aspect="aspect-[3/1]"
-            hint="Wide logo, transparent PNG works best"
-          />
+          {vis.logo && (
+            <ImageDrop
+              label="Brokerage logo (optional)"
+              value={fields.logo_url}
+              onChange={(v) => set("logo_url", v)}
+              maxDim={600}
+              aspect="aspect-[3/1]"
+              hint="Wide logo, transparent PNG works best"
+            />
+          )}
 
           <TextField
             label="Headline"
@@ -591,7 +627,7 @@ function PersonalizeEditor({
             onChange={(e) => set("subhead", e.target.value)}
           />
 
-          {isOpenHouse && (
+          {vis.eventDateTime && (
             <div className="grid grid-cols-2 gap-4">
               <TextField
                 label="Event date"
@@ -608,35 +644,39 @@ function PersonalizeEditor({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <TextField
-              label="Price"
-              placeholder="$749,000"
-              value={fields.price}
-              onChange={(e) => set("price", e.target.value)}
-            />
-            <TextField
-              label="Beds"
-              value={fields.beds}
-              onChange={(e) => set("beds", e.target.value)}
-            />
-            <TextField
-              label="Baths"
-              value={fields.baths}
-              onChange={(e) => set("baths", e.target.value)}
-            />
-            <TextField
-              label="Sq ft"
-              value={fields.sqft}
-              onChange={(e) => set("sqft", e.target.value)}
-            />
-          </div>
+          {vis.propertyDetails && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <TextField
+                label="Price"
+                placeholder="$749,000"
+                value={fields.price}
+                onChange={(e) => set("price", e.target.value)}
+              />
+              <TextField
+                label="Beds"
+                value={fields.beds}
+                onChange={(e) => set("beds", e.target.value)}
+              />
+              <TextField
+                label="Baths"
+                value={fields.baths}
+                onChange={(e) => set("baths", e.target.value)}
+              />
+              <TextField
+                label="Sq ft"
+                value={fields.sqft}
+                onChange={(e) => set("sqft", e.target.value)}
+              />
+            </div>
+          )}
 
-          <TextField
-            label="Property address"
-            value={fields.property_address}
-            onChange={(e) => set("property_address", e.target.value)}
-          />
+          {vis.propertyAddress && (
+            <TextField
+              label="Property address"
+              value={fields.property_address}
+              onChange={(e) => set("property_address", e.target.value)}
+            />
+          )}
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-700">
