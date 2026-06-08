@@ -77,6 +77,16 @@ export interface DesignFields {
   // style overrides (empty string = use the template's default)
   accent: string;
   font: string;
+  // where the printed QR code should link (Lob encodes this at send time)
+  qr_url: string;
+  // return ("FROM") address override — empty falls back to the profile
+  return_name: string;
+  return_line1: string;
+  return_city: string;
+  return_state: string;
+  return_zip: string;
+  // compliance: show the REALTOR® mark (Equal Housing always shows)
+  nar_member: string; // "yes" = NAR member → render REALTOR® logo
 }
 
 export type AddressVerificationStatus =

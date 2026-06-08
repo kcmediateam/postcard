@@ -110,7 +110,7 @@ create table if not exists public.designs (
   front_image_url text,
   back_image_url text,
   template_id text,
-  template_kind text check (template_kind in ('just_listed','just_sold','open_house')),
+  template_kind text check (template_kind in ('just_listed','just_sold','coming_soon','open_house','market_update','neighbor_intro')),
   fields jsonb,
   created_at timestamptz not null default now()
 );

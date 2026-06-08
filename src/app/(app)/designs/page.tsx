@@ -776,6 +776,14 @@ function PersonalizeEditor({
             onChange={(e) => set("cta", e.target.value)}
           />
 
+          <TextField
+            label="QR code links to"
+            placeholder="https://your-site.com/listing"
+            value={fields.qr_url}
+            onChange={(e) => set("qr_url", e.target.value)}
+            hint="Where the scannable QR code sends people."
+          />
+
           <fieldset className="rounded-lg border border-zinc-200 p-4">
             <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Testimonial (optional, shows on back)
@@ -818,6 +826,67 @@ function PersonalizeEditor({
                 onChange={(e) => set("agent_email", e.target.value)}
               />
             </div>
+          </fieldset>
+
+          <fieldset className="rounded-lg border border-zinc-200 p-4">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Return address (FROM)
+            </legend>
+            <p className="mb-3 text-xs text-zinc-400">
+              Leave blank to use your profile&apos;s return address.
+            </p>
+            <div className="space-y-3">
+              <TextField
+                label="Name"
+                placeholder={profile?.return_name ?? "Your name"}
+                value={fields.return_name}
+                onChange={(e) => set("return_name", e.target.value)}
+              />
+              <TextField
+                label="Street address"
+                placeholder={profile?.return_line1 ?? "123 Main St"}
+                value={fields.return_line1}
+                onChange={(e) => set("return_line1", e.target.value)}
+              />
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <TextField
+                  label="City"
+                  placeholder={profile?.return_city ?? "City"}
+                  value={fields.return_city}
+                  onChange={(e) => set("return_city", e.target.value)}
+                />
+                <TextField
+                  label="State"
+                  placeholder={profile?.return_state ?? "ST"}
+                  value={fields.return_state}
+                  onChange={(e) => set("return_state", e.target.value)}
+                />
+                <TextField
+                  label="ZIP"
+                  placeholder={profile?.return_zip ?? "00000"}
+                  value={fields.return_zip}
+                  onChange={(e) => set("return_zip", e.target.value)}
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="rounded-lg border border-zinc-200 p-4">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Compliance logos
+            </legend>
+            <p className="mb-3 text-xs text-zinc-400">
+              The Equal Housing Opportunity logo always appears on the back.
+            </p>
+            <label className="flex items-center gap-2.5 text-sm text-zinc-700">
+              <input
+                type="checkbox"
+                checked={fields.nar_member === "yes"}
+                onChange={(e) => set("nar_member", e.target.checked ? "yes" : "")}
+                className="size-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+              />
+              I&apos;m a NAR member — show the REALTOR<sup>®</sup> logo
+            </label>
           </fieldset>
         </div>
 

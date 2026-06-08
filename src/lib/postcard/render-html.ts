@@ -14,6 +14,14 @@ const esc = (s: string | null | undefined) =>
     c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;"
   );
 
+/** Equal Housing Opportunity mark (simplified, monochrome). */
+const equalHousingSvg = (color: string) =>
+  `<svg width="0.3in" height="0.3in" viewBox="0 0 100 100"><path d="M0 42 L50 0 L100 42 L84 42 L84 100 L16 100 L16 42 Z" fill="${color}"/><rect x="34" y="54" width="32" height="8" fill="#fff"/><rect x="34" y="70" width="32" height="8" fill="#fff"/></svg>`;
+
+/** REALTOR® block-R mark (simplified, monochrome). */
+const realtorSvg = (color: string) =>
+  `<svg width="0.26in" height="0.3in" viewBox="0 0 84 100"><rect x="7" width="70" height="100" rx="6" fill="${color}"/><text x="42" y="80" text-anchor="middle" font-size="74" font-weight="800" fill="#fff" font-family="Helvetica,Arial">R</text></svg>`;
+
 function doc(body: string, accent: string): string {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     @page { margin: 0; }
@@ -28,7 +36,9 @@ function doc(body: string, accent: string): string {
 export function postcardFrontHtml(design: Design): string | null {
   if (design.source !== "template" || !design.fields) return null;
   const f = design.fields;
-  const accent = KIND_ACCENT[design.template_kind ?? "just_listed"];
+  const accent =
+    (f.accent && f.accent.trim()) ||
+    KIND_ACCENT[design.template_kind ?? "just_listed"];
   const badge =
     design.template_kind === "just_sold"
       ? "JUST SOLD"
@@ -73,16 +83,32 @@ export function postcardFrontHtml(design: Design): string | null {
 export function postcardBackHtml(design: Design, profile: Profile): string | null {
   if (design.source !== "template" || !design.fields) return null;
   const f = design.fields;
-  const accent = KIND_ACCENT[design.template_kind ?? "just_listed"];
+  const accent =
+    (f.accent && f.accent.trim()) ||
+    KIND_ACCENT[design.template_kind ?? "just_listed"];
+  // FROM: per-design override falls back to the profile.
   const ret = [
-    profile.return_name,
+    f.return_name || profile.return_name,
     profile.company_name,
-    profile.return_line1,
-    [profile.return_city, profile.return_state, profile.return_zip].filter(Boolean).join(", "),
+    f.return_line1 || profile.return_line1,
+    [
+      f.return_city || profile.return_city,
+      f.return_state || profile.return_state,
+      f.return_zip || profile.return_zip,
+    ]
+      .filter(Boolean)
+      .join(", "),
   ]
     .filter(Boolean)
     .map((l) => `<div>${esc(l)}</div>`)
     .join("");
+
+  // Compliance: Equal Housing always; REALTOR® only for NAR members.
+  const logos = `
+    <div style="position:absolute;bottom:0.16in;left:0.4in;display:flex;align-items:flex-end;gap:0.12in">
+      ${equalHousingSvg("#15181e")}
+      ${f.nar_member === "yes" ? realtorSvg("#15181e") : ""}
+    </div>`;
 
   // Left half = message + return address. Right half left clear for Lob's
   // address block + the QR code (added via the qr_code API param).
@@ -92,9 +118,10 @@ export function postcardBackHtml(design: Design, profile: Profile): string | nul
       <div style="font-size:14pt;font-weight:700;color:#15181e">${esc(f.subhead) || "A note for your neighbors"}</div>
       <div style="margin-top:0.1in;font-size:10.5pt;color:#3f3f46;line-height:1.4">${esc(f.body)}</div>
     </div>
-    <div style="position:absolute;bottom:0.4in;left:0.4in;width:3.0in;font-size:8.5pt;color:#71717a">
+    <div style="position:absolute;bottom:0.55in;left:0.4in;width:3.0in;font-size:8.5pt;color:#71717a">
       <div style="letter-spacing:1px;font-weight:700;color:#a1a1aa">FROM</div>
       ${ret}
-    </div>`;
+    </div>
+    ${logos}`;
   return doc(body, accent);
 }

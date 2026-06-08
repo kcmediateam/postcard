@@ -590,6 +590,46 @@ function ElegantSplitFront({
   );
 }
 
+/** Equal Housing Opportunity mark — simplified monochrome (house + "="). */
+function EqualHousingMark({ x, y, s, fill, cut }: { x: number; y: number; s: number; fill: string; cut: string }) {
+  return (
+    <g transform={`translate(${x},${y})`} aria-label="Equal Housing Opportunity">
+      <path
+        d={`M0 ${0.42 * s} L${0.5 * s} 0 L${s} ${0.42 * s} L${0.84 * s} ${0.42 * s} L${0.84 * s} ${s} L${0.16 * s} ${s} L${0.16 * s} ${0.42 * s} Z`}
+        fill={fill}
+      />
+      <rect x={0.34 * s} y={0.54 * s} width={0.32 * s} height={0.08 * s} fill={cut} />
+      <rect x={0.34 * s} y={0.7 * s} width={0.32 * s} height={0.08 * s} fill={cut} />
+    </g>
+  );
+}
+
+/** REALTOR® block-R mark — simplified monochrome. */
+function RealtorMark({ x, y, s, fill, cut }: { x: number; y: number; s: number; fill: string; cut: string }) {
+  return (
+    <g transform={`translate(${x},${y})`} aria-label="REALTOR">
+      <rect x={0.08 * s} width={0.84 * s} height={s} rx={0.06 * s} fill={fill} />
+      <text
+        x={0.5 * s}
+        y={0.8 * s}
+        textAnchor="middle"
+        fontSize={0.84 * s}
+        fontWeight="800"
+        fill={cut}
+        fontFamily="var(--font-sans), Arial, sans-serif"
+      >
+        R
+      </text>
+    </g>
+  );
+}
+
+/** Trim a URL to its host + path for display under the QR. */
+function prettyUrl(url: string): string {
+  const u = url.trim().replace(/^https?:\/\//i, "").replace(/\/$/, "");
+  return u.length > 30 ? u.slice(0, 29) + "…" : u;
+}
+
 function BackCard({
   kind,
   f,
@@ -601,28 +641,44 @@ function BackCard({
   c: Colors;
   profile: Profile | null;
 }) {
-  const uid = useId().replace(/:/g, "");
-  const bodyLines = wrapText(f.body, 46, 5);
-  const ret = profile
-    ? [
-        profile.return_name,
-        profile.company_name,
-        profile.return_line1,
-        [profile.return_city, profile.return_state, profile.return_zip].filter(Boolean).join(", "),
-      ].filter(Boolean)
-    : [];
+  // Left message column is ~270px wide → wrap tight so it never crosses the
+  // divider. Allow more lines (back has the room) so copy isn't truncated.
+  const bodyLines = wrapText(f.body, 33, 6);
+  const bodyTop = 86;
+  const lh = 20;
+  const bodyBottom = bodyTop + (bodyLines.length - 1) * lh;
+  const testiTop = bodyBottom + 32;
+
+  // FROM: per-design override falls back to the profile.
+  const ret = [
+    f.return_name || profile?.return_name || "",
+    profile?.company_name || "",
+    f.return_line1 || profile?.return_line1 || "",
+    [
+      f.return_city || profile?.return_city || "",
+      f.return_state || profile?.return_state || "",
+    ]
+      .filter(Boolean)
+      .join(", ") +
+      (f.return_zip || profile?.return_zip
+        ? ` ${f.return_zip || profile?.return_zip}`
+        : ""),
+  ]
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
     <>
       <rect width="600" height="400" fill={c.bg} />
-      <rect x={0} y={0} width={600} height={14} fill={c.badgeBg} />
+      <rect x={0} y={0} width={600} height={12} fill={c.badgeBg} />
 
-      <text x={40} y={62} fill={c.text} fontSize="22" fontWeight="800" className="pc-display">
-        {wrapText(f.subhead || KIND_LABEL[kind], 30, 1)[0]}
+      {/* ── left: message ── */}
+      <text x={40} y={54} fill={c.text} fontSize="20" fontWeight="800" className="pc-display">
+        {wrapText(f.subhead || KIND_LABEL[kind], 26, 1)[0]}
       </text>
-      <text x={40} y={92} fill={c.sub} fontSize="15" fontWeight="500">
+      <text x={40} y={bodyTop} fill={c.sub} fontSize="14" fontWeight="500">
         {bodyLines.map((l, i) => (
-          <tspan key={i} x={40} dy={i === 0 ? 0 : 22}>
+          <tspan key={i} x={40} dy={i === 0 ? 0 : lh}>
             {l}
           </tspan>
         ))}
@@ -630,58 +686,79 @@ function BackCard({
 
       {f.testimonial && (
         <g>
-          <text x={40} y={216} fill={c.highlight} fontSize="22" fontWeight="800">
+          <text x={40} y={testiTop} fill={c.highlight} fontSize="18" fontWeight="800">
             ★★★★★
           </text>
-          <text x={40} y={238} fill={c.sub} fontSize="12.5" fontStyle="italic">
-            {wrapText(`“${f.testimonial}”`, 52, 2).map((l, i) => (
-              <tspan key={i} x={40} dy={i === 0 ? 0 : 18}>
+          <text x={40} y={testiTop + 22} fill={c.sub} fontSize="12.5" fontStyle="italic">
+            {wrapText(`“${f.testimonial}”`, 38, 2).map((l, i) => (
+              <tspan key={i} x={40} dy={i === 0 ? 0 : 17}>
                 {l}
               </tspan>
             ))}
           </text>
           {f.testimonial_author && (
-            <text x={40} y={282} fill={c.muted} fontSize="12">
+            <text x={40} y={testiTop + 62} fill={c.muted} fontSize="12">
               — {f.testimonial_author}
             </text>
           )}
         </g>
       )}
 
-      {/* return address */}
-      <text x={40} y={312} fill={c.muted} fontSize="10.5" letterSpacing="2" fontWeight="600">
+      {/* return address (bottom-left) */}
+      <text x={40} y={304} fill={c.muted} fontSize="10" letterSpacing="2" fontWeight="700">
         FROM
       </text>
       {ret.map((line, i) => (
-        <text key={i} x={40} y={330 + i * 17} fill={c.sub} fontSize="12.5">
+        <text key={i} x={40} y={320 + i * 15} fill={c.sub} fontSize="11.5">
           {line}
         </text>
       ))}
 
-      <line x1={330} y1={40} x2={330} y2={360} stroke={c.line} strokeDasharray="4 4" />
-      <rect x={470} y={40} width={90} height={62} fill="none" stroke={c.line} strokeDasharray="5 4" />
-      <text x={515} y={76} textAnchor="middle" fill={c.muted} fontSize="11">
+      {/* ── divider ── */}
+      <line x1={318} y1={34} x2={318} y2={366} stroke={c.line} strokeWidth="1" strokeDasharray="3 4" />
+
+      {/* ── right: stamp / address / QR ── */}
+      <rect x={486} y={30} width={80} height={54} rx={4} fill="none" stroke={c.line} strokeDasharray="4 4" />
+      <text x={526} y={61} textAnchor="middle" fill={c.muted} fontSize="10" letterSpacing="1">
         STAMP
       </text>
-      <text x={360} y={190} fill={c.sub} fontSize="14">
-        [ Recipient address ]
+
+      <text x={344} y={140} fill={c.muted} fontSize="10" letterSpacing="2" fontWeight="700">
+        DELIVER TO
       </text>
-      <text x={360} y={210} fill={c.muted} fontSize="11.5">
-        Printed per contact at send
+      <line x1={344} y1={164} x2={470} y2={164} stroke={c.line} strokeWidth="1" />
+      <line x1={344} y1={186} x2={470} y2={186} stroke={c.line} strokeWidth="1" />
+      <line x1={344} y1={208} x2={470} y2={208} stroke={c.line} strokeWidth="1" />
+      <text x={344} y={226} fill={c.muted} fontSize="10.5">
+        Each verified address printed at send.
       </text>
 
-      <g transform="translate(360,250)">
-        <rect width={74} height={74} rx={6} fill={c.text} />
-        <rect x={9} y={9} width={56} height={56} fill={c.bg} />
-        <rect x={17} y={17} width={40} height={40} fill={c.text} />
-        <rect x={27} y={27} width={20} height={20} fill={c.bg} />
+      {/* QR */}
+      <g transform="translate(344,250)">
+        <rect width={76} height={76} rx={6} fill={c.text} />
+        <rect x={9} y={9} width={58} height={58} fill={c.bg} />
+        <rect x={17} y={17} width={42} height={42} fill={c.text} />
+        <rect x={28} y={28} width={20} height={20} fill={c.bg} />
       </g>
-      <text x={446} y={286} fill={c.muted} fontSize="11.5">
-        Lob QR —
+      <text x={432} y={272} fill={c.muted} fontSize="11">
+        Scan goes to
       </text>
-      <text x={446} y={302} fill={c.highlight} fontSize="11.5" fontWeight="600">
-        {f.cta || "Scan to learn more"}
+      <text x={432} y={290} fill={c.highlight} fontSize="11.5" fontWeight="700">
+        {f.qr_url ? prettyUrl(f.qr_url) : "Set a link →"}
       </text>
+      <text x={432} y={312} fill={c.sub} fontSize="11.5">
+        {wrapText(f.cta || "Scan to learn more", 20, 2).map((l, i) => (
+          <tspan key={i} x={432} dy={i === 0 ? 0 : 14}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+
+      {/* ── compliance logos (bottom-right) ── */}
+      <EqualHousingMark x={f.nar_member === "yes" ? 506 : 540} y={364} s={26} fill={c.text} cut={c.bg} />
+      {f.nar_member === "yes" && (
+        <RealtorMark x={540} y={366} s={24} fill={c.text} cut={c.bg} />
+      )}
     </>
   );
 }

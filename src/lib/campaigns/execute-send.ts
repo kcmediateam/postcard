@@ -97,16 +97,20 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
     design.source === "uploaded" ? design.back_image_url : postcardBackHtml(design, profile);
   if (!front || !back) return fail();
 
+  // Return address: per-design override (fields.return_*) falls back to profile.
+  const df = design.fields;
   const from: LobAddress = {
-    name: profile.return_name ?? "",
-    address_line1: profile.return_line1 ?? "",
+    name: df?.return_name?.trim() || profile.return_name || "",
+    address_line1: df?.return_line1?.trim() || profile.return_line1 || "",
     address_line2: profile.return_line2 ?? undefined,
-    address_city: profile.return_city ?? "",
-    address_state: profile.return_state ?? "",
-    address_zip: profile.return_zip ?? "",
+    address_city: df?.return_city?.trim() || profile.return_city || "",
+    address_state: df?.return_state?.trim() || profile.return_state || "",
+    address_zip: df?.return_zip?.trim() || profile.return_zip || "",
     address_country: "US",
   };
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  // QR destination: the design's link if set, else our app.
+  const qrRedirectUrl = df?.qr_url?.trim() || appUrl;
 
   const results = await Promise.allSettled(
     toSend.map((c) =>
@@ -123,7 +127,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
         from,
         front,
         back,
-        qrRedirectUrl: appUrl,
+        qrRedirectUrl,
         metadata: { campaign_id: campaignId, profile_id: uid, contact_id: c.id },
         idempotencyKey: `${campaignId}:${c.id}`,
       }).then((r) => ({ contact: c, lobId: r.id }))

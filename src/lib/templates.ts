@@ -70,6 +70,13 @@ export function emptyFields(): DesignFields {
     agent_email: "",
     accent: "",
     font: "",
+    qr_url: "",
+    return_name: "",
+    return_line1: "",
+    return_city: "",
+    return_state: "",
+    return_zip: "",
+    nar_member: "",
   };
 }
 
