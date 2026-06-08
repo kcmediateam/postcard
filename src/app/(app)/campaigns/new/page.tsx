@@ -50,11 +50,16 @@ export default function NewCampaignPage() {
   } | null>(null);
 
   useEffect(() => {
-    Promise.all([db.listDesigns(), db.listContactLists()]).then(([d, l]) => {
-      setDesigns(d);
-      setLists(l);
-      setLoaded(true);
-    });
+    const load = () =>
+      Promise.all([db.listDesigns(), db.listContactLists()]).then(([d, l]) => {
+        setDesigns(d);
+        setLists(l);
+        setLoaded(true);
+      });
+    load();
+    // Re-fetch when returning from creating a design/list in another tab.
+    window.addEventListener("focus", load);
+    return () => window.removeEventListener("focus", load);
   }, [db]);
 
   const loadPreview = useCallback(
@@ -238,7 +243,11 @@ export default function NewCampaignPage() {
 
           {/* design (both tiers) */}
           <section>
-            <SectionTitle n={3} title="Choose a design" />
+            <SectionTitle
+              n={3}
+              title="Choose a design"
+              action={<NewLink href="/designs">New design</NewLink>}
+            />
             {!loaded ? (
               <div className="text-sm text-zinc-400">Loading…</div>
             ) : designs.length === 0 ? (
@@ -276,7 +285,11 @@ export default function NewCampaignPage() {
           {!isManaged && (
             <>
               <section>
-                <SectionTitle n={4} title="Choose a contact list" />
+                <SectionTitle
+                  n={4}
+                  title="Choose a contact list"
+                  action={<NewLink href="/contacts">New list</NewLink>}
+                />
                 {!loaded ? (
                   <div className="text-sm text-zinc-400">Loading…</div>
                 ) : lists.length === 0 ? (
@@ -487,7 +500,7 @@ export default function NewCampaignPage() {
                 : "Schedule campaign"}
             </Button>
             <p className="mt-2 text-center text-[11px] text-zinc-400">
-              Stripe/Lob in test mode — no real charges or mail.
+              Credits are debited when your postcards send.
             </p>
           </Card>
         </div>
@@ -534,14 +547,37 @@ function AudienceCard({
   );
 }
 
-function SectionTitle({ n, title }: { n: number; title: string }) {
+function SectionTitle({
+  n,
+  title,
+  action,
+}: {
+  n: number;
+  title: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="mb-3 flex items-center gap-2">
       <span className="grid size-6 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
         {n}
       </span>
       <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
+      {action && <div className="ml-auto">{action}</div>}
     </div>
+  );
+}
+
+function NewLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      target="_blank"
+      rel="noopener"
+      className="inline-flex items-center gap-1 rounded-lg border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:border-brand-300 hover:text-brand-700"
+    >
+      <span className="text-sm leading-none">+</span>
+      {children}
+    </Link>
   );
 }
 

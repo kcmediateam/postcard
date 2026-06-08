@@ -288,7 +288,7 @@ export default function BillingPage() {
                 disabled={busy === "portal"}
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
               >
-                {busy === "portal" ? "Opening…" : "Customer portal"}
+                {busy === "portal" ? "Opening…" : "Payment methods & invoices"}
               </button>
             }
           />
@@ -340,8 +340,8 @@ export default function BillingPage() {
       </section>
 
       <p className="mt-6 text-center text-xs text-zinc-400">
-        Stripe test mode — use card 4242 4242 4242 4242, any future expiry &amp;
-        CVC. No real charges.
+        Secure checkout by Stripe. Credits never expire; monthly-plan credits
+        roll over.
       </p>
     </div>
   );
