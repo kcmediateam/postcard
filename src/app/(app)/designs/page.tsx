@@ -32,21 +32,23 @@ function fieldVis(template: Template) {
   const isElegant = layout === "elegant_split";
   const isIntro = layout === "intro";
   const isShowcase = layout === "showcase";
-  // Property listing details only render on photo "showcase" cards.
-  const propertyDetails = isShowcase && !isMarket;
+  const isPhotoBanner = layout === "photo_banner";
+  // Full property listing details (beds/baths/sqft) only render on showcases.
+  const showcaseProps = isShowcase && !isMarket;
   return {
-    // elegant uses one home photo; showcase uses property photos; intro/market
-    // use a single portrait (the headshot slot) — so they don't show this.
-    photoMain: isElegant || propertyDetails,
+    // elegant + photo_banner use one home photo; showcase uses property photos;
+    // intro/market use a single portrait (the headshot slot).
+    photoMain: isElegant || showcaseProps || isPhotoBanner,
     // intro renders ONE portrait via the headshot slot; showcase has a headshot
-    // in the header band; elegant has none.
+    // in the header band; elegant/photo_banner have none.
     headshot: isShowcase || isIntro,
     isIntro, // the intro portrait is a tall photo, not a square headshot
-    collage: propertyDetails, // 2nd/3rd photos only on photo showcases
-    logo: !isElegant, // elegant has no logo slot
+    collage: showcaseProps, // 2nd/3rd photos only on photo showcases
+    logo: !isElegant && !isPhotoBanner,
     eventDateTime: template.kind === "open_house",
-    propertyDetails, // price / beds / baths / sqft
-    propertyAddress: propertyDetails,
+    price: showcaseProps || isPhotoBanner, // photo_banner shows a price chip
+    stats: showcaseProps, // beds / baths / sqft
+    propertyAddress: showcaseProps || isPhotoBanner,
   };
 }
 
@@ -723,29 +725,35 @@ function PersonalizeEditor({
             </div>
           )}
 
-          {vis.propertyDetails && (
+          {(vis.price || vis.stats) && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <TextField
-                label="Price"
-                placeholder="$749,000"
-                value={fields.price}
-                onChange={(e) => set("price", e.target.value)}
-              />
-              <TextField
-                label="Beds"
-                value={fields.beds}
-                onChange={(e) => set("beds", e.target.value)}
-              />
-              <TextField
-                label="Baths"
-                value={fields.baths}
-                onChange={(e) => set("baths", e.target.value)}
-              />
-              <TextField
-                label="Sq ft"
-                value={fields.sqft}
-                onChange={(e) => set("sqft", e.target.value)}
-              />
+              {vis.price && (
+                <TextField
+                  label="Price"
+                  placeholder="$749,000"
+                  value={fields.price}
+                  onChange={(e) => set("price", e.target.value)}
+                />
+              )}
+              {vis.stats && (
+                <>
+                  <TextField
+                    label="Beds"
+                    value={fields.beds}
+                    onChange={(e) => set("beds", e.target.value)}
+                  />
+                  <TextField
+                    label="Baths"
+                    value={fields.baths}
+                    onChange={(e) => set("baths", e.target.value)}
+                  />
+                  <TextField
+                    label="Sq ft"
+                    value={fields.sqft}
+                    onChange={(e) => set("sqft", e.target.value)}
+                  />
+                </>
+              )}
             </div>
           )}
 

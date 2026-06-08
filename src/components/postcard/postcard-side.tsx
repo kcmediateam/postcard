@@ -590,6 +590,95 @@ function ElegantSplitFront({
   );
 }
 
+/**
+ * Full-bleed property photo with a price chip (top-left) and a banner along
+ * the bottom (label · address), inside a thin white frame. Bands use the
+ * accent color so the design recolors with the brand.
+ */
+function PhotoBannerFront({
+  f,
+  accent,
+  uid,
+}: {
+  f: DesignFields;
+  accent: string;
+  uid: string;
+}) {
+  const photo = f.property_photo_url;
+  const label = f.headline || "New Listing";
+  const addrLines = wrapText(f.property_address || "", 30, 2);
+  const priceW = Math.max(120, (f.price?.length || 0) * 19 + 44);
+
+  return (
+    <>
+      {photo ? (
+        <>
+          <clipPath id={`pb-${uid}`}>
+            <rect width={600} height={400} />
+          </clipPath>
+          <image
+            href={photo}
+            x={0}
+            y={0}
+            width={600}
+            height={400}
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#pb-${uid})`}
+          />
+        </>
+      ) : (
+        <>
+          <rect width={600} height={400} fill="#e8e6e2" />
+          <path
+            d="M252 214 l48 -40 l48 40"
+            fill="none"
+            stroke="#bcb7ae"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <rect x={270} y={210} width={60} height={50} fill="none" stroke="#bcb7ae" strokeWidth="3" />
+        </>
+      )}
+
+      {/* thin inset frame */}
+      <rect x={20} y={20} width={560} height={360} fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.9" />
+
+      {/* price chip */}
+      {f.price && (
+        <>
+          <rect x={20} y={42} width={priceW} height={54} fill={accent} opacity="0.92" />
+          <text x={42} y={78} fill="#ffffff" fontSize="30" fontWeight="700" letterSpacing="3">
+            {f.price}
+          </text>
+        </>
+      )}
+
+      {/* bottom banner */}
+      <rect x={20} y={318} width={560} height={62} fill={accent} opacity="0.88" />
+      <text x={44} y={357} fill="#ffffff" fontSize="29" fontWeight="400" letterSpacing="0.5">
+        {label}
+      </text>
+      <line x1={252} y1={332} x2={252} y2={368} stroke="#ffffff" strokeWidth="1.5" opacity="0.5" />
+      <text
+        x={418}
+        y={addrLines.length > 1 ? 347 : 356}
+        fill="#ffffff"
+        fontSize="14"
+        letterSpacing="1.2"
+        textAnchor="middle"
+        opacity="0.92"
+      >
+        {addrLines.map((l, i) => (
+          <tspan key={i} x={418} dy={i === 0 ? 0 : 18}>
+            {l}
+          </tspan>
+        ))}
+      </text>
+    </>
+  );
+}
+
 /** Equal Housing Opportunity mark — simplified monochrome (house + "="). */
 function EqualHousingMark({ x, y, s, fill, cut }: { x: number; y: number; s: number; fill: string; cut: string }) {
   return (
@@ -783,6 +872,7 @@ function Layout({
   const uid = useId().replace(/:/g, "");
   const c = themeColors(theme, accent);
   if (side === "back") return <BackCard kind={kind} f={fields} c={c} profile={profile} />;
+  if (layout === "photo_banner") return <PhotoBannerFront f={fields} accent={accent} uid={uid} />;
   if (layout === "elegant_split") return <ElegantSplitFront f={fields} accent={accent} uid={uid} />;
   if (layout === "intro") return <IntroFront f={fields} c={c} uid={uid} />;
   return <ShowcaseFront kind={kind} f={fields} c={c} uid={uid} />;

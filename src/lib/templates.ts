@@ -111,6 +111,26 @@ export const ACCENT_PRESETS = [
 
 export const TEMPLATES: Template[] = [
   {
+    id: "tpl_new_listing",
+    name: "New Listing · Photo",
+    kind: "just_listed",
+    theme: "light",
+    accent: "#2b2f3a",
+    layout: "photo_banner",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      headline: "New Listing",
+      subhead: "Just listed in your neighborhood",
+      body: "A beautiful new home just hit the market nearby. Curious what your home is worth in today's market? Scan the code or reach out for a free, no-pressure estimate.",
+      cta: "Scan for the full listing",
+      price: "$239,000",
+      property_address: "123 Anywhere St., Any City, ST 12345",
+      agent_name: "Jordan Avery",
+      agent_phone: "(512) 555-0142",
+    },
+  },
+  {
     id: "tpl_elegant_split",
     name: "Buy or Sell · Elegant",
     kind: "neighbor_intro",

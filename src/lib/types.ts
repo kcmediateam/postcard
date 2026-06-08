@@ -42,7 +42,11 @@ export type DesignTheme = "light" | "dark" | "bold";
  * distinct composition (e.g. an elegant diagonal split) regardless of its
  * marketing kind. The back always renders the functional QR/address card.
  */
-export type PostcardLayout = "showcase" | "intro" | "elegant_split";
+export type PostcardLayout =
+  | "showcase"
+  | "intro"
+  | "elegant_split"
+  | "photo_banner";
 
 /**
  * Personalization data for a template-based design. The postcard art is
