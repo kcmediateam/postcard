@@ -176,68 +176,18 @@ export default function DesignsPage() {
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {designs.map((d) => (
-            <Card key={d.id} className="overflow-hidden">
-              <button
-                onClick={() => setPreview(d)}
-                className="block w-full"
-                title="Preview front & back"
-              >
-                <PostcardSide design={d} side="front" />
-              </button>
-              <div className="flex items-center justify-between gap-2 px-4 py-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-zinc-900">
-                    {d.name}
-                  </div>
-                  <SourceBadge source={d.source} />
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {d.source === "template" && d.template_id && (
-                    <button
-                      onClick={() => {
-                        const tpl = templates.find(
-                          (t) => t.id === d.template_id
-                        );
-                        if (tpl)
-                          setMode({ type: "editor", template: tpl, design: d });
-                      }}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  {d.external_edit_url && (
-                    <>
-                      <a
-                        href={d.external_edit_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
-                      >
-                        Edit in Canva
-                      </a>
-                      <button
-                        onClick={() => resyncCanva(d)}
-                        disabled={resyncing === d.id}
-                        title="Pull the latest version from Canva"
-                        className="rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-60"
-                      >
-                        {resyncing === d.id ? "Syncing…" : "Re-sync"}
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => handleDelete(d)}
-                    className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
-                    aria-label="Delete design"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </Card>
+            <DesignCard
+              key={d.id}
+              d={d}
+              templates={templates}
+              resyncing={resyncing}
+              onEditTemplate={(tpl) =>
+                setMode({ type: "editor", template: tpl, design: d })
+              }
+              onPreview={() => setPreview(d)}
+              onResync={() => resyncCanva(d)}
+              onDelete={() => handleDelete(d)}
+            />
           ))}
         </div>
       )}
@@ -456,6 +406,107 @@ function SourceBadge({ source }: { source: Design["source"] }) {
     >
       {isTemplate ? "Personalized template" : "Uploaded"}
     </span>
+  );
+}
+
+function DesignCard({
+  d,
+  templates,
+  resyncing,
+  onEditTemplate,
+  onPreview,
+  onResync,
+  onDelete,
+}: {
+  d: Design;
+  templates: Template[];
+  resyncing: string | null;
+  onEditTemplate: (tpl: Template) => void;
+  onPreview: () => void;
+  onResync: () => void;
+  onDelete: () => void;
+}) {
+  const [side, setSide] = useState<"front" | "back">("front");
+  const hasTwoSides = Boolean(d.back_image_url || d.source === "template");
+  return (
+    <Card className="overflow-hidden">
+      <div className="relative">
+        <button
+          onClick={onPreview}
+          className="block w-full"
+          title="Preview front & back"
+        >
+          <PostcardSide design={d} side={side} />
+        </button>
+        {hasTwoSides && (
+          <div className="absolute right-2 top-2 flex gap-0.5 rounded-md bg-white/85 p-0.5 text-[10px] font-medium shadow-sm backdrop-blur">
+            {(["front", "back"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSide(s)}
+                className={`rounded px-1.5 py-0.5 capitalize transition-colors ${
+                  side === s
+                    ? "bg-zinc-900 text-white"
+                    : "text-zinc-600 hover:text-zinc-900"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="flex items-center justify-between gap-2 px-4 py-3">
+        <div className="min-w-0">
+          <div className="truncate text-sm font-medium text-zinc-900">
+            {d.name}
+          </div>
+          <SourceBadge source={d.source} />
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          {d.source === "template" && d.template_id && (
+            <button
+              onClick={() => {
+                const tpl = templates.find((t) => t.id === d.template_id);
+                if (tpl) onEditTemplate(tpl);
+              }}
+              className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
+            >
+              Edit
+            </button>
+          )}
+          {d.external_edit_url && (
+            <>
+              <a
+                href={d.external_edit_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
+              >
+                Edit in Canva
+              </a>
+              <button
+                onClick={onResync}
+                disabled={resyncing === d.id}
+                title="Pull the latest version from Canva"
+                className="rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-60"
+              >
+                {resyncing === d.id ? "Syncing…" : "Re-sync"}
+              </button>
+            </>
+          )}
+          <button
+            onClick={onDelete}
+            className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+            aria-label="Delete design"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </Card>
   );
 }
 
