@@ -32,16 +32,22 @@ export async function POST(req: Request) {
   const admin = getAdminSupabase();
   const { data: design } = await admin
     .from("designs")
-    .select("id, external_edit_url, profile_id")
+    .select("id, template_id, external_edit_url, profile_id")
     .eq("id", id)
     .eq("profile_id", user.id)
     .maybeSingle();
   if (!design) return Response.json({ error: "not_found" }, { status: 404 });
 
-  const editUrl: string | null = design.external_edit_url ?? null;
-  const canvaId = editUrl?.match(/design\/([^/?#]+)/)?.[1];
+  // The Canva design id is stored in template_id at import. A real Canva id has
+  // no dots; if it's missing (older import) ask them to re-import once.
+  const stored: string | null = design.template_id ?? null;
+  const canvaId =
+    stored && !stored.includes(".") && stored.trim() ? stored.trim() : null;
   if (!canvaId) {
-    return Response.json({ error: "not_a_canva_design" }, { status: 400 });
+    return Response.json(
+      { error: "Re-import this design once to enable re-sync." },
+      { status: 400 }
+    );
   }
 
   const token = await getAccessToken(user.id);

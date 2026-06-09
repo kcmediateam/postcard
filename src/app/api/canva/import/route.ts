@@ -54,7 +54,9 @@ export async function POST(req: Request) {
       source: "uploaded",
       front_image_url: front,
       back_image_url: back,
-      template_id: null,
+      // Stash the Canva design id here (unused for uploaded designs) so we can
+      // re-export it later for one-click Re-sync.
+      template_id: typeof designId === "string" ? designId : null,
       template_kind: null,
       fields: null,
       external_edit_url: typeof editUrl === "string" ? editUrl : null,
