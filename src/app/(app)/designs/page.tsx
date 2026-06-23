@@ -1090,7 +1090,7 @@ function UploadModal({
 }) {
   const { db } = useData();
   const [name, setName] = useState("");
-  const [size, setSize] = useState<PostcardSize>("6x9");
+  const [size, setSize] = useState<PostcardSize>("4x6");
   const [front, setFront] = useState<string | null>(null);
   const [back, setBack] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -1100,7 +1100,7 @@ function UploadModal({
 
   function resetAndClose() {
     setName("");
-    setSize("6x9");
+    setSize("4x6");
     setFront(null);
     setBack(null);
     setError(null);
