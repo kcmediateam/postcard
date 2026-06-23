@@ -1115,8 +1115,9 @@ function UploadModal({
           onChange={(e) => setName(e.target.value)}
         />
         <div className="grid gap-4 sm:grid-cols-2">
-          <ImageDrop label="Front" value={front} onChange={setFront} maxDim={1800} />
-          <ImageDrop label="Back" value={back} onChange={setBack} maxDim={1800} />
+          {/* Lob 4x6 needs a landscape image ≥1875×1275px; keep resolution above that. */}
+          <ImageDrop label="Front" value={front} onChange={setFront} maxDim={2100} hint="Landscape, ≥1875×1275px (PNG/JPG)" />
+          <ImageDrop label="Back" value={back} onChange={setBack} maxDim={2100} hint="Landscape, ≥1875×1275px (PNG/JPG)" />
         </div>
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

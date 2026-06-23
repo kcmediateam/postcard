@@ -2,6 +2,7 @@ import { getAdminSupabase } from "@/lib/supabase/admin";
 import { executeCampaignSend } from "@/lib/campaigns/execute-send";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 /**
  * Fires due scheduled campaigns. Invoked by Vercel Cron (which sends

@@ -11,6 +11,30 @@ export interface SendOutcome {
   status: Campaign["status"];
 }
 
+/** Like Promise.allSettled but with a max number of workers in flight. */
+async function settleWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = new Array(items.length);
+  let cursor = 0;
+  async function run(): Promise<void> {
+    while (cursor < items.length) {
+      const i = cursor++;
+      try {
+        results[i] = { status: "fulfilled", value: await worker(items[i]) };
+      } catch (reason) {
+        results[i] = { status: "rejected", reason };
+      }
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, run)
+  );
+  return results;
+}
+
 /**
  * Execute a campaign send for an already-created campaign (status should be
  * 'sending'). Shared by the immediate send route and the scheduled-send cron.
@@ -113,26 +137,26 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   // QR destination: the design's link if set, else our app.
   const qrRedirectUrl = df?.qr_url?.trim() || appUrl;
 
-  const results = await Promise.allSettled(
-    toSend.map((c) =>
-      createLobPostcard({
-        to: {
-          name: c.full_name,
-          address_line1: c.address_line1,
-          address_line2: c.address_line2 ?? undefined,
-          address_city: c.city,
-          address_state: c.state,
-          address_zip: c.zip,
-          address_country: "US",
-        },
-        from,
-        front,
-        back,
-        qrRedirectUrl,
-        metadata: { campaign_id: campaignId, profile_id: uid, contact_id: c.id },
-        idempotencyKey: `${campaignId}:${c.id}`,
-      }).then((r) => ({ contact: c, lobId: r.id }))
-    )
+  // Send with bounded concurrency — blasting all pieces at once trips Lob's
+  // rate limit. ~6 in flight stays well under the limit; 429s also retry.
+  const results = await settleWithConcurrency(toSend, 6, (c) =>
+    createLobPostcard({
+      to: {
+        name: c.full_name,
+        address_line1: c.address_line1,
+        address_line2: c.address_line2 ?? undefined,
+        address_city: c.city,
+        address_state: c.state,
+        address_zip: c.zip,
+        address_country: "US",
+      },
+      from,
+      front,
+      back,
+      qrRedirectUrl,
+      metadata: { campaign_id: campaignId, profile_id: uid, contact_id: c.id },
+      idempotencyKey: `${campaignId}:${c.id}`,
+    }).then((r) => ({ contact: c, lobId: r.id }))
   );
 
   const newPieces = results

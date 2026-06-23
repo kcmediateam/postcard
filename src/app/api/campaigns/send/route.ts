@@ -4,6 +4,7 @@ import { executeCampaignSend } from "@/lib/campaigns/execute-send";
 import { InsufficientCreditsError } from "@/lib/data/provider";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabase();

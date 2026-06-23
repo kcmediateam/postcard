@@ -30,9 +30,14 @@ function authHeader(): string {
   return "Basic " + Buffer.from(`${key}:`).toString("base64");
 }
 
-/** Create a Lob postcard with a native QR (back) + our metadata stamped. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Create a Lob postcard with a native QR (back) + our metadata stamped.
+ * Retries on Lob rate-limit (429); the per-piece Idempotency-Key makes retries
+ * safe (Lob returns the same postcard rather than creating a duplicate). */
 export async function createLobPostcard(
-  input: CreatePostcardInput
+  input: CreatePostcardInput,
+  attempt = 0
 ): Promise<{ id: string }> {
   const body = {
     to: input.to,
@@ -61,6 +66,13 @@ export async function createLobPostcard(
     },
     body: JSON.stringify(body),
   });
+
+  // Rate limited: back off and retry (Lob suggests ~5s). Idempotency-Key keeps
+  // this safe from duplicates.
+  if (res.status === 429 && attempt < 4) {
+    await sleep(2500 * (attempt + 1));
+    return createLobPostcard(input, attempt + 1);
+  }
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
