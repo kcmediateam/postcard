@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +14,34 @@ import type { Campaign, ContactList, Design } from "@/lib/types";
 import type { CampaignPreview } from "@/lib/data/provider";
 
 type Timing = "now" | "schedule";
+
+// Auto-saved campaign draft (browser-local) so progress survives navigating
+// away to upload a design, add a list, or buy credits.
+const DRAFT_KEY = "postcard:campaign-draft:v1";
+
+type CampaignDraft = {
+  audience: AudienceTier;
+  name: string;
+  designId: string | null;
+  listId: string | null;
+  timing: Timing;
+  scheduledAt: string;
+  targetArea: string;
+  quantity: string;
+};
+
+function isDraftMeaningful(d: CampaignDraft): boolean {
+  return Boolean(
+    d.name.trim() ||
+      d.designId ||
+      d.listId ||
+      d.targetArea.trim() ||
+      d.quantity.trim() ||
+      d.audience !== "self_service" ||
+      d.timing !== "now" ||
+      d.scheduledAt
+  );
+}
 
 function toLocalInputValue(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -48,6 +76,67 @@ export default function NewCampaignPage() {
     quantity: number;
     cost: number;
   } | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const hydrated = useRef(false);
+
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {}
+    setDraftRestored(false);
+  }, []);
+
+  // Restore an in-progress draft once on mount (client-only).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw) as Partial<CampaignDraft>;
+        if (d.audience === "self_service" || d.audience === "managed")
+          setAudience(d.audience);
+        if (typeof d.name === "string") setName(d.name);
+        if (typeof d.designId === "string") setDesignId(d.designId);
+        if (typeof d.listId === "string") setListId(d.listId);
+        if (d.timing === "now" || d.timing === "schedule") setTiming(d.timing);
+        if (typeof d.scheduledAt === "string") setScheduledAt(d.scheduledAt);
+        if (typeof d.targetArea === "string") setTargetArea(d.targetArea);
+        if (typeof d.quantity === "string") setQuantity(d.quantity);
+        if (isDraftMeaningful(d as CampaignDraft)) setDraftRestored(true);
+      }
+    } catch {}
+    hydrated.current = true;
+  }, []);
+
+  // Persist the draft as the form changes (after hydration, before completion).
+  useEffect(() => {
+    if (!hydrated.current || created || managedDone) return;
+    const draft: CampaignDraft = {
+      audience,
+      name,
+      designId,
+      listId,
+      timing,
+      scheduledAt,
+      targetArea,
+      quantity,
+    };
+    try {
+      if (isDraftMeaningful(draft))
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      else localStorage.removeItem(DRAFT_KEY);
+    } catch {}
+  }, [
+    audience,
+    name,
+    designId,
+    listId,
+    timing,
+    scheduledAt,
+    targetArea,
+    quantity,
+    created,
+    managedDone,
+  ]);
 
   useEffect(() => {
     const load = () =>
@@ -131,6 +220,7 @@ export default function NewCampaignPage() {
           target_area: targetArea,
           quantity: managedQty,
         });
+        clearDraft();
         setManagedDone({ quantity: managedQty, cost });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not submit request.");
@@ -153,6 +243,7 @@ export default function NewCampaignPage() {
         send_now: timing === "now",
       });
       await refreshWallet();
+      clearDraft();
       setCreated(campaign);
     } catch (e) {
       if (e instanceof InsufficientCreditsError) {
@@ -180,6 +271,7 @@ export default function NewCampaignPage() {
     setSubmitting(false);
     setCreated(null);
     setManagedDone(null);
+    clearDraft();
   }
 
   if (created) return <SentView campaign={created} onAnother={resetForm} />;
@@ -199,6 +291,21 @@ export default function NewCampaignPage() {
         title="New campaign"
         description="Choose your audience, pick a design, and confirm the credit cost."
       />
+
+      {draftRestored && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm text-brand-800">
+          <span>
+            <span className="font-medium">Draft restored.</span> We saved your
+            progress — pick up right where you left off.
+          </span>
+          <button
+            onClick={resetForm}
+            className="font-medium text-brand-700 underline underline-offset-2 hover:text-brand-900"
+          >
+            Start over
+          </button>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-8">
