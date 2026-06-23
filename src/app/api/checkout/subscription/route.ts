@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     mode: "subscription",
     customer,
     line_items: [{ price: priceId, quantity: 1 }],
+    allow_promotion_codes: true,
     success_url: `${appUrl}/billing?status=success`,
     cancel_url: `${appUrl}/billing?status=cancel`,
     metadata: { ...meta, kind: "subscription" },
