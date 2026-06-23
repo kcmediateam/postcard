@@ -356,7 +356,7 @@ export const mockProvider: DataProvider = {
       back_image_url: input.back_image_url,
       template_id: null,
       template_kind: null,
-      fields: null,
+      fields: input.size ? ({ size: input.size } as Design["fields"]) : null,
       external_edit_url: null,
       created_at: nowIso(),
     };

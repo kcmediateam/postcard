@@ -25,6 +25,9 @@ export type SubscriptionStatus =
 
 export type DesignSource = "uploaded" | "template";
 
+/** Lob postcard sizes we support. Templates render 4x6; uploads pick their own. */
+export type PostcardSize = "4x6" | "6x9" | "6x11";
+
 /** Built-in personalizable template layouts. */
 export type TemplateKind =
   | "just_listed"
@@ -99,6 +102,8 @@ export interface DesignFields {
   nar_member: string; // "yes" = NAR member → render REALTOR® logo
   // bullet/feature list (one per line) for checklist-style layouts
   features: string;
+  // Lob postcard size (uploaded designs). Absent → 4x6.
+  size?: PostcardSize;
 }
 
 export type AddressVerificationStatus =

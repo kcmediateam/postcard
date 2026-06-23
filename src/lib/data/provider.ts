@@ -7,6 +7,7 @@ import type {
   Design,
   DesignFields,
   MailPiece,
+  PostcardSize,
   Profile,
   Session,
   Subscription,
@@ -216,6 +217,7 @@ export interface CreateUploadedDesignInput {
   name: string;
   front_image_url: string;
   back_image_url: string;
+  size?: PostcardSize;
 }
 
 export interface CreateTemplateDesignInput {

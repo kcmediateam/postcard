@@ -19,7 +19,25 @@ import {
   FONTS,
   emptyFields,
 } from "@/lib/templates";
-import type { Design, DesignFields, Profile, Template } from "@/lib/types";
+import type {
+  Design,
+  DesignFields,
+  PostcardSize,
+  Profile,
+  Template,
+} from "@/lib/types";
+
+/** Upload size options + the print resolution Lob needs for each. */
+const UPLOAD_SIZES: {
+  value: PostcardSize;
+  label: string;
+  px: string;
+  maxDim: number;
+}[] = [
+  { value: "4x6", label: "4 × 6", px: "1875 × 1275px", maxDim: 2100 },
+  { value: "6x9", label: "6 × 9", px: "1875 × 2775px", maxDim: 3000 },
+  { value: "6x11", label: "6 × 11", px: "1875 × 3375px", maxDim: 3600 },
+];
 
 /**
  * Which editor fields to show for a template — gated by the layout/kind that
@@ -1072,13 +1090,17 @@ function UploadModal({
 }) {
   const { db } = useData();
   const [name, setName] = useState("");
+  const [size, setSize] = useState<PostcardSize>("6x9");
   const [front, setFront] = useState<string | null>(null);
   const [back, setBack] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const spec = UPLOAD_SIZES.find((s) => s.value === size) ?? UPLOAD_SIZES[0];
+
   function resetAndClose() {
     setName("");
+    setSize("6x9");
     setFront(null);
     setBack(null);
     setError(null);
@@ -1096,6 +1118,7 @@ function UploadModal({
         name,
         front_image_url: front,
         back_image_url: back,
+        size,
       });
       resetAndClose();
       await onCreated();
@@ -1114,10 +1137,46 @@ function UploadModal({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <div>
+          <div className="mb-1.5 text-sm font-medium text-zinc-700">
+            Postcard size
+          </div>
+          <div className="flex gap-2">
+            {UPLOAD_SIZES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => setSize(s.value)}
+                className={`flex-1 rounded-lg border px-3 py-2 text-center text-sm transition-colors ${
+                  size === s.value
+                    ? "border-brand-500 bg-brand-50/50 ring-1 ring-brand-500"
+                    : "border-zinc-200 hover:border-zinc-300"
+                }`}
+              >
+                <div className="font-medium text-zinc-800">{s.label}</div>
+                <div className="text-[11px] text-zinc-500">{s.px}</div>
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs text-zinc-500">
+            Upload art at least {spec.px} (300 DPI). Lob rejects anything smaller.
+          </p>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Lob 4x6 needs a landscape image ≥1875×1275px; keep resolution above that. */}
-          <ImageDrop label="Front" value={front} onChange={setFront} maxDim={2100} hint="Landscape, ≥1875×1275px (PNG/JPG)" />
-          <ImageDrop label="Back" value={back} onChange={setBack} maxDim={2100} hint="Landscape, ≥1875×1275px (PNG/JPG)" />
+          <ImageDrop
+            label="Front"
+            value={front}
+            onChange={setFront}
+            maxDim={spec.maxDim}
+            hint={`≥ ${spec.px} (PNG/JPG)`}
+          />
+          <ImageDrop
+            label="Back"
+            value={back}
+            onChange={setBack}
+            maxDim={spec.maxDim}
+            hint={`≥ ${spec.px} (PNG/JPG)`}
+          />
         </div>
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

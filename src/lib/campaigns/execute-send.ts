@@ -136,6 +136,8 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   // QR destination: the design's link if set, else our app.
   const qrRedirectUrl = df?.qr_url?.trim() || appUrl;
+  // Postcard size: uploaded designs may be 6x9/6x11; templates render 4x6.
+  const size = df?.size ?? "4x6";
 
   // Send with bounded concurrency — blasting all pieces at once trips Lob's
   // rate limit. ~6 in flight stays well under the limit; 429s also retry.
@@ -154,6 +156,7 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
       front,
       back,
       qrRedirectUrl,
+      size,
       metadata: { campaign_id: campaignId, profile_id: uid, contact_id: c.id },
       idempotencyKey: `${campaignId}:${c.id}`,
     }).then((r) => ({ contact: c, lobId: r.id }))

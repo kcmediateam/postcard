@@ -1,5 +1,7 @@
 /** Server-only Lob client (test key). */
 
+import type { PostcardSize } from "@/lib/types";
+
 const LOB_BASE = "https://api.lob.com/v1";
 
 export interface LobAddress {
@@ -22,6 +24,8 @@ export interface CreatePostcardInput {
   qrRedirectUrl: string;
   metadata: Record<string, string>;
   idempotencyKey: string;
+  /** Lob postcard size; defaults to 4x6. */
+  size?: PostcardSize;
 }
 
 function authHeader(): string {
@@ -44,7 +48,7 @@ export async function createLobPostcard(
     from: input.from,
     front: input.front,
     back: input.back,
-    size: "4x6",
+    size: input.size ?? "4x6",
     use_type: "marketing",
     metadata: input.metadata,
     qr_code: {

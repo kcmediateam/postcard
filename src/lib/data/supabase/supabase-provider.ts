@@ -288,7 +288,7 @@ export const supabaseProvider: DataProvider = {
         back_image_url: back,
         template_id: null,
         template_kind: null,
-        fields: null,
+        fields: input.size ? { size: input.size } : null,
       })
       .select("*")
       .single();
