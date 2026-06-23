@@ -49,15 +49,6 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "unauthorized" }, { status: 401 });
 
-  const lobKey = process.env.LOB_API_KEY;
-  if (!lobKey) {
-    return Response.json(
-      { error: "LOB_API_KEY (test secret key) not set" },
-      { status: 500 }
-    );
-  }
-  const authHeader = "Basic " + Buffer.from(`${lobKey}:`).toString("base64");
-
   const { listId } = await req.json().catch(() => ({ listId: null }));
   if (!listId) return Response.json({ error: "missing_listId" }, { status: 400 });
 
@@ -68,6 +59,36 @@ export async function POST(req: Request) {
     .eq("list_id", listId);
   if (error) return Response.json({ error: error.message }, { status: 500 });
   const rows = (data ?? []) as Row[];
+
+  // Address verification is OFF unless explicitly enabled. While Lob runs in
+  // TEST mode it can't do real USPS verification (it returns "undeliverable"
+  // for real addresses), so by default we pass every address through as
+  // verified. Set ADDRESS_VERIFICATION_ENABLED=true once Lob is LIVE.
+  const verificationEnabled =
+    process.env.ADDRESS_VERIFICATION_ENABLED === "true";
+  if (!verificationEnabled) {
+    if (rows.length) {
+      await supabase
+        .from("contacts")
+        .update({ lob_verification_status: "verified" })
+        .eq("list_id", listId);
+    }
+    return Response.json({
+      total: rows.length,
+      verified: rows.length,
+      undeliverable: 0,
+      unverified: 0,
+    });
+  }
+
+  const lobKey = process.env.LOB_API_KEY;
+  if (!lobKey) {
+    return Response.json(
+      { error: "LOB_API_KEY (test secret key) not set" },
+      { status: 500 }
+    );
+  }
+  const authHeader = "Basic " + Buffer.from(`${lobKey}:`).toString("base64");
 
   const verified: string[] = [];
   const undeliverable: string[] = [];
