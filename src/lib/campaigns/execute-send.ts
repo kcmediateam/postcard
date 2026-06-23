@@ -149,6 +149,22 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
       scan_count: 0,
     }));
   const failed = results.length - newPieces.length;
+
+  // Surface why pieces failed at Lob — otherwise allSettled swallows the
+  // errors and the campaign just ends up "failed" with no explanation.
+  if (failed > 0) {
+    const reasons = results
+      .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+      .map((r) =>
+        r.reason instanceof Error ? r.reason.message : String(r.reason)
+      );
+    const sample = [...new Set(reasons)].slice(0, 5);
+    console.error(
+      `[campaign ${campaignId}] ${failed}/${results.length} pieces failed at Lob:`,
+      sample
+    );
+  }
+
   if (newPieces.length) await admin.from("mail_pieces").insert(newPieces);
 
   const totalPieces = done.size + newPieces.length;
