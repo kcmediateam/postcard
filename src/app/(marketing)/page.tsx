@@ -8,9 +8,10 @@ import { Reveal, CountUp } from "@/components/marketing/motion";
 import { Signal } from "@/components/marketing/signal";
 
 export const metadata: Metadata = {
-  title: "Radiate — targeted direct mail for real estate agents",
+  title: "Radiate — tracked direct mail for local marketing",
   description:
-    "Design, mail, and measure postcard campaigns. Verified addresses, QR scan tracking, transparent credit pricing — self-serve or done-for-you.",
+    "Design, mail, and measure postcard campaigns for any local business — agents, home-service pros, and small businesses. Verified addresses, QR scan tracking, and honest per-piece pricing. Self-serve or done-for-you.",
+  alternates: { canonical: "/" },
 };
 
 export default function HomePage() {
@@ -36,8 +37,8 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-xl leading-relaxed text-white/80">
-              Tracked postcards for real estate — design, send, and measure in
-              minutes. No minimums, no markup.
+              Tracked postcards for any local business — design, send, and
+              measure in minutes. No minimums, no markup.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/login?mode=signup">
@@ -84,8 +85,17 @@ export default function HomePage() {
             Why the mailbox still wins
           </h2>
           <p className="mt-3 text-lg text-zinc-600">
-            For US real-estate farming, showing up in the mailbox — again and
-            again — is how you become the agent people already trust.
+            Whether you&rsquo;re an agent farming a neighborhood, a home-service
+            pro, or a local shop, showing up in the mailbox — again and again —
+            is how you become the name people already trust. See the{" "}
+            <Link href="/products" className="font-medium text-brand-600 hover:text-brand-700">
+              postcard templates
+            </Link>{" "}
+            or{" "}
+            <Link href="/services" className="font-medium text-brand-600 hover:text-brand-700">
+              let us mail it for you
+            </Link>
+            .
           </p>
         </Reveal>
 
@@ -116,17 +126,16 @@ export default function HomePage() {
             <span className="font-semibold text-zinc-900">
               around 7 touches
             </span>{" "}
-            before a prospect remembers your name — yet most buyers and sellers
-            hire the first agent they think of. Consistent, tracked postcards
-            keep <span className="font-semibold text-zinc-900">you</span> top of
-            mind for that moment.
+            before a prospect remembers your name — yet most people hire the
+            first business they think of. Consistent, tracked postcards keep{" "}
+            <span className="font-semibold text-zinc-900">you</span> top of mind
+            for that moment.
           </p>
         </Reveal>
 
         <p className="mt-5 text-center text-xs text-zinc-400">
-          Sources: NAR Profile of Home Buyers &amp; Sellers (2025); ANA/DMA
-          Response Rate Report; the marketing &ldquo;Rule of 7.&rdquo; US
-          figures.
+          Sources: ANA/DMA Response Rate Report; USPS household-mail &amp; Mail
+          Moments studies; the marketing &ldquo;Rule of 7.&rdquo; US figures.
         </p>
       </section>
 
@@ -196,7 +205,7 @@ export default function HomePage() {
               How Radiate compares
             </h2>
             <p className="mt-3 text-lg text-zinc-600">
-              Radiate vs. the platforms agents leave behind.
+              Radiate vs. the platforms local marketers leave behind.
             </p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-medium text-brand-700">
               <span className="bg-radiate size-2 rounded-full" />
@@ -261,8 +270,8 @@ const STATS: {
 }[] = [
   { value: 4.4, decimals: 1, suffix: "%", label: "Direct-mail response rate", sub: "vs 0.12% for email" },
   { value: 7, suffix: "+", label: "Touches to be remembered", sub: "the marketing “Rule of 7”" },
-  { value: 88, suffix: "%", label: "of buyers use an agent", sub: "NAR, 2025" },
-  { value: 91, suffix: "%", label: "of sellers use an agent", sub: "NAR, 2025" },
+  { value: 90, suffix: "%", label: "of direct mail gets opened", sub: "USPS, household mail" },
+  { value: 74, suffix: "%", label: "say mail feels more personal", sub: "USPS Mail Moments" },
 ];
 
 const STEPS = [

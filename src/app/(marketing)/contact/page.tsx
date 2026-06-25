@@ -82,7 +82,7 @@ export default function ContactPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="you@brokerage.com"
+              placeholder="you@business.com"
             />
             <div>
               <label className="mb-1.5 block text-sm font-medium text-zinc-700">

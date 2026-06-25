@@ -19,8 +19,16 @@ export default function ProductsPage() {
             Products
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-zinc-600">
-            Professionally designed postcards built for real estate — personalize
-            them in minutes, then mail and track.
+            Professionally designed postcards for any local business —
+            personalize them in minutes, then mail and track. Browse the{" "}
+            <Link href="/pricing" className="font-medium text-brand-600 hover:text-brand-700">
+              pricing
+            </Link>{" "}
+            or see{" "}
+            <Link href="/services" className="font-medium text-brand-600 hover:text-brand-700">
+              done-for-you mailing
+            </Link>
+            .
           </p>
         </div>
       </section>

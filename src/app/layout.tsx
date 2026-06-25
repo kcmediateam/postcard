@@ -48,9 +48,37 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = "https://radiatepost.com";
-const TITLE = "Radiate — targeted direct mail, done for you";
+const TITLE = "Radiate — tracked direct mail for local marketing";
 const DESCRIPTION =
-  "Design, mail, and measure postcard campaigns for real estate agents. Verified addresses, QR scan tracking, and per-piece pricing — self-service or full-service.";
+  "Design, mail, and measure postcard campaigns — for local businesses, real-estate agents, and home-service pros. Verified addresses, QR scan tracking, and honest per-piece pricing. Self-service or done-for-you. No minimums, no markup.";
+
+// Structured data (JSON-LD) for richer search results.
+const JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Radiate",
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon.svg`,
+    description: DESCRIPTION,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Radiate",
+    url: SITE_URL,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Radiate direct mail",
+    serviceType: "Direct mail marketing",
+    provider: { "@type": "Organization", name: "Radiate", url: SITE_URL },
+    areaServed: "US",
+    description:
+      "Tracked, QR-coded postcard campaigns with USPS address verification and per-piece pricing — for any local or direct-to-mailbox marketing.",
+  },
+];
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -92,6 +120,10 @@ export default function RootLayout({
       className={`${bricolage.variable} ${hanken.variable} ${outfit.variable} ${playfair.variable} ${fraunces.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
         <DataProviderClient>{children}</DataProviderClient>
       </body>
     </html>
