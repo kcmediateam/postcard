@@ -176,7 +176,327 @@ export const ACCENT_PRESETS = [
   "#111114",
 ];
 
+// ── Industry template generator ───────────────────────────────────────────
+// Each industry combines its copy pool across the layout engines + accent +
+// photo to yield 10 distinctive designs. Keeps the gallery deep without 100s
+// of hand-written entries.
+const U = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?w=1200&q=80`;
+const LAYOUT_LABEL: Record<string, string> = {
+  editorial: "Editorial",
+  banner: "Bold",
+  service: "Checklist",
+  split: "Split",
+  minimal: "Minimal",
+  collage: "Collage",
+};
+const DARK_LAYOUTS = new Set(["editorial", "banner", "split"]);
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+
+type GenVariant = Partial<DesignFields> & { kind?: TemplateKind };
+interface IndustrySpec {
+  category: string;
+  kinds: TemplateKind[];
+  other?: boolean;
+  fonts: string[];
+  accents: string[];
+  photos: string[];
+  layouts: string[];
+  company: string;
+  agent?: string;
+  phone?: string;
+  address?: string;
+  defaultFeatures?: string;
+  variants: GenVariant[];
+}
+
+const HOUSE = [
+  "1568605114967-8130f3a36994",
+  "1570129477492-45c003edd2be",
+  "1512917774080-9991f1c4c750",
+  "1518780664697-55e3ad937233",
+  "1586023492125-27b2c045efd7",
+  "1600585154340-be6161a56a0c",
+].map(U);
+
+const INDUSTRY_SPECS: IndustrySpec[] = [
+  {
+    category: "Real Estate",
+    kinds: ["just_listed", "just_sold", "coming_soon", "market_update", "neighbor_intro", "open_house"],
+    fonts: ["geometric", "editorial", "modern"],
+    accents: ["#4F46E5", "#0F766E", "#111827", "#B45309"],
+    photos: HOUSE,
+    layouts: ["editorial", "banner", "split", "minimal", "collage"],
+    company: "Avery Realty Group",
+    agent: "Jordan Avery",
+    phone: "(913) 555-0142",
+    variants: [
+      { kind: "just_listed", headline: "Just Listed", subhead: "A standout home in your neighborhood", price: "$525,000", beds: "4", baths: "3", sqft: "2,650", body: "Just listed nearby — scan for the full gallery, details, and a private showing." },
+      { kind: "just_sold", headline: "Just Sold", subhead: "Another home sold in your area", price: "Sold over asking", body: "Curious what your home could sell for? The estimate is on me — just reach out." },
+      { kind: "coming_soon", headline: "Coming Soon", subhead: "Get the first look before it's public", body: "A standout home is about to hit the market nearby. Scan to be notified the moment it lists." },
+      { kind: "market_update", headline: "What's Your Home Worth?", subhead: "Homes near you are selling fast", body: "Inventory is tight and well-priced homes are getting multiple offers. Scan for a free, no-pressure estimate." },
+      { kind: "neighbor_intro", headline: "Your Local Expert", subhead: "I know this neighborhood inside and out", body: "Buying, selling, or just curious about your home's value? I'd love to help — reach out anytime." },
+      { kind: "open_house", headline: "Open House", subhead: "Come tour this beautiful home in person", event_date: "Sat, July 12", event_time: "1:00 – 4:00 PM", body: "Tour the home, meet the neighbors, and see if it's the right fit. Refreshments provided." },
+    ],
+  },
+  {
+    category: "Lawn & Landscaping",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern", "editorial"],
+    accents: ["#15803D", "#166534", "#0E7490", "#4D7C0F"],
+    photos: [U("1558904541-efa843a96f01")],
+    layouts: ["service", "banner", "editorial", "split", "minimal"],
+    company: "GreenLeaf Lawn Care",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Precise mowing and trimming\nWeed control and removal\nEdging for a sharp finish\nSeasonal cleanup",
+    variants: [
+      { eyebrow: "Lawn Care", headline: "Professional Lawn Maintenance", subhead: "Expert care that keeps your yard looking its best all year.", body: "Reach out for a free quote — we'd love to help." },
+      { eyebrow: "Spring Special", headline: "Get Your Yard Ready", subhead: "Book your spring cleanup today and save.", body: "Scan or call for a free, no-pressure estimate." },
+      { eyebrow: "Landscaping", headline: "Curb Appeal, Done Right", subhead: "Design, planting, and upkeep that makes your home shine.", features: "Garden design and planting\nMulch and bed refresh\nTrimming and pruning\nSeasonal color" },
+      { eyebrow: "Free Quote", headline: "Love Your Lawn Again", subhead: "Reliable weekly service, no contracts.", body: "We'll keep it green so you don't have to. Call today." },
+      { eyebrow: "Local & Trusted", headline: "Your Neighborhood Lawn Pros", subhead: "Trusted by homeowners right on your street.", features: "Mowing and edging\nFertilization\nLeaf and debris cleanup\nAeration and seeding" },
+    ],
+  },
+  {
+    category: "Cleaning",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern", "editorial"],
+    accents: ["#0EA5A4", "#0891B2", "#2563EB", "#0D9488"],
+    photos: [U("1581578731548-c64695cc6952")],
+    layouts: ["service", "banner", "minimal", "split", "editorial"],
+    company: "Bright & Tidy Cleaning",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Kitchens and bathrooms\nDusting and vacuuming\nFloors and surfaces\nMove-in / move-out cleans",
+    variants: [
+      { eyebrow: "Home Cleaning", headline: "Sparkling Clean, Every Time", subhead: "Reliable home cleaning you can count on, scheduled around you.", body: "Book your first clean this month and see the difference." },
+      { eyebrow: "New Client Offer", headline: "$30 Off Your First Clean", subhead: "A spotless home is one call away.", body: "Mention this card to claim your discount." },
+      { eyebrow: "Deep Clean", headline: "Top to Bottom, Done Right", subhead: "Move-in, move-out, and seasonal deep cleans.", features: "Inside cabinets and appliances\nBaseboards and windows\nGrout and tile\nFull sanitize" },
+      { eyebrow: "Trusted & Insured", headline: "Cleaning You Can Trust", subhead: "Background-checked, fully insured, and detail-obsessed.", body: "Reach out for a free quote today." },
+      { eyebrow: "Recurring Service", headline: "Come Home to Clean", subhead: "Weekly, bi-weekly, or monthly — your choice.", features: "Kitchens and baths\nFloors and dusting\nTrash and linens\nEco-friendly products" },
+    ],
+  },
+  {
+    category: "HVAC",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern"],
+    accents: ["#2563EB", "#1D4ED8", "#0891B2", "#B91C1C"],
+    photos: [U("1581094794329-c8112a89af12")],
+    layouts: ["service", "banner", "split", "minimal"],
+    company: "Comfort Pros HVAC",
+    phone: "(123) 456-7890",
+    defaultFeatures: "AC repair and tune-ups\nFurnace and heating service\nNew system installs\n24/7 emergency calls",
+    variants: [
+      { eyebrow: "Heating & Cooling", headline: "Comfort You Can Trust", subhead: "Fast, honest service to keep your home comfortable year-round.", body: "Schedule your seasonal tune-up and save." },
+      { eyebrow: "Seasonal Special", headline: "Beat the Heat", subhead: "AC tune-up special this month only.", body: "Call now to book before the rush." },
+      { eyebrow: "24/7 Service", headline: "Never Without Comfort", subhead: "Emergency repairs, day or night.", features: "Same-day repairs\nFree estimates on installs\nFinancing available\nSatisfaction guaranteed" },
+      { eyebrow: "Save Energy", headline: "Lower Bills, More Comfort", subhead: "Upgrade to a high-efficiency system.", body: "Ask about rebates and financing." },
+    ],
+  },
+  {
+    category: "Restaurant",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "editorial", "modern"],
+    accents: ["#C2410C", "#B91C1C", "#9A3412", "#0F766E"],
+    photos: [U("1414235077428-338989a2e8c0")],
+    layouts: ["banner", "editorial", "minimal", "split"],
+    company: "The Corner Kitchen",
+    agent: "Open daily 11–10",
+    phone: "(123) 456-7890",
+    variants: [
+      { eyebrow: "Now Serving", headline: "20% Off Your First Visit", subhead: "Dine in or take out", body: "Bring this card in for 20% off your first order. We can't wait to feed you!" },
+      { eyebrow: "New Menu", headline: "Taste the Season", subhead: "Fresh dishes, made from scratch", body: "Stop by and try our new seasonal menu." },
+      { eyebrow: "Grand Opening", headline: "We're Open!", subhead: "Come say hello to your new favorite spot", body: "Show this card for a free appetizer with any entrée." },
+      { eyebrow: "Weekend Special", headline: "Brunch Is Back", subhead: "Saturdays & Sundays · 9am–2pm", body: "Reserve your table and join us this weekend." },
+      { eyebrow: "Loyalty", headline: "Your Next Coffee's On Us", subhead: "A little thank-you to our neighbors", body: "Scan to join our rewards and claim your free drink." },
+    ],
+  },
+  {
+    category: "Salon & Spa",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["editorial", "geometric", "modern"],
+    accents: ["#BE185D", "#9333EA", "#7C3AED", "#DB2777"],
+    photos: [U("1560066984-138dadb4c035")],
+    layouts: ["editorial", "banner", "minimal", "split"],
+    company: "Lumière Salon & Spa",
+    agent: "Book online or call",
+    phone: "(123) 456-7890",
+    variants: [
+      { eyebrow: "Book Your Visit", headline: "Treat Yourself", subhead: "A little time for you, close to home", body: "New clients get 15% off their first appointment. Scan to book today." },
+      { eyebrow: "New Client Offer", headline: "Look & Feel Your Best", subhead: "Cut, color, and care by pros who listen", body: "Mention this card for your new-client discount." },
+      { eyebrow: "Spa Day", headline: "Relax. Recharge. Renew.", subhead: "Massage, facials, and more", body: "Gift cards available. Book your escape." },
+      { eyebrow: "Seasonal", headline: "Refresh Your Look", subhead: "New season, new you", body: "Reserve your spot before we fill up." },
+    ],
+  },
+  {
+    category: "Dental & Medical",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern", "editorial"],
+    accents: ["#0891B2", "#2563EB", "#0D9488", "#0EA5A4"],
+    photos: [U("1606811841689-23dfddce3e95")],
+    layouts: ["service", "editorial", "banner", "minimal", "split"],
+    company: "Bright Smile Dental",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Cleanings and checkups\nWhitening and cosmetic\nSame-day emergencies\nMost insurance accepted",
+    variants: [
+      { eyebrow: "Now Accepting", headline: "New Patients Welcome", subhead: "Gentle, modern care for your whole family.", body: "New patients get a free first exam this month. Call to book." },
+      { eyebrow: "Healthy Smiles", headline: "Care You'll Smile About", subhead: "Comfortable visits, honest treatment.", body: "Reach out to schedule your visit today." },
+      { eyebrow: "Special Offer", headline: "$99 New Patient Exam", subhead: "Includes cleaning and x-rays", body: "Mention this card to claim the offer." },
+      { eyebrow: "Family Care", headline: "Every Smile, Every Age", subhead: "From first teeth to bright retirement smiles.", features: "Kids and adults\nPreventive care\nCosmetic options\nEvening hours" },
+    ],
+  },
+  {
+    category: "Fitness",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern"],
+    accents: ["#EA580C", "#DC2626", "#111827", "#16A34A"],
+    photos: [U("1534438327276-14e5300c3a48")],
+    layouts: ["banner", "service", "minimal", "split"],
+    company: "Iron Works Gym",
+    agent: "Open 5am – 11pm",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Open gym 24/7\nGroup classes\nPersonal training\nNo contracts",
+    variants: [
+      { eyebrow: "Limited Offer", headline: "Join Today", subhead: "First month free · no contracts", body: "Your first month is on us. Bring this card in for your free trial." },
+      { eyebrow: "New Year, New You", headline: "Start Strong", subhead: "Classes, weights, and coaching", body: "Scan to claim your free week pass." },
+      { eyebrow: "Personal Training", headline: "Reach Your Goals", subhead: "One-on-one coaching that works", body: "Book a free consultation today." },
+      { eyebrow: "Group Classes", headline: "Stronger Together", subhead: "Spin, HIIT, yoga, and more", body: "First class is free — come sweat with us." },
+    ],
+  },
+  {
+    category: "Events",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["editorial", "geometric", "modern"],
+    accents: ["#7C3AED", "#9333EA", "#DB2777", "#2563EB"],
+    photos: [U("1492684223066-81342ee5ff30")],
+    layouts: ["minimal", "editorial", "banner", "split"],
+    company: "Your Organization",
+    agent: "RSVP today",
+    phone: "(123) 456-7890",
+    variants: [
+      { eyebrow: "You're Invited", headline: "Community Open House", price: "Sat · 2–5 PM", body: "Join us for food, music, and fun. Scan the code to RSVP." },
+      { eyebrow: "Save the Date", headline: "Annual Fundraiser", price: "Fri · 6 PM", body: "An evening of giving back. Reserve your seats today." },
+      { eyebrow: "Join Us", headline: "Grand Celebration", subhead: "Everyone's welcome", body: "Bring the whole family — we can't wait to see you there." },
+      { eyebrow: "Limited Seats", headline: "Workshop & Mixer", subhead: "Learn, connect, and grow", body: "Scan to register before spots fill up." },
+    ],
+  },
+  {
+    category: "Automotive",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "modern"],
+    accents: ["#B91C1C", "#1F2937", "#1D4ED8", "#EA580C"],
+    photos: [U("1486006920555-c77dcf18193c")],
+    layouts: ["service", "banner", "split", "minimal"],
+    company: "Main St. Auto",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Oil changes and tune-ups\nBrakes and tires\nDiagnostics and AC\nFree multi-point inspection",
+    variants: [
+      { eyebrow: "Service Special", headline: "Service You Can Trust", subhead: "Honest, fast auto care from the pros next door.", body: "Bring this card in for $20 off your next service." },
+      { eyebrow: "$20 Off", headline: "Keep It Running Right", subhead: "Oil change + inspection special", body: "Mention this card to save." },
+      { eyebrow: "Tires & Brakes", headline: "Safe on Every Mile", subhead: "Quality parts, fair prices", features: "Brake service\nTire rotation and replace\nAlignment\nFree safety check" },
+      { eyebrow: "Trusted Local", headline: "Your Neighborhood Shop", subhead: "We treat your car like our own.", body: "Schedule your appointment today." },
+    ],
+  },
+  {
+    category: "Pet Care",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["editorial", "geometric", "modern"],
+    accents: ["#0D9488", "#EA580C", "#7C3AED", "#16A34A"],
+    photos: [U("1583511655857-d19b40a7a54e")],
+    layouts: ["editorial", "banner", "service", "minimal", "split"],
+    company: "Paws & Co.",
+    agent: "Book your visit",
+    phone: "(123) 456-7890",
+    defaultFeatures: "Full-service grooming\nBoarding and daycare\nNail trims and baths\nFriendly, certified staff",
+    variants: [
+      { eyebrow: "Pamper Your Pet", headline: "Happy, Healthy Pets", subhead: "Grooming, boarding, and daycare your pet will love", body: "New clients get 15% off the first groom. Scan to book." },
+      { eyebrow: "New Client Offer", headline: "First Groom 15% Off", subhead: "Treat your best friend", body: "Mention this card when you book." },
+      { eyebrow: "Daycare & Boarding", headline: "A Home Away From Home", subhead: "Safe, fun, and full of belly rubs", features: "Supervised play\nCozy boarding\nWebcam check-ins\nMedication care" },
+      { eyebrow: "Grooming", headline: "Looking Sharp", subhead: "Baths, trims, and the works", body: "Book your pet's pampering today." },
+    ],
+  },
+  {
+    category: "Retail & Local",
+    kinds: ["neighbor_intro"],
+    other: true,
+    fonts: ["geometric", "editorial", "modern"],
+    accents: ["#4F46E5", "#DB2777", "#EA580C", "#0F766E"],
+    photos: [U("1441986300917-64674bd600d8"), U("1556742049-0cfed4f6a45d")],
+    layouts: ["banner", "minimal", "editorial", "split"],
+    company: "Your Business",
+    agent: "Visit us today",
+    phone: "(123) 456-7890",
+    variants: [
+      { eyebrow: "Grand Opening", headline: "Now Open", subhead: "123 Anywhere St., Any City", body: "We just opened down the street and we'd love to meet you. Stop in and say hello!" },
+      { eyebrow: "Special Offer", headline: "Save 20% This Month", subhead: "A thank-you to our neighbors", body: "Bring this card in to claim your discount." },
+      { eyebrow: "New Arrivals", headline: "Fresh In Store", subhead: "Come see what's new", body: "Scan for this week's deals." },
+      { eyebrow: "Local Favorite", headline: "Shop Small, Shop Local", subhead: "Proudly serving the neighborhood", body: "Show this card for a welcome gift." },
+    ],
+  },
+];
+
+function genIndustry(spec: IndustrySpec, count = 10): Template[] {
+  const out: Template[] = [];
+  for (let i = 0; i < count; i++) {
+    const layout = spec.layouts[i % spec.layouts.length];
+    const variant = spec.variants[i % spec.variants.length];
+    const accent = spec.accents[i % spec.accents.length];
+    const font = spec.fonts[i % spec.fonts.length];
+    const photo = spec.photos[i % spec.photos.length];
+    const photo2 = spec.photos[(i + 2) % spec.photos.length];
+    const photo3 = spec.photos[(i + 4) % spec.photos.length];
+    const { kind, ...vFields } = variant;
+    const k = kind ?? spec.kinds[i % spec.kinds.length];
+    const features =
+      layout === "service"
+        ? (vFields.features as string) || spec.defaultFeatures || ""
+        : (vFields.features as string) || "";
+    out.push({
+      id: `gen_${slugify(spec.category)}_${i + 1}`,
+      name: `${vFields.headline ?? spec.category} · ${LAYOUT_LABEL[layout] ?? layout}`,
+      kind: k,
+      theme: DARK_LAYOUTS.has(layout) ? "dark" : "light",
+      accent,
+      layout: "showcase",
+      category: spec.category,
+      active: true,
+      defaults: {
+        ...emptyFields(),
+        ...vFields,
+        layout,
+        font,
+        accent,
+        features,
+        ...(spec.other ? { industry: "other" } : {}),
+        property_address:
+          (vFields.property_address as string) || spec.address || "123 Anywhere St., Any City",
+        property_photo_url: photo,
+        property_photo_url_2: photo2,
+        property_photo_url_3: photo3,
+        return_company: spec.company,
+        agent_name: (vFields.agent_name as string) || spec.agent || "",
+        agent_phone: spec.phone || "(123) 456-7890",
+      },
+    });
+  }
+  return out;
+}
+
+const generateGalleryTemplates = (): Template[] =>
+  INDUSTRY_SPECS.flatMap((s) => genIndustry(s, 10));
+
 export const TEMPLATES: Template[] = [
+  ...generateGalleryTemplates(),
   {
     id: "tpl_for_sale_bold",
     name: "For Sale · Bold",

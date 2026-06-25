@@ -25,6 +25,7 @@ export function PostcardHtmlPreview({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -33,11 +34,27 @@ export function PostcardHtmlPreview({
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
-    return () => ro.disconnect();
+    // Only mount the iframe once near the viewport (keeps big galleries fast).
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    io.observe(el);
+    return () => {
+      ro.disconnect();
+      io.disconnect();
+    };
   }, []);
 
   const html =
-    side === "front"
+    !visible
+      ? null
+      : side === "front"
       ? postcardFrontHtml(design)
       : profile
       ? postcardBackHtml(design, profile)
