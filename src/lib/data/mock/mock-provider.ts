@@ -710,6 +710,23 @@ export const mockProvider: DataProvider = {
     return delay({ total, updated: 0 });
   },
 
+  async deleteCampaign(campaignId: string): Promise<void> {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const pieceIds = db.mail_pieces
+      .filter((p) => p.campaign_id === campaignId && p.profile_id === userId)
+      .map((p) => p.id);
+    db.scans = db.scans.filter((s) => !pieceIds.includes(s.mail_piece_id));
+    db.mail_pieces = db.mail_pieces.filter(
+      (p) => !(p.campaign_id === campaignId && p.profile_id === userId)
+    );
+    db.campaigns = db.campaigns.filter(
+      (c) => !(c.id === campaignId && c.profile_id === userId)
+    );
+    persist();
+    return delay(undefined);
+  },
+
   async seedSampleData(): Promise<void> {
     const db = loadDB();
     const userId = requireUserId(db);

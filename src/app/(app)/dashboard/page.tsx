@@ -79,6 +79,10 @@ export default function DashboardPage() {
         campaign={selected}
         stats={stats[selected.id]}
         onBack={() => setSelected(null)}
+        onDeleted={async () => {
+          setSelected(null);
+          await reload();
+        }}
       />
     );
   }
@@ -274,10 +278,12 @@ function CampaignDetail({
   campaign,
   stats,
   onBack,
+  onDeleted,
 }: {
   campaign: Campaign;
   stats?: CampaignStats;
   onBack: () => void;
+  onDeleted: () => void | Promise<void>;
 }) {
   const { db } = useData();
   const [pieces, setPieces] = useState<CampaignPiece[]>([]);
@@ -299,6 +305,17 @@ function CampaignDetail({
   useEffect(() => {
     load();
   }, [load]);
+
+  async function remove() {
+    if (
+      !window.confirm(
+        `Delete "${campaign.name}"? This removes it from your dashboard (already-mailed postcards are unaffected). Spent credits aren't refunded.`
+      )
+    )
+      return;
+    await db.deleteCampaign(campaign.id);
+    await onDeleted();
+  }
 
   async function syncFromLob() {
     setSyncing(true);
@@ -337,11 +354,16 @@ function CampaignDetail({
             : `Created ${formatDate(campaign.created_at)}`
         }
         action={
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLES[campaign.status]}`}
-          >
-            {campaign.status.replace("_", " ")}
-          </span>
+          <div className="flex items-center gap-3">
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLES[campaign.status]}`}
+            >
+              {campaign.status.replace("_", " ")}
+            </span>
+            <Button variant="danger" onClick={remove}>
+              Delete
+            </Button>
+          </div>
         }
       />
 

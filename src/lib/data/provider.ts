@@ -158,6 +158,10 @@ export interface DataProvider {
   /** Reconcile a campaign's piece statuses with Lob (missed webhooks). */
   syncCampaignStatus(campaignId: string): Promise<{ total: number; updated: number }>;
 
+  /** Delete a campaign and its pieces/scans (cascade). Already-mailed postcards
+   * at Lob are unaffected; spent credits are not refunded. */
+  deleteCampaign(campaignId: string): Promise<void>;
+
   /**
    * Demo convenience: populate a realistic completed campaign (with design,
    * verified list, delivered pieces, and scans) for the signed-in agent so the

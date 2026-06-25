@@ -592,6 +592,12 @@ export const supabaseProvider: DataProvider = {
     }) as unknown as Awaited<ReturnType<DataProvider["listCampaignPieces"]>>;
   },
 
+  async deleteCampaign(campaignId: string): Promise<void> {
+    // RLS limits this to the owner; mail_pieces + scans cascade-delete.
+    const { error } = await sb().from("campaigns").delete().eq("id", campaignId);
+    if (error) throw new Error(error.message);
+  },
+
   async syncCampaignStatus(campaignId: string) {
     const res = await fetch("/api/campaigns/sync", {
       method: "POST",
