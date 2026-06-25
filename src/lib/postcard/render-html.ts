@@ -156,12 +156,12 @@ function frontService(design: Design, accent: string): string {
     .split(/\n+/)
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, 5);
+    .slice(0, 4);
   const list = items.length
     ? items
         .map(
           (it) =>
-            `<div style="display:flex;align-items:center;gap:0.12in;margin-bottom:0.11in">${checkSvg(accent)}<span style="font-size:10.5pt;font-weight:600;color:#1f2933">${esc(it)}</span></div>`
+            `<div style="display:flex;align-items:center;gap:0.1in;margin-bottom:0.085in">${checkSvg(accent)}<span style="font-size:10pt;font-weight:600;color:#1f2933">${esc(it)}</span></div>`
         )
         .join("")
     : "";
@@ -174,17 +174,19 @@ function frontService(design: Design, accent: string): string {
         <span class="disp" style="font-size:13pt;font-weight:800;letter-spacing:.02em">${esc(brand)}</span>
       </div>
     </div>
-    <div style="position:absolute;top:0.66in;left:0;width:2.9in;bottom:0;padding:0.3in 0.28in">
+    <div style="position:absolute;top:0.66in;left:0;width:2.85in;bottom:0;padding:0.28in 0.26in">
       <div style="width:100%;height:100%;border:5px solid #fff;box-shadow:0 8px 22px rgba(0,0,0,.18);overflow:hidden;position:relative">
         ${sceneOrAccent(f.property_photo_url, accent)}
       </div>
     </div>
-    <div style="position:absolute;top:0.66in;right:0;left:2.9in;bottom:0;padding:0.34in 0.4in 0.3in 0.1in">
-      <div class="disp accent" style="font-size:25pt;font-weight:800;line-height:0.98;letter-spacing:-.5px">${esc(f.headline) || "Professional Service"}</div>
-      ${f.subhead ? `<div style="margin-top:0.1in;font-size:9.5pt;line-height:1.5;color:#52606d">${esc(f.subhead)}</div>` : ""}
-      ${list ? `<div class="disp accent" style="margin-top:0.18in;margin-bottom:0.12in;font-size:11pt;font-weight:800;letter-spacing:.02em">What we provide:</div>${list}` : ""}
-      ${contact ? `<div style="position:absolute;bottom:0.28in;left:0.1in;font-size:9pt;font-weight:600;color:#1f2933">${contact}</div>` : ""}
-      ${f.headshot_url ? `<div style="position:absolute;bottom:0.22in;right:0.4in">${headshotImg(f.headshot_url, "0.6in")}</div>` : ""}
+    <div style="position:absolute;top:0.66in;right:0;left:2.85in;bottom:0;padding:0.3in 0.4in 0.26in 0.08in;display:flex;flex-direction:column">
+      <div class="disp accent" style="font-size:23pt;font-weight:800;line-height:0.98;letter-spacing:-.5px">${esc(f.headline) || "Professional Service"}</div>
+      ${f.subhead ? `<div style="margin-top:0.08in;font-size:9pt;line-height:1.45;color:#52606d">${esc(f.subhead)}</div>` : ""}
+      ${list ? `<div class="disp accent" style="margin-top:0.14in;margin-bottom:0.1in;font-size:10.5pt;font-weight:800;letter-spacing:.02em">What we provide:</div>${list}` : ""}
+      <div style="margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:0.16in;padding-top:0.12in">
+        ${contact ? `<div style="font-size:8.5pt;font-weight:600;color:#1f2933">${contact}</div>` : "<div></div>"}
+        ${f.headshot_url ? headshotImg(f.headshot_url, "0.56in") : ""}
+      </div>
     </div>`;
 }
 

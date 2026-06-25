@@ -227,6 +227,8 @@ export interface Template {
   accent: string;
   /** front-art layout family (defaults by kind when omitted). */
   layout?: PostcardLayout;
+  /** Industry category for gallery filtering (e.g. "Real Estate", "Lawn"). */
+  category?: string;
   active: boolean;
   /** sample copy/property data to prefill the personalize form. */
   defaults: DesignFields;

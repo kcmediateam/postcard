@@ -1,14 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { PostcardPreview } from "@/components/postcard/postcard-side";
-import { PostcardHtmlPreview } from "@/components/postcard/postcard-html-preview";
-import {
-  TEMPLATES,
-  KIND_LABEL,
-  designFromTemplate,
-  isHtmlLayout,
-} from "@/lib/templates";
+import { ProductTemplateGallery } from "@/components/marketing/product-template-gallery";
+import { TEMPLATES, isHtmlLayout } from "@/lib/templates";
 
 export const metadata: Metadata = {
   title: "Products — Radiate",
@@ -48,31 +42,9 @@ export default function ProductsPage() {
           Start from a template and make it yours — your photo, headshot, price,
           and details drop right in.
         </p>
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          {TEMPLATES.filter((t) => t.active && isHtmlLayout(t.defaults)).map((t) => (
-            <div key={t.id} className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
-              {isHtmlLayout(t.defaults) ? (
-                <PostcardHtmlPreview design={designFromTemplate(t)} side="front" />
-              ) : (
-                <PostcardPreview
-                  kind={t.kind}
-                  theme={t.theme}
-                  accent={t.accent}
-                  layout={t.layout}
-                  fields={t.defaults}
-                  side="front"
-                  profile={null}
-                />
-              )}
-              <div className="px-4 py-3">
-                <div className="text-sm font-semibold text-zinc-900">
-                  {t.name}
-                </div>
-                <div className="text-xs text-zinc-500">Fully personalizable</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProductTemplateGallery
+          templates={TEMPLATES.filter((t) => t.active && isHtmlLayout(t.defaults))}
+        />
       </section>
 
       {/* Product pillars */}

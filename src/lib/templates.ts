@@ -54,6 +54,43 @@ export function isHtmlLayout(fields: DesignFields | null | undefined): boolean {
   return !!fields?.layout && HTML_LAYOUTS.includes(fields.layout);
 }
 
+/** Industry category for a template (for gallery filtering). */
+const TEMPLATE_CATEGORY: Record<string, string> = {
+  tpl_for_sale_bold: "Real Estate",
+  tpl_listing_editorial: "Real Estate",
+  tpl_just_sold_bold: "Real Estate",
+  tpl_coming_soon_bold: "Real Estate",
+  tpl_open_house_editorial: "Real Estate",
+  tpl_home_value_editorial: "Real Estate",
+  tpl_meet_agent_editorial: "Real Estate",
+  tpl_listing_split: "Real Estate",
+  tpl_just_sold_split: "Real Estate",
+  tpl_minimal_for_sale: "Real Estate",
+  tpl_listing_collage: "Real Estate",
+  tpl_home_services: "Lawn & Landscaping",
+  tpl_cleaning_service: "Cleaning",
+  tpl_hvac_service: "HVAC",
+  tpl_restaurant_promo: "Restaurant",
+  tpl_salon_spa_editorial: "Salon & Spa",
+  tpl_grand_opening_bold: "Retail & Local",
+  tpl_promo_split: "Retail & Local",
+};
+export function categoryOf(t: Template): string {
+  return t.category || TEMPLATE_CATEGORY[t.id] || "Other";
+}
+
+/** Distinct categories across the visible (gallery) templates, ordered. */
+export function templateCategories(list: Template[]): string[] {
+  const seen = new Set<string>();
+  for (const t of list) seen.add(categoryOf(t));
+  // Real Estate first, then alphabetical.
+  const all = [...seen];
+  all.sort((a, b) =>
+    a === "Real Estate" ? -1 : b === "Real Estate" ? 1 : a.localeCompare(b)
+  );
+  return all;
+}
+
 /** Default accent per kind (templates can override via `accent`). */
 export const KIND_ACCENT: Record<TemplateKind, string> = {
   just_listed: "#2249c9",
@@ -604,6 +641,140 @@ export const TEMPLATES: Template[] = [
       agent_name: "Visit us today",
       agent_phone: "(123) 456-7890",
       body: "Bring this card in to claim your discount. We can't wait to see you!",
+    },
+  },
+  {
+    id: "tpl_dental_service",
+    name: "Dental · New Patients",
+    kind: "neighbor_intro",
+    theme: "light",
+    accent: "#0891B2",
+    layout: "showcase",
+    category: "Dental & Medical",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "service",
+      font: "geometric",
+      accent: "#0891B2",
+      industry: "other",
+      headline: "New patients welcome",
+      subhead: "Gentle, modern dental care for your whole family.",
+      features:
+        "Cleanings and checkups\nWhitening and cosmetic\nSame-day emergencies\nMost insurance accepted",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=1200&q=80",
+      return_company: "Bright Smile Dental",
+      agent_phone: "(123) 456-7890",
+      property_address: "123 Anywhere St., Any City",
+      body: "New patients get a free first exam this month. Call to book your visit.",
+    },
+  },
+  {
+    id: "tpl_fitness_banner",
+    name: "Fitness · Join Today",
+    kind: "neighbor_intro",
+    theme: "dark",
+    accent: "#EA580C",
+    layout: "showcase",
+    category: "Fitness",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "banner",
+      font: "geometric",
+      accent: "#EA580C",
+      industry: "other",
+      eyebrow: "Limited Offer",
+      headline: "Join Today",
+      subhead: "First month free · no contracts",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80",
+      return_company: "Iron Works Gym",
+      agent_name: "Open 5am – 11pm",
+      agent_phone: "(123) 456-7890",
+      body: "Your first month is on us. Bring this card in to claim your free trial.",
+    },
+  },
+  {
+    id: "tpl_event_minimal",
+    name: "Event · You're Invited",
+    kind: "neighbor_intro",
+    theme: "light",
+    accent: "#7C3AED",
+    layout: "showcase",
+    category: "Events",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "minimal",
+      font: "editorial",
+      accent: "#7C3AED",
+      industry: "other",
+      eyebrow: "You're Invited",
+      headline: "Community Open House",
+      price: "Sat · 2–5 PM",
+      property_address: "123 Anywhere St., Any City",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&q=80",
+      return_company: "Your Organization",
+      agent_name: "RSVP today",
+      agent_phone: "(123) 456-7890",
+      body: "Join us for food, music, and fun. Scan the code to RSVP — we'd love to see you.",
+    },
+  },
+  {
+    id: "tpl_auto_service",
+    name: "Auto · Service Special",
+    kind: "neighbor_intro",
+    theme: "light",
+    accent: "#B91C1C",
+    layout: "showcase",
+    category: "Automotive",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "service",
+      font: "geometric",
+      accent: "#B91C1C",
+      industry: "other",
+      headline: "Service you can trust",
+      subhead: "Honest, fast auto care from the pros next door.",
+      features:
+        "Oil changes and tune-ups\nBrakes and tires\nDiagnostics and AC\nFree multi-point inspection",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=1200&q=80",
+      return_company: "Main St. Auto",
+      agent_phone: "(123) 456-7890",
+      property_address: "123 Anywhere St., Any City",
+      body: "Bring this card in for $20 off your next service. We'll get you back on the road.",
+    },
+  },
+  {
+    id: "tpl_pet_editorial",
+    name: "Pet Care · Editorial",
+    kind: "neighbor_intro",
+    theme: "dark",
+    accent: "#0D9488",
+    layout: "showcase",
+    category: "Pet Care",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "editorial",
+      font: "editorial",
+      accent: "#0D9488",
+      industry: "other",
+      eyebrow: "Pamper Your Pet",
+      headline: "Happy, healthy pets",
+      subhead: "Grooming, boarding, and daycare your pet will love",
+      property_address: "123 Anywhere St., Any City",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=1200&q=80",
+      return_company: "Paws & Co.",
+      agent_name: "Book your visit",
+      agent_phone: "(123) 456-7890",
+      body: "New clients get 15% off the first groom. Scan to book your pet's pampering.",
     },
   },
   {

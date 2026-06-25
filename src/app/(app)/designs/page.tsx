@@ -24,6 +24,8 @@ import {
   findTemplate,
   designFromTemplate,
   isHtmlLayout,
+  categoryOf,
+  templateCategories,
 } from "@/lib/templates";
 import type {
   Design,
@@ -123,6 +125,7 @@ export default function DesignsPage() {
 
   const [mode, setMode] = useState<Mode>({ type: "list" });
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [chooserCat, setChooserCat] = useState("All");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [canvaOpen, setCanvaOpen] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
@@ -256,8 +259,25 @@ export default function DesignsPage() {
           Start from a template and personalize it, or upload your own front and
           back.
         </p>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {["All", ...templateCategories(templates)].map((c) => (
+            <button
+              key={c}
+              onClick={() => setChooserCat(c)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                chooserCat === c
+                  ? "bg-brand-600 text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          {templates.map((t) => (
+          {templates
+            .filter((t) => chooserCat === "All" || categoryOf(t) === chooserCat)
+            .map((t) => (
             <Card key={t.id} className="overflow-hidden">
               {isHtmlLayout(t.defaults) ? (
                 <PostcardHtmlPreview design={designFromTemplate(t)} side="front" />
