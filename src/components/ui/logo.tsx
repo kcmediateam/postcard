@@ -1,32 +1,27 @@
-/** Radiate mark — an envelope with radiating ripples. Uses currentColor. */
+/** Radiate mark — the "burst": warm rays radiating from a center dot.
+ *  Keeps its warm colors on every background (per brand guidelines). */
 export function RadiateMark({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      stroke="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      {/* radiating ripples */}
-      <circle cx="20" cy="20" r="17" strokeWidth="1.6" opacity="0.25" />
-      <circle cx="20" cy="20" r="13" strokeWidth="1.6" opacity="0.5" />
-      <circle cx="20" cy="20" r="9.2" strokeWidth="1.6" opacity="0.8" />
-      {/* envelope */}
-      <rect x="11" y="14.5" width="18" height="12" rx="2.2" strokeWidth="2" />
-      <path
-        d="M11.6 15.8 20 22l8.4-6.2"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+      <g stroke="#FF8A4C" strokeWidth="3" strokeLinecap="round">
+        <line x1="20" y1="4" x2="20" y2="13" />
+        <line x1="20" y1="27" x2="20" y2="36" />
+        <line x1="4" y1="20" x2="13" y2="20" />
+        <line x1="27" y1="20" x2="36" y2="20" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+        <line x1="25" y1="25" x2="31" y2="31" />
+        <line x1="31" y1="9" x2="25" y2="15" />
+        <line x1="15" y1="25" x2="9" y2="31" />
+      </g>
+      <circle cx="20" cy="20" r="4.5" fill="#FFB02E" />
     </svg>
   );
 }
 
 /**
- * Radiate lockup. `default` = gradient tile + dark wordmark (light backgrounds).
- * `light` = white mark + white wordmark (for dark / gradient panels).
+ * Radiate lockup: the burst locked to the Bricolage wordmark.
+ * `default` = ink wordmark (for light/paper backgrounds).
+ * `light`   = white wordmark (for the indigo field / dark panels).
  */
 export function Logo({
   className = "",
@@ -38,16 +33,10 @@ export function Logo({
   const light = variant === "light";
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      {light ? (
-        <RadiateMark className="size-8 text-white" />
-      ) : (
-        <span className="bg-radiate grid size-8 place-items-center rounded-[9px] shadow-sm">
-          <RadiateMark className="size-5 text-white" />
-        </span>
-      )}
+      <RadiateMark className="size-7" />
       <span
-        className={`text-[19px] font-medium tracking-tight ${
-          light ? "text-white" : "text-zinc-900"
+        className={`font-display text-[21px] font-extrabold tracking-tight ${
+          light ? "text-white" : "text-ink"
         }`}
       >
         Radiate

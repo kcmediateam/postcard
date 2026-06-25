@@ -1,30 +1,44 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-hanken);
+  --font-display: var(--font-bricolage);
   --font-mono: var(--font-geist-mono);
 
-  /* Radiate brand — blue anchored on #4A7BF7 (the gradient midpoint / favicon). */
-  --color-brand-50: #eef3ff;
-  --color-brand-100: #dbe6ff;
-  --color-brand-200: #c2d4ff;
-  --color-brand-300: #98b6fe;
-  --color-brand-400: #6f97fb;
-  --color-brand-500: #4a7bf7;
-  --color-brand-600: #3a63e6;
-  --color-brand-700: #2f4ec2;
-  --color-brand-800: #2a429b;
-  --color-brand-900: #25386f;
+  /* Radiate brand v1.0 — indigo anchored on Radiate Indigo #4F46E5. */
+  --color-brand-50: #eeeefe;
+  --color-brand-100: #e0dffb;
+  --color-brand-200: #c6c3f7;
+  --color-brand-300: #a39ef1;
+  --color-brand-400: #837aec;
+  --color-brand-500: #635ae8;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #3d34c9;
+  --color-brand-800: #322ba0;
+  --color-brand-900: #211c66;
 
-  /* Radiate gradient stops (135deg: purple -> blue -> teal). */
-  --color-grad-from: #6c3ce1;
-  --color-grad-via: #4a7bf7;
-  --color-grad-to: #2ec4b6;
+  /* Brand palette tokens (generate bg-ink, text-gold, etc.). */
+  --color-ink: #100f38;
+  --color-deep-indigo: #211c66;
+  --color-indigo-light: #7c74f2;
+  --color-gold: #ffc836;
+  --color-amber: #ffc23d;
+  --color-orange: #ff8a4c;
+  --color-coral: #ff5d6c;
+  --color-coral-deep: #e8324a;
+  --color-paper: #fbf9f4;
+  --color-muted: #6e6b86;
+  --color-line: #e6e4dc;
+
+  /* Signal (warm ray) gradient stops. */
+  --color-grad-from: #ffc836;
+  --color-grad-via: #ff8a4c;
+  --color-grad-to: #7c74f2;
 }
 
 :root {
-  --background: #f6f7f9;
-  --foreground: #15181e;
+  --background: #fbf9f4;
+  --foreground: #100f38;
 }
 
 /* Bump the base size up — everything scales from rem. */
@@ -39,27 +53,51 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Radiate signature gradient (logo tile, hero/CTA panels). */
+/* Display face (Bricolage Grotesque) for headlines, set tight per brand. */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Radiate signature — the deep indigo "field" (hero/CTA/dark panels). */
 .bg-radiate {
-  background-image: linear-gradient(
-    135deg,
-    var(--color-grad-from) 0%,
-    var(--color-grad-via) 50%,
-    var(--color-grad-to) 100%
+  background-image: radial-gradient(
+    120% 130% at 14% 86%,
+    #2a2483 0%,
+    var(--color-deep-indigo) 34%,
+    var(--color-ink) 72%
   );
 }
 
-/* Gradient wordmark/text accent. */
+/* Warm "signal" gradient — gold → orange → indigo-light (accents, badges). */
+.bg-signal {
+  background-image: linear-gradient(
+    95deg,
+    var(--color-gold) 0%,
+    var(--color-orange) 55%,
+    var(--color-indigo-light) 100%
+  );
+}
+
+/* Gradient text accent (warm signal). */
 .text-radiate {
   background-image: linear-gradient(
-    135deg,
-    var(--color-grad-from) 0%,
-    var(--color-grad-via) 50%,
-    var(--color-grad-to) 100%
+    95deg,
+    var(--color-gold) 0%,
+    var(--color-orange) 55%,
+    var(--color-indigo-light) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Solid gold accent text (hero highlight words). */
+.text-signal {
+  color: var(--color-gold);
 }
 
 /* ── Postcard fonts ──────────────────────────────────────────────────
@@ -75,16 +113,16 @@ body {
 
 /* ── Premium subtle motion ───────────────────────────────────────── */
 
-/* Slowly drifting gradient (hero / CTA panels). */
+/* Slowly drifting indigo field (hero / CTA panels). */
 .bg-radiate-anim {
-  background-image: linear-gradient(
-    135deg,
-    var(--color-grad-from) 0%,
-    var(--color-grad-via) 50%,
-    var(--color-grad-to) 100%
+  background-image: radial-gradient(
+    120% 130% at 14% 86%,
+    #2a2483 0%,
+    var(--color-deep-indigo) 34%,
+    var(--color-ink) 72%
   );
-  background-size: 200% 200%;
-  animation: grad-drift 14s ease-in-out infinite;
+  background-size: 160% 160%;
+  animation: grad-drift 18s ease-in-out infinite;
 }
 @keyframes grad-drift {
   0%,

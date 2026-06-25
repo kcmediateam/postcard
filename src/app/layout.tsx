@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import {
+  Bricolage_Grotesque,
+  Hanken_Grotesk,
   Outfit,
   Geist_Mono,
   Playfair_Display,
@@ -8,6 +10,17 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { DataProviderClient } from "@/lib/data/data-context";
+
+// Brand fonts: Bricolage Grotesque (display) + Hanken Grotesk (body/UI).
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+});
+
+const hanken = Hanken_Grotesk({
+  variable: "--font-hanken",
+  subsets: ["latin"],
+});
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -76,7 +89,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${playfair.variable} ${fraunces.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${hanken.variable} ${outfit.variable} ${playfair.variable} ${fraunces.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <DataProviderClient>{children}</DataProviderClient>
