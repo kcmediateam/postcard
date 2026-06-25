@@ -5,6 +5,7 @@ import { PricingCalculator } from "@/components/marketing/pricing-calculator";
 import { CompareTable } from "@/components/marketing/compare-table";
 import { LogoMarquee } from "@/components/marketing/logo-marquee";
 import { Reveal, CountUp } from "@/components/marketing/motion";
+import { Signal } from "@/components/marketing/signal";
 
 export const metadata: Metadata = {
   title: "Radiate — targeted direct mail for real estate agents",
@@ -15,43 +16,53 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="bg-radiate-anim pointer-events-none absolute -right-40 -top-40 size-[34rem] rounded-full opacity-20 blur-3xl" />
-        <div className="bg-radiate-anim pointer-events-none absolute -left-32 top-40 size-[24rem] rounded-full opacity-10 blur-3xl" />
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 py-20 lg:grid-cols-2 lg:py-24">
+      {/* Hero — indigo field + the Signal */}
+      <section className="bg-radiate relative overflow-hidden">
+        {/* the radiating Signal, emanating from the lower-left corner */}
+        <Signal className="pointer-events-none absolute inset-0 h-full w-full" />
+        {/* scrim so the headline always wins over the rings */}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(101deg,rgba(13,12,46,0.78)_0%,rgba(13,12,46,0.45)_42%,transparent_74%)]" />
+
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-2 lg:py-28">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
-              <span className="bg-radiate size-2 rounded-full" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-gold backdrop-blur-sm">
+              <span className="bg-signal size-2 rounded-full" />
               Targeted direct mail, done for you
             </span>
-            <h1 className="mt-5 text-5xl font-semibold leading-[1.05] tracking-tight text-zinc-900">
-              Mail that <span className="text-radiate">radiates</span> results.
+            <h1 className="font-display mt-6 text-5xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-[4.5rem]">
+              The mail that{" "}
+              <span className="text-signal text-signal-glow">
+                reaches every door.
+              </span>
             </h1>
-            <p className="mt-4 max-w-md text-xl text-zinc-600">
+            <p className="mt-6 max-w-md text-xl leading-relaxed text-white/80">
               Tracked postcards for real estate — design, send, and measure in
-              minutes.
+              minutes. No minimums, no markup.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/login?mode=signup">
                 <Button size="lg">Start sending</Button>
               </Link>
               <Link href="/pricing">
-                <Button size="lg" variant="secondary">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="border-white/25 bg-white/10 text-white hover:bg-white/20"
+                >
                   See pricing
                 </Button>
               </Link>
             </div>
           </Reveal>
 
-          {/* Fanned postcards — gently floating */}
+          {/* Fanned postcards — gently floating over the field */}
           <div className="relative mx-auto hidden h-[400px] w-full max-w-md lg:block">
             <HeroImageCard src="/hero/design-2.jpg" alt="Listing summary postcard" pos="left-0 top-12" base="rotate(-8deg)" floatClass="animate-float-slow" />
             <HeroImageCard src="/hero/design-3.jpg" alt="Newly listed postcard" pos="right-0 top-16" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
             <HeroImageCard src="/hero/design-1.jpg" alt="New listing postcard" pos="left-1/2 top-0 z-10" base="translateX(-50%)" floatClass="animate-float" delay={0.5} featured />
           </div>
           {/* mobile: single */}
-          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 lg:hidden">
+          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 lg:hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/hero/design-1.jpg" alt="New listing postcard" className="block w-full" />
           </div>

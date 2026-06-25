@@ -151,6 +151,61 @@ h3,
   }
 }
 
+/* ── The Signal (radiating rings) ─────────────────────────────────── */
+.signal-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: signal-ripple 7s linear infinite;
+}
+.signal-ripple-2 {
+  animation-delay: 2.33s;
+}
+.signal-ripple-3 {
+  animation-delay: 4.66s;
+}
+@keyframes signal-ripple {
+  0% {
+    transform: scale(0.12);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.signal-pin-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: signal-pin-pulse 3s ease-out infinite;
+}
+@keyframes signal-pin-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+/* Soft pulsing glow on hero highlight words. */
+.text-signal-glow {
+  animation: signal-glow 4.5s ease-in-out infinite;
+}
+@keyframes signal-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(255, 200, 54, 0);
+  }
+  50% {
+    text-shadow: 0 0 26px rgba(255, 200, 54, 0.5);
+  }
+}
+
 /* Scroll reveal — toggled to .is-in by the Reveal island. */
 .reveal {
   opacity: 0;
@@ -204,8 +259,15 @@ h3,
     animation: none;
   }
   .animate-float,
-  .animate-float-slow {
+  .animate-float-slow,
+  .signal-ripple,
+  .signal-pin-pulse,
+  .text-signal-glow {
     animation: none;
+  }
+  .signal-ripple {
+    opacity: 0.3;
+    transform: scale(1);
   }
   .reveal {
     opacity: 1;
