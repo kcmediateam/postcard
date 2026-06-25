@@ -20,6 +20,7 @@ import {
   DEFAULT_LAYOUT,
   FONTS,
   emptyFields,
+  findTemplate,
 } from "@/lib/templates";
 import type {
   Design,
@@ -490,7 +491,11 @@ function DesignCard({
           {d.source === "template" && d.template_id && (
             <button
               onClick={() => {
-                const tpl = templates.find((t) => t.id === d.template_id);
+                // Look up across ALL templates (incl. inactive) so designs made
+                // from a now-inactive template are still editable.
+                const tpl =
+                  templates.find((t) => t.id === d.template_id) ??
+                  findTemplate(d.template_id!);
                 if (tpl) onEditTemplate(tpl);
               }}
               className="rounded-md px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
