@@ -1187,8 +1187,8 @@ function UploadModal({
             ))}
           </div>
           <p className="mt-1.5 text-xs text-zinc-500">
-            We auto-fit your art to {specPx} (landscape) for Lob — upload a
-            high-resolution image and we handle the exact sizing.
+            We fit your whole design to {specPx} (landscape) for Lob — nothing
+            is cropped. Keep key text ~0.25in from the edges (print trim).
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

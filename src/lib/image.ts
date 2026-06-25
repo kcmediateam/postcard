@@ -31,10 +31,11 @@ export async function fileToDownscaledDataUrl(
 }
 
 /**
- * Resize a data-URL image to EXACTLY targetW × targetH using cover-fit
- * (scale to fill, center-crop the overflow). Postcards are printed with bleed
- * that gets trimmed, so a small edge crop is expected and correct — this makes
- * any reasonable upload match Lob's strict size/ratio requirement for a size.
+ * Resize a data-URL image to EXACTLY targetW × targetH WITHOUT cropping any of
+ * the design (contain-fit). To avoid white bars when the art's ratio doesn't
+ * exactly match the target, any thin edge gap is filled with a zoomed
+ * (cover-fit) copy of the same art behind it, so it still looks full-bleed.
+ * Makes any reasonable upload meet Lob's strict size/ratio requirement.
  */
 export async function fitImageToExactDataUrl(
   dataUrl: string,
@@ -48,13 +49,21 @@ export async function fitImageToExactDataUrl(
   canvas.height = targetH;
   const ctx = canvas.getContext("2d");
   if (!ctx) return dataUrl;
-  // cover: scale so the image fills the target, then center it (cropping overflow)
-  const scale = Math.max(targetW / img.width, targetH / img.height);
-  const w = img.width * scale;
-  const h = img.height * scale;
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, targetW, targetH);
-  ctx.drawImage(img, (targetW - w) / 2, (targetH - h) / 2, w, h);
+
+  // Background: cover-fit (fills the canvas, slightly zoomed) so edges blend.
+  const cover = Math.max(targetW / img.width, targetH / img.height);
+  const cw = img.width * cover;
+  const ch = img.height * cover;
+  ctx.drawImage(img, (targetW - cw) / 2, (targetH - ch) / 2, cw, ch);
+
+  // Foreground: contain-fit (the WHOLE design, nothing cropped), centered.
+  const contain = Math.min(targetW / img.width, targetH / img.height);
+  const fw = img.width * contain;
+  const fh = img.height * contain;
+  ctx.drawImage(img, (targetW - fw) / 2, (targetH - fh) / 2, fw, fh);
+
   return canvas.toDataURL("image/jpeg", quality);
 }
 
