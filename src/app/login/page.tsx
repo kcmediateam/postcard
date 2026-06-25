@@ -8,11 +8,12 @@ import { Logo } from "@/components/ui/logo";
 import { useData } from "@/lib/data/data-context";
 import { AuthError } from "@/lib/data";
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "reset";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { session, loading, signIn, signUp } = useData();
+  const { session, loading, signIn, signUp, db } = useData();
+  const [resetSent, setResetSent] = useState(false);
 
   const [mode, setMode] = useState<Mode>(() =>
     typeof window !== "undefined" &&
@@ -41,6 +42,12 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
+      if (mode === "reset") {
+        await db.sendPasswordReset(email);
+        setResetSent(true);
+        setSubmitting(false);
+        return;
+      }
       if (mode === "signup") {
         await signUp({ email, password, full_name: fullName });
       } else {
@@ -98,78 +105,130 @@ export default function LoginPage() {
 
           <div className="mt-8 lg:mt-0">
             <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">
-              {mode === "signin" ? "Welcome back" : "Create your account"}
+              {mode === "signin"
+                ? "Welcome back"
+                : mode === "signup"
+                ? "Create your account"
+                : "Reset your password"}
             </h2>
             <p className="mt-1 text-sm text-zinc-500">
               {mode === "signin"
                 ? "Sign in to manage your postcard campaigns."
-                : "Start sending tracked postcard campaigns."}
+                : mode === "signup"
+                ? "Start sending tracked postcard campaigns."
+                : "Enter your email and we'll send you a reset link."}
             </p>
           </div>
 
           {/* mode toggle */}
-          <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg bg-zinc-100 p-1 text-sm font-medium">
-            {(["signin", "signup"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => switchMode(m)}
-                className={`h-9 rounded-md transition-colors ${
-                  mode === m
-                    ? "bg-white text-zinc-900 shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-700"
-                }`}
-              >
-                {m === "signin" ? "Sign in" : "Create account"}
-              </button>
-            ))}
-          </div>
+          {mode !== "reset" && (
+            <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg bg-zinc-100 p-1 text-sm font-medium">
+              {(["signin", "signup"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => switchMode(m)}
+                  className={`h-9 rounded-md transition-colors ${
+                    mode === m
+                      ? "bg-white text-zinc-900 shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-700"
+                  }`}
+                >
+                  {m === "signin" ? "Sign in" : "Create account"}
+                </button>
+              ))}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            {mode === "signup" && (
-              <TextField
-                label="Full name"
-                type="text"
-                autoComplete="name"
-                placeholder="Jordan Avery"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            )}
-            <TextField
-              label="Email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@brokerage.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              autoComplete={
-                mode === "signin" ? "current-password" : "new-password"
-              }
-              required
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              hint={
-                mode === "signup" ? "At least 8 characters." : undefined
-              }
-            />
-
-            {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
+          {mode === "reset" && resetSent ? (
+            <div className="mt-6">
+              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                If an account exists for <strong>{email}</strong>, a reset link
+                is on its way. Check your inbox (and spam).
               </div>
-            )}
+              <button
+                type="button"
+                onClick={() => {
+                  switchMode("signin");
+                  setResetSent(false);
+                }}
+                className="mt-4 text-sm font-medium text-brand-600 hover:text-brand-700"
+              >
+                ← Back to sign in
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {mode === "signup" && (
+                <TextField
+                  label="Full name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Jordan Avery"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              )}
+              <TextField
+                label="Email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="you@business.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {mode !== "reset" && (
+                <div>
+                  <TextField
+                    label="Password"
+                    type="password"
+                    autoComplete={
+                      mode === "signin" ? "current-password" : "new-password"
+                    }
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    hint={mode === "signup" ? "At least 8 characters." : undefined}
+                  />
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={() => switchMode("reset")}
+                      className="mt-1.5 text-xs font-medium text-brand-600 hover:text-brand-700"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+              )}
 
-            <Button type="submit" fullWidth loading={submitting} size="lg">
-              {mode === "signin" ? "Sign in" : "Create account"}
-            </Button>
-          </form>
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <Button type="submit" fullWidth loading={submitting} size="lg">
+                {mode === "signin"
+                  ? "Sign in"
+                  : mode === "signup"
+                  ? "Create account"
+                  : "Send reset link"}
+              </Button>
+
+              {mode === "reset" && (
+                <button
+                  type="button"
+                  onClick={() => switchMode("signin")}
+                  className="w-full text-center text-sm font-medium text-zinc-500 hover:text-zinc-700"
+                >
+                  ← Back to sign in
+                </button>
+              )}
+            </form>
+          )}
 
           <p className="mt-6 text-center text-xs text-zinc-400">
             <a href="/" className="hover:text-zinc-600">

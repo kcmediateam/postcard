@@ -206,6 +206,14 @@ export const mockProvider: DataProvider = {
     return delay(sessionFor(profile));
   },
 
+  async sendPasswordReset(): Promise<void> {
+    return delay(undefined);
+  },
+
+  async updatePassword(): Promise<void> {
+    return delay(undefined);
+  },
+
   async signOut(): Promise<void> {
     const db = loadDB();
     db.current_user_id = null;
@@ -519,6 +527,28 @@ export const mockProvider: DataProvider = {
     );
     persist();
     return delay(undefined);
+  },
+
+  async deleteUnverifiedContacts(listId: string): Promise<number> {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const removeIds = db.contacts
+      .filter(
+        (c) =>
+          c.list_id === listId &&
+          c.profile_id === userId &&
+          (c.lob_verification_status === "undeliverable" ||
+            c.lob_verification_status === "unverified")
+      )
+      .map((c) => c.id);
+    db.contacts = db.contacts.filter((c) => !removeIds.includes(c.id));
+    const list = db.contact_lists.find((l) => l.id === listId);
+    if (list)
+      list.contact_count = db.contacts.filter(
+        (c) => c.list_id === listId
+      ).length;
+    persist();
+    return delay(removeIds.length);
   },
 
   async listCampaigns(): Promise<Campaign[]> {

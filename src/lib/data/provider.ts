@@ -34,6 +34,12 @@ export interface DataProvider {
   /** Sign in with email + password. Throws AuthError on bad credentials. */
   signIn(email: string, password: string): Promise<Session>;
 
+  /** Email a password-reset link to the address (if it has an account). */
+  sendPasswordReset(email: string): Promise<void>;
+
+  /** Set a new password for the current (recovery) session. */
+  updatePassword(newPassword: string): Promise<void>;
+
   /** Clear the current session. */
   signOut(): Promise<void>;
 
@@ -122,6 +128,9 @@ export interface DataProvider {
 
   /** Delete a list and its contacts. */
   deleteContactList(listId: string): Promise<void>;
+
+  /** Remove undeliverable + unverified contacts from a list. Returns # removed. */
+  deleteUnverifiedContacts(listId: string): Promise<number>;
 
   // ---- campaigns (Screen 6: New campaign) -------------------------------
 

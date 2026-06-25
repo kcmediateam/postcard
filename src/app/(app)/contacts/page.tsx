@@ -186,6 +186,7 @@ function ContactListDetail({
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const load = useCallback(async () => {
     setContacts(await db.listContacts(list.id));
@@ -219,6 +220,26 @@ function ContactListDetail({
     }
   }
 
+  async function removeUnverified() {
+    const bad = counts.undeliverable + counts.unverified;
+    if (
+      !window.confirm(
+        `Remove ${bad.toLocaleString()} undeliverable/unverified address${
+          bad === 1 ? "" : "es"
+        }? The rest of your list stays.`
+      )
+    )
+      return;
+    setRemoving(true);
+    try {
+      await db.deleteUnverifiedContacts(list.id);
+      await load();
+      await onChanged();
+    } finally {
+      setRemoving(false);
+    }
+  }
+
   async function remove() {
     if (!window.confirm(`Delete "${list.name}" and its contacts?`)) return;
     await db.deleteContactList(list.id);
@@ -240,7 +261,7 @@ function ContactListDetail({
           list.created_at
         )}`}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="secondary"
               onClick={reverify}
@@ -248,6 +269,16 @@ function ContactListDetail({
             >
               Re-verify
             </Button>
+            {counts.undeliverable + counts.unverified > 0 && (
+              <Button
+                variant="secondary"
+                onClick={removeUnverified}
+                loading={removing}
+              >
+                Remove undeliverable (
+                {(counts.undeliverable + counts.unverified).toLocaleString()})
+              </Button>
+            )}
             <Button variant="danger" onClick={remove}>
               Delete list
             </Button>

@@ -446,10 +446,16 @@ const INDUSTRY_SPECS: IndustrySpec[] = [
 ];
 
 function genIndustry(spec: IndustrySpec, count = 10): Template[] {
+  // Distinct (copy × layout) combinations so every design is different —
+  // never the same layout+copy with only a font swap.
+  const combos: { variant: GenVariant; layout: string }[] = [];
+  for (const variant of spec.variants)
+    for (const layout of spec.layouts) combos.push({ variant, layout });
+  const picked = combos.slice(0, count);
+
   const out: Template[] = [];
-  for (let i = 0; i < count; i++) {
-    const layout = spec.layouts[i % spec.layouts.length];
-    const variant = spec.variants[i % spec.variants.length];
+  for (let i = 0; i < picked.length; i++) {
+    const { layout, variant } = picked[i];
     const accent = spec.accents[i % spec.accents.length];
     const font = spec.fonts[i % spec.fonts.length];
     const photo = spec.photos[i % spec.photos.length];

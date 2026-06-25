@@ -177,6 +177,18 @@ export const supabaseProvider: DataProvider = {
     return { user: { id: data.user.id, email: data.user.email ?? email }, profile: await loadProfile() };
   },
 
+  async sendPasswordReset(email: string): Promise<void> {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/reset` : undefined;
+    const { error } = await sb().auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw new Error(error.message);
+  },
+
+  async updatePassword(newPassword: string): Promise<void> {
+    const { error } = await sb().auth.updateUser({ password: newPassword });
+    if (error) throw new Error(error.message);
+  },
+
   async signOut(): Promise<void> {
     await sb().auth.signOut();
     cachedUid = null;
@@ -434,6 +446,27 @@ export const supabaseProvider: DataProvider = {
   async deleteContactList(listId: string): Promise<void> {
     const { error } = await sb().from("contact_lists").delete().eq("id", listId);
     if (error) throw new Error(error.message);
+  },
+
+  async deleteUnverifiedContacts(listId: string): Promise<number> {
+    const { data, error } = await sb()
+      .from("contacts")
+      .delete()
+      .eq("list_id", listId)
+      .in("lob_verification_status", ["undeliverable", "unverified"])
+      .select("id");
+    if (error) throw new Error(error.message);
+    const removed = (data ?? []).length;
+    // Keep the list's stored count in sync.
+    const { count } = await sb()
+      .from("contacts")
+      .select("id", { count: "exact", head: true })
+      .eq("list_id", listId);
+    await sb()
+      .from("contact_lists")
+      .update({ contact_count: count ?? 0 })
+      .eq("id", listId);
+    return removed;
   },
 
   // ---- campaigns ---------------------------------------------------------
