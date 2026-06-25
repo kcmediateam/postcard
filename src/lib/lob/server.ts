@@ -1,6 +1,6 @@
 /** Server-only Lob client (test key). */
 
-import type { PostcardSize } from "@/lib/types";
+import type { MailPieceStatus, PostcardSize } from "@/lib/types";
 
 const LOB_BASE = "https://api.lob.com/v1";
 
@@ -84,4 +84,41 @@ export async function createLobPostcard(
     throw new Error(msg);
   }
   return { id: json.id as string };
+}
+
+/** Map a Lob tracking-event name to our mail_piece status. */
+function statusFromEventName(name: string): MailPieceStatus {
+  const n = name.toLowerCase();
+  if (n.includes("delivered")) return "delivered";
+  if (n.includes("returned")) return "returned";
+  if (/transit|local area|processed|mailed|re-?rout/.test(n)) return "in_transit";
+  return "created";
+}
+
+/** Fetch a postcard's current status from Lob (reconcile missed webhooks). */
+export async function getLobPostcardStatus(
+  id: string
+): Promise<{ status: MailPieceStatus; deliveredAt: string | null }> {
+  const res = await fetch(`${LOB_BASE}/postcards/${id}`, {
+    headers: { Authorization: authHeader() },
+  });
+  if (!res.ok) throw new Error(`Lob get failed (${res.status})`);
+  const json = (await res.json()) as {
+    tracking_events?: { name?: string; type?: string; time?: string; date_created?: string }[];
+  };
+  const events = Array.isArray(json.tracking_events) ? json.tracking_events : [];
+  let latestName = "";
+  let latestTime = -1;
+  let deliveredAt: string | null = null;
+  for (const e of events) {
+    const when = e.time ?? e.date_created ?? "";
+    const t = when ? new Date(when).getTime() : 0;
+    const name = String(e.name ?? e.type ?? "");
+    if (t >= latestTime) {
+      latestTime = t;
+      latestName = name;
+    }
+    if (name.toLowerCase().includes("delivered") && when) deliveredAt = when;
+  }
+  return { status: statusFromEventName(latestName), deliveredAt };
 }

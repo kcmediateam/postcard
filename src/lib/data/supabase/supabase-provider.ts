@@ -592,6 +592,17 @@ export const supabaseProvider: DataProvider = {
     }) as unknown as Awaited<ReturnType<DataProvider["listCampaignPieces"]>>;
   },
 
+  async syncCampaignStatus(campaignId: string) {
+    const res = await fetch("/api/campaigns/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ campaignId }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || "Could not sync from Lob.");
+    return json as { total: number; updated: number };
+  },
+
   async seedSampleData(): Promise<void> {
     // Server-side RPC (SECURITY DEFINER) so it works under the tightened ledger
     // RLS where clients can't insert credit transactions directly.

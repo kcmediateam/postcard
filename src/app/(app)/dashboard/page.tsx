@@ -283,16 +283,40 @@ function CampaignDetail({
   const [pieces, setPieces] = useState<CampaignPiece[]>([]);
   const [design, setDesign] = useState<Design | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncNote, setSyncNote] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const [p, designs] = await Promise.all([
+      db.listCampaignPieces(campaign.id),
+      db.listDesigns(),
+    ]);
+    setPieces(p);
+    setDesign(designs.find((d) => d.id === campaign.design_id) ?? null);
+    setLoaded(true);
+  }, [db, campaign.id, campaign.design_id]);
 
   useEffect(() => {
-    Promise.all([db.listCampaignPieces(campaign.id), db.listDesigns()]).then(
-      ([p, designs]) => {
-        setPieces(p);
-        setDesign(designs.find((d) => d.id === campaign.design_id) ?? null);
-        setLoaded(true);
-      }
-    );
-  }, [db, campaign.id, campaign.design_id]);
+    load();
+  }, [load]);
+
+  async function syncFromLob() {
+    setSyncing(true);
+    setSyncNote(null);
+    try {
+      const { updated } = await db.syncCampaignStatus(campaign.id);
+      await load();
+      setSyncNote(
+        updated > 0
+          ? `Updated ${updated} piece${updated === 1 ? "" : "s"} from Lob.`
+          : "Already up to date with Lob."
+      );
+    } catch (e) {
+      setSyncNote(e instanceof Error ? e.message : "Sync failed.");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   const s = stats;
 
@@ -351,7 +375,22 @@ function CampaignDetail({
 
       {/* pieces table */}
       <div className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold text-zinc-900">Recipients</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-zinc-900">Recipients</h2>
+          <div className="flex items-center gap-3">
+            {syncNote && (
+              <span className="text-xs text-zinc-500">{syncNote}</span>
+            )}
+            <Button
+              variant="secondary"
+              onClick={syncFromLob}
+              loading={syncing}
+              disabled={campaign.piece_count === 0}
+            >
+              Sync from Lob
+            </Button>
+          </div>
+        </div>
         <Card className="overflow-hidden">
           {!loaded ? (
             <div className="px-5 py-8 text-sm text-zinc-400">Loading…</div>

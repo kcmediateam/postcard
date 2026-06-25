@@ -701,6 +701,15 @@ export const mockProvider: DataProvider = {
     return delay(rows);
   },
 
+  async syncCampaignStatus(campaignId: string) {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const total = db.mail_pieces.filter(
+      (p) => p.campaign_id === campaignId && p.profile_id === userId
+    ).length;
+    return delay({ total, updated: 0 });
+  },
+
   async seedSampleData(): Promise<void> {
     const db = loadDB();
     const userId = requireUserId(db);

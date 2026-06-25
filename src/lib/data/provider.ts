@@ -155,6 +155,9 @@ export interface DataProvider {
   /** Per-piece rows for a campaign (with recipient name) for the drill-in. */
   listCampaignPieces(campaignId: string): Promise<CampaignPiece[]>;
 
+  /** Reconcile a campaign's piece statuses with Lob (missed webhooks). */
+  syncCampaignStatus(campaignId: string): Promise<{ total: number; updated: number }>;
+
   /**
    * Demo convenience: populate a realistic completed campaign (with design,
    * verified list, delivered pieces, and scans) for the signed-in agent so the
