@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { PostcardSide } from "@/components/postcard/postcard-side";
+import { PostcardHtmlPreview } from "@/components/postcard/postcard-html-preview";
+import { isHtmlLayout } from "@/lib/templates";
 import { useData } from "@/lib/data/data-context";
 import type { Campaign, CampaignStatus, Design } from "@/lib/types";
 import type { CampaignPiece, CampaignStats } from "@/lib/data/provider";
@@ -400,7 +402,11 @@ function CampaignDetail({
           </div>
           {design ? (
             <div className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
-              <PostcardSide design={design} side="front" />
+              {isHtmlLayout(design.fields) ? (
+                <PostcardHtmlPreview design={design} side="front" />
+              ) : (
+                <PostcardSide design={design} side="front" />
+              )}
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-400">

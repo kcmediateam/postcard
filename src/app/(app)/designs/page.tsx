@@ -54,6 +54,29 @@ const UPLOAD_SIZES: {
  * never see two image slots that silently override each other).
  */
 function fieldVis(template: Template) {
+  // Premium HTML print layouts gate fields to exactly what they render — plus
+  // headshot + logo, which brokerages require for compliance.
+  const printLayout = template.defaults?.layout;
+  if (
+    printLayout === "banner" ||
+    printLayout === "service" ||
+    printLayout === "editorial"
+  ) {
+    const isEditorial = printLayout === "editorial";
+    return {
+      photoMain: true,
+      headshot: true,
+      isIntro: false,
+      collage: false,
+      logo: true,
+      eventDateTime: false,
+      price: isEditorial,
+      stats: isEditorial,
+      propertyAddress: true,
+      features: printLayout === "service",
+    };
+  }
+
   const layout = template.layout ?? DEFAULT_LAYOUT[template.kind];
   const isMarket = template.kind === "market_update";
   const isElegant = layout === "elegant_split";

@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextField } from "@/components/ui/text-field";
 import { PostcardSide } from "@/components/postcard/postcard-side";
+import { PostcardHtmlPreview } from "@/components/postcard/postcard-html-preview";
+import { isHtmlLayout } from "@/lib/templates";
 import { useData } from "@/lib/data/data-context";
 import { InsufficientCreditsError } from "@/lib/data";
 import { CREDITS_PER_PIECE, creditCost, type AudienceTier } from "@/lib/billing";
@@ -388,7 +390,11 @@ export default function NewCampaignPage() {
                           : "border-zinc-200 hover:border-zinc-300"
                       }`}
                     >
-                      <PostcardSide design={d} side="front" />
+                      {isHtmlLayout(d.fields) ? (
+                        <PostcardHtmlPreview design={d} side="front" />
+                      ) : (
+                        <PostcardSide design={d} side="front" />
+                      )}
                       <div className="truncate px-2.5 py-2 text-xs font-medium text-zinc-800">
                         {d.name}
                       </div>

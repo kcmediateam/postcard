@@ -67,6 +67,17 @@ function sceneOrAccent(url: string | null | undefined, accent: string): string {
     : `<div style="position:absolute;inset:0;background:linear-gradient(120deg, ${accent} 0%, #12152e 90%)"></div>`;
 }
 
+function headshotImg(url: string | null | undefined, size: string): string {
+  return url
+    ? `<img src="${esc(url)}" style="width:${size};height:${size};border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);flex:0 0 auto" />`
+    : "";
+}
+function logoImg(url: string | null | undefined, maxH: string): string {
+  return url
+    ? `<img src="${esc(url)}" style="height:${maxH};width:auto;max-width:1.5in;object-fit:contain" />`
+    : "";
+}
+
 function eyebrowFor(design: Design): string {
   switch (design.template_kind) {
     case "just_sold": return "Just Sold";
@@ -103,10 +114,14 @@ function frontEditorial(design: Design, accent: string): string {
       ${stats ? `<div style="margin-top:0.12in;font-size:10pt;font-weight:600;color:#fbeede">${stats}</div>` : ""}
       ${f.property_address ? `<div style="margin-top:0.04in;font-size:9pt;color:#e7dccb;opacity:.85">${esc(f.property_address)}</div>` : ""}
     </div>
-    <div style="position:absolute;left:0.5in;bottom:0.34in;color:#FFF8EC">
-      <span class="disp" style="font-size:10.5pt;font-weight:700">${esc(f.agent_name) || "Your name"}</span>
-      <span style="font-size:8.5pt;opacity:.85;margin-left:10px">${[esc(f.agent_phone), esc(f.agent_email)].filter(Boolean).join("&nbsp;&nbsp;·&nbsp;&nbsp;")}</span>
-    </div>`;
+    <div style="position:absolute;left:0.5in;bottom:0.3in;display:flex;align-items:center;gap:0.12in;color:#FFF8EC">
+      ${headshotImg(f.headshot_url, "0.52in")}
+      <div>
+        <div class="disp" style="font-size:10.5pt;font-weight:700">${esc(f.agent_name) || "Your name"}</div>
+        <div style="font-size:8.5pt;opacity:.85">${[esc(f.agent_phone), esc(f.agent_email)].filter(Boolean).join("&nbsp;&nbsp;·&nbsp;&nbsp;")}</div>
+      </div>
+    </div>
+    ${f.logo_url ? `<div style="position:absolute;right:0.5in;top:0.5in">${logoImg(f.logo_url, "0.42in")}</div>` : ""}`;
 }
 
 function frontBanner(design: Design, accent: string): string {
@@ -123,8 +138,12 @@ function frontBanner(design: Design, accent: string): string {
       <div style="font-family:'Anton',sans-serif;font-size:54pt;line-height:0.9;letter-spacing:1px;text-transform:uppercase;text-shadow:0 3px 24px rgba(0,0,0,.5)">${esc(f.headline || eyebrow)}</div>
       ${sub ? `<div style="margin-top:0.16in;font-size:10pt;font-weight:600;letter-spacing:.18em;text-transform:uppercase">${esc(sub)}</div>` : ""}
     </div>
-    <div style="position:absolute;left:0;right:0;bottom:0;height:0.62in;display:flex;align-items:center;justify-content:center;background:rgba(8,10,22,.55)">
-      <span class="disp" style="color:#fff;font-size:12pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase">${esc(brand) || "Your Company"}</span>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:0.74in;display:flex;align-items:center;justify-content:space-between;padding:0 0.4in;background:rgba(8,10,22,.62)">
+      <div style="display:flex;align-items:center;gap:0.14in">
+        ${logoImg(f.logo_url, "0.4in")}
+        <span class="disp" style="color:#fff;font-size:12pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${esc(brand) || "Your Company"}</span>
+      </div>
+      ${headshotImg(f.headshot_url, "0.5in")}
     </div>`;
 }
 
@@ -147,8 +166,11 @@ function frontService(design: Design, accent: string): string {
   const contact = [esc(f.agent_phone), esc(f.property_address)].filter(Boolean).join("&nbsp;&nbsp;·&nbsp;&nbsp;");
   return `
     <div class="bg-accent" style="position:absolute;top:0;left:0;right:0;height:0.66in;display:flex;align-items:center;justify-content:space-between;padding:0 0.4in;color:#fff">
-      <span style="font-size:8.5pt;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.85">${eyebrowFor(design)}</span>
-      <span class="disp" style="font-size:13pt;font-weight:800;letter-spacing:.02em">${esc(brand)}</span>
+      <span style="font-size:8.5pt;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.85">Trusted Local Service</span>
+      <div style="display:flex;align-items:center;gap:0.12in">
+        ${logoImg(f.logo_url, "0.38in")}
+        <span class="disp" style="font-size:13pt;font-weight:800;letter-spacing:.02em">${esc(brand)}</span>
+      </div>
     </div>
     <div style="position:absolute;top:0.66in;left:0;width:2.9in;bottom:0;padding:0.3in 0.28in">
       <div style="width:100%;height:100%;border:5px solid #fff;box-shadow:0 8px 22px rgba(0,0,0,.18);overflow:hidden;position:relative">
@@ -159,7 +181,8 @@ function frontService(design: Design, accent: string): string {
       <div class="disp accent" style="font-size:25pt;font-weight:800;line-height:0.98;letter-spacing:-.5px">${esc(f.headline) || "Professional Service"}</div>
       ${f.subhead ? `<div style="margin-top:0.1in;font-size:9.5pt;line-height:1.5;color:#52606d">${esc(f.subhead)}</div>` : ""}
       ${list ? `<div class="disp accent" style="margin-top:0.18in;margin-bottom:0.12in;font-size:11pt;font-weight:800;letter-spacing:.02em">What we provide:</div>${list}` : ""}
-      ${contact ? `<div style="position:absolute;bottom:0.28in;font-size:9pt;font-weight:600;color:#1f2933">${contact}</div>` : ""}
+      ${contact ? `<div style="position:absolute;bottom:0.28in;left:0.1in;font-size:9pt;font-weight:600;color:#1f2933">${contact}</div>` : ""}
+      ${f.headshot_url ? `<div style="position:absolute;bottom:0.22in;right:0.4in">${headshotImg(f.headshot_url, "0.6in")}</div>` : ""}
     </div>`;
 }
 
