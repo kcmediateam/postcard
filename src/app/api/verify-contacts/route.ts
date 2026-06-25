@@ -102,7 +102,7 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof Error && e.message === "lob_auth") {
       return Response.json(
-        { error: "Lob rejected the API key (use the TEST secret key)." },
+        { error: "Address verification is temporarily unavailable." },
         { status: 502 }
       );
     }

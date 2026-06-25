@@ -105,7 +105,7 @@ export default function PrintPreviewPage() {
         Printed template preview — true 4×6 size
       </h1>
       <p className="mb-6 text-sm text-zinc-500">
-        This is exactly the HTML Lob prints (front + back). No mail is sent.
+        This is exactly the print HTML (front + back). No mail is sent.
       </p>
       <div className="space-y-10">
         {SAMPLES.map((d) => (

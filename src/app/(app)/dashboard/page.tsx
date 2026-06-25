@@ -343,8 +343,8 @@ function CampaignDetail({
       await load();
       setSyncNote(
         updated > 0
-          ? `Updated ${updated} piece${updated === 1 ? "" : "s"} from Lob.`
-          : "Already up to date with Lob."
+          ? `Updated ${updated} piece${updated === 1 ? "" : "s"}.`
+          : "Already up to date."
       );
     } catch (e) {
       setSyncNote(e instanceof Error ? e.message : "Sync failed.");
@@ -440,7 +440,7 @@ function CampaignDetail({
               loading={syncing}
               disabled={campaign.piece_count === 0}
             >
-              Sync from Lob
+              Sync for print
             </Button>
           </div>
         </div>

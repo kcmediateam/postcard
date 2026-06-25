@@ -1275,7 +1275,7 @@ function UploadModal({
             ))}
           </div>
           <p className="mt-1.5 text-xs text-zinc-500">
-            We fit your whole design to {specPx} (landscape) for Lob — nothing
+            We fit your whole design to {specPx} (landscape) for print — nothing
             is cropped. Keep key text ~0.25in from the edges (print trim).
           </p>
         </div>

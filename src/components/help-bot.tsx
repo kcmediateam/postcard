@@ -21,7 +21,7 @@ function tipsFor(pathname: string): TipSet {
     return {
       title: "Designs",
       tips: [
-        "Upload a front + back — we auto-fit your art to Lob's exact size, no cropping.",
+        "Upload a front + back — we auto-fit your art to the exact print size, no cropping.",
         "Set the client's “From” address and a QR link (with UTM tracking) right on the upload.",
       ],
     };
@@ -55,7 +55,7 @@ function tipsFor(pathname: string): TipSet {
       tips: [
         "Click a campaign to see per-recipient status and QR scans.",
         "“Share with client” gives them a read-only tracking link — no login needed.",
-        "“Sync from Lob” refreshes delivery statuses anytime.",
+        "“Sync for print” refreshes delivery statuses anytime.",
       ],
     };
   return DEFAULT_TIPS;

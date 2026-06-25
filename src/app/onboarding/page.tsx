@@ -216,8 +216,8 @@ export default function OnboardingPage() {
                 </div>
               </div>
               <p className="mt-3 text-xs text-zinc-500">
-                Your return block (top-left) and Lob&rsquo;s tracking QR appear
-                on the postcard back.
+                Your return block (top-left) and the tracking QR appear on the
+                postcard back.
               </p>
             </div>
           </div>

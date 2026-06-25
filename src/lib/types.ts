@@ -107,6 +107,10 @@ export interface DesignFields {
   size?: PostcardSize;
   // Printed layout style: "editorial" | "banner" | "service". Absent → editorial.
   layout?: string;
+  // Optional eyebrow/tag over the headline (lets non-real-estate use the layouts).
+  eyebrow?: string;
+  // "other" hides the real-estate compliance marks (Equal Housing / REALTOR®).
+  industry?: string;
 }
 
 export type AddressVerificationStatus =

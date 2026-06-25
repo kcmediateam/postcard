@@ -79,6 +79,8 @@ function logoImg(url: string | null | undefined, maxH: string): string {
 }
 
 function eyebrowFor(design: Design): string {
+  const custom = design.fields?.eyebrow?.trim();
+  if (custom) return custom;
   switch (design.template_kind) {
     case "just_sold": return "Just Sold";
     case "open_house": return "Open House";
@@ -216,7 +218,11 @@ export function postcardBackHtml(design: Design, profile: Profile): string | nul
       .filter(Boolean).join(", "),
   ].filter(Boolean).map((l) => `<div>${esc(l)}</div>`).join("");
 
-  const logos = `
+  // Real-estate compliance marks — hidden for non-RE businesses (industry=other).
+  const logos =
+    f.industry === "other"
+      ? ""
+      : `
     <div style="display:flex;align-items:flex-end;gap:0.12in;margin-top:0.16in">
       ${equalHousingSvg("#2B2540")}
       ${f.nar_member === "yes" ? realtorSvg("#2B2540") : ""}
