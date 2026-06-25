@@ -876,7 +876,7 @@ function PersonalizeEditor({
 
           {vis.logo && (
             <ImageDrop
-              label="Brokerage logo (optional)"
+              label="Logo (optional)"
               value={fields.logo_url}
               onChange={(v) => set("logo_url", v)}
               maxDim={600}
@@ -1091,23 +1091,28 @@ function PersonalizeEditor({
             </div>
           </fieldset>
 
-          <fieldset className="rounded-lg border border-zinc-200 p-4">
-            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Compliance logos
-            </legend>
-            <p className="mb-3 text-xs text-zinc-400">
-              The Equal Housing Opportunity logo always appears on the back.
-            </p>
-            <label className="flex items-center gap-2.5 text-sm text-zinc-700">
-              <input
-                type="checkbox"
-                checked={fields.nar_member === "yes"}
-                onChange={(e) => set("nar_member", e.target.checked ? "yes" : "")}
-                className="size-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
-              />
-              I&apos;m a NAR member — show the REALTOR<sup>®</sup> logo
-            </label>
-          </fieldset>
+          {fields.industry !== "other" && (
+            <fieldset className="rounded-lg border border-zinc-200 p-4">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                Real estate compliance
+              </legend>
+              <p className="mb-3 text-xs text-zinc-400">
+                The Equal Housing Opportunity logo appears on the back of
+                real-estate postcards.
+              </p>
+              <label className="flex items-center gap-2.5 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  checked={fields.nar_member === "yes"}
+                  onChange={(e) =>
+                    set("nar_member", e.target.checked ? "yes" : "")
+                  }
+                  className="size-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+                />
+                I&apos;m a NAR member — show the REALTOR<sup>®</sup> logo
+              </label>
+            </fieldset>
+          )}
         </div>
 
         {/* live preview */}

@@ -179,16 +179,14 @@ function BalanceWidget({ balance }: { balance: number }) {
   return (
     <Link
       href="/billing"
-      className="block rounded-xl border border-zinc-200 bg-white p-3 transition-colors hover:border-brand-300"
+      className="block rounded-xl bg-ink p-3 text-white transition-opacity hover:opacity-90"
     >
-      <div className="text-xs text-zinc-500">Credit balance</div>
-      <div className="mt-0.5 text-xl font-semibold tabular-nums text-zinc-900">
+      <div className="text-xs text-white/60">Credit balance</div>
+      <div className="mt-0.5 text-xl font-semibold tabular-nums text-white">
         {balance.toLocaleString()}
-        <span className="ml-1 text-sm font-normal text-zinc-400">credits</span>
+        <span className="ml-1 text-sm font-normal text-white/55">credits</span>
       </div>
-      <div className="mt-1 text-xs font-medium text-brand-600">
-        Buy more →
-      </div>
+      <div className="mt-1 text-xs font-medium text-gold">Buy more →</div>
     </Link>
   );
 }

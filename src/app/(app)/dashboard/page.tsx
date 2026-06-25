@@ -225,8 +225,8 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <Card className={`p-4 ${accent ? "bg-brand-600" : ""}`}>
-      <div className={`text-xs ${accent ? "text-brand-100" : "text-zinc-500"}`}>
+    <Card className={`p-4 ${accent ? "bg-ink border-ink" : ""}`}>
+      <div className={`text-xs ${accent ? "text-white/60" : "text-zinc-500"}`}>
         {label}
       </div>
       <div
@@ -237,7 +237,7 @@ function StatCard({
         {value.toLocaleString()}
       </div>
       {sub && (
-        <div className={`mt-0.5 text-xs ${accent ? "text-brand-100" : "text-zinc-400"}`}>
+        <div className={`mt-0.5 text-xs ${accent ? "text-white/60" : "text-zinc-400"}`}>
           {sub}
         </div>
       )}
