@@ -13,7 +13,9 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "unauthorized" }, { status: 401 });
 
-  const { name, design_id, contact_list_id } = await req.json().catch(() => ({}));
+  const { name, design_id, contact_list_id, qr_url } = await req
+    .json()
+    .catch(() => ({}));
   if (!name?.trim() || !design_id || !contact_list_id) {
     return Response.json({ error: "missing_fields" }, { status: 400 });
   }
@@ -46,18 +48,20 @@ export async function POST(req: Request) {
 
   // Create the campaign (status sending), then run the shared send.
   const admin = getAdminSupabase();
+  const insert: Record<string, unknown> = {
+    profile_id: user.id,
+    name: name.trim(),
+    design_id,
+    contact_list_id,
+    scheduled_at: null,
+    status: "sending",
+    piece_count: deliverable,
+    credit_cost: deliverable,
+  };
+  if (typeof qr_url === "string" && qr_url.trim()) insert.qr_url = qr_url.trim();
   const { data: campaignRow, error: campErr } = await admin
     .from("campaigns")
-    .insert({
-      profile_id: user.id,
-      name: name.trim(),
-      design_id,
-      contact_list_id,
-      scheduled_at: null,
-      status: "sending",
-      piece_count: deliverable,
-      credit_cost: deliverable,
-    })
+    .insert(insert)
     .select("id")
     .single();
   if (campErr || !campaignRow) {

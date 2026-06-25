@@ -474,6 +474,7 @@ export const supabaseProvider: DataProvider = {
           name: input.name.trim(),
           design_id: input.design_id,
           contact_list_id: input.contact_list_id,
+          qr_url: input.qr_url ?? "",
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -498,13 +499,21 @@ export const supabaseProvider: DataProvider = {
       throw new InsufficientCreditsError(needed, wallet.balance);
     }
 
-    const { data, error } = await sb().rpc("create_campaign", {
+    const rpcArgs = {
       p_name: input.name.trim(),
       p_design_id: input.design_id,
       p_contact_list_id: input.contact_list_id,
       p_scheduled_at: input.scheduled_at,
       p_send_now: input.send_now,
+    };
+    let { data, error } = await sb().rpc("create_campaign", {
+      ...rpcArgs,
+      p_qr_url: input.qr_url ?? null,
     });
+    // Fallback if the m6_campaign_qr migration hasn't been run yet.
+    if (error && /create_campaign|p_qr_url|function/i.test(error.message || "")) {
+      ({ data, error } = await sb().rpc("create_campaign", rpcArgs));
+    }
     if (error) {
       const m = error.message || "";
       const insf = m.match(/insufficient_credits:(\d+):(\d+)/);

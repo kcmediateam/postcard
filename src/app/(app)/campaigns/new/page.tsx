@@ -10,6 +10,7 @@ import { PostcardSide } from "@/components/postcard/postcard-side";
 import { useData } from "@/lib/data/data-context";
 import { InsufficientCreditsError } from "@/lib/data";
 import { CREDITS_PER_PIECE, creditCost, type AudienceTier } from "@/lib/billing";
+import { buildTrackedUrl } from "@/lib/utm";
 import type { Campaign, ContactList, Design } from "@/lib/types";
 import type { CampaignPreview } from "@/lib/data/provider";
 
@@ -67,6 +68,15 @@ export default function NewCampaignPage() {
   // managed ("build my list") fields
   const [targetArea, setTargetArea] = useState("");
   const [quantity, setQuantity] = useState("");
+
+  // optional per-campaign QR override (blank = use the design's QR)
+  const [qrBase, setQrBase] = useState("");
+  const [utm, setUtm] = useState({
+    source: "postcard",
+    medium: "direct_mail",
+    campaign: "",
+  });
+  const qrOverride = buildTrackedUrl(qrBase, utm);
 
   const [preview, setPreview] = useState<CampaignPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -241,6 +251,7 @@ export default function NewCampaignPage() {
         scheduled_at:
           timing === "schedule" ? new Date(scheduledAt).toISOString() : null,
         send_now: timing === "now",
+        qr_url: qrOverride || undefined,
       });
       await refreshWallet();
       clearDraft();
@@ -459,6 +470,55 @@ export default function NewCampaignPage() {
                     </div>
                   )}
                 </div>
+              </section>
+
+              <section>
+                <SectionTitle n={6} title="QR link for this send (optional)" />
+                <p className="mb-2 text-xs text-zinc-500">
+                  Override the design&rsquo;s QR destination just for this
+                  campaign — handy for reusing one design with different UTM
+                  tags. Leave blank to keep the design&rsquo;s QR link.
+                </p>
+                <TextField
+                  label=""
+                  placeholder="https://client-site.com/listing"
+                  value={qrBase}
+                  onChange={(e) => setQrBase(e.target.value)}
+                />
+                {qrBase.trim() && (
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    <TextField
+                      label="UTM source"
+                      placeholder="postcard"
+                      value={utm.source}
+                      onChange={(e) =>
+                        setUtm((u) => ({ ...u, source: e.target.value }))
+                      }
+                    />
+                    <TextField
+                      label="UTM medium"
+                      placeholder="direct_mail"
+                      value={utm.medium}
+                      onChange={(e) =>
+                        setUtm((u) => ({ ...u, medium: e.target.value }))
+                      }
+                    />
+                    <TextField
+                      label="UTM campaign"
+                      placeholder="fall-farm"
+                      value={utm.campaign}
+                      onChange={(e) =>
+                        setUtm((u) => ({ ...u, campaign: e.target.value }))
+                      }
+                    />
+                  </div>
+                )}
+                {qrOverride && (
+                  <p className="mt-2 break-all text-[11px] text-zinc-500">
+                    <span className="font-medium text-zinc-600">QR opens:</span>{" "}
+                    {qrOverride}
+                  </p>
+                )}
               </section>
             </>
           )}

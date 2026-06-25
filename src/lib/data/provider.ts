@@ -201,6 +201,8 @@ export interface CreateCampaignInput {
   /** ISO timestamp to schedule, or null to send now. */
   scheduled_at: string | null;
   send_now: boolean;
+  /** Optional per-campaign QR override (incl. UTMs); blank = use the design's. */
+  qr_url?: string;
 }
 
 export interface CreateManagedCampaignInput {

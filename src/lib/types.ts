@@ -263,6 +263,7 @@ export interface Campaign {
   requested_quantity: number | null; // managed: how many to source
   piece_count: number;
   credit_cost: number;
+  qr_url?: string | null; // per-campaign QR override (incl. UTMs)
   created_at: string;
 }
 

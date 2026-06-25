@@ -134,8 +134,9 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
     address_country: "US",
   };
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-  // QR destination: the design's link if set, else our app.
-  const qrRedirectUrl = df?.qr_url?.trim() || appUrl;
+  // QR destination: per-campaign override > design's link > our app.
+  const qrRedirectUrl =
+    campaign.qr_url?.trim() || df?.qr_url?.trim() || appUrl;
   // Postcard size: uploaded designs may be 6x9/6x11; templates render 4x6.
   const size = df?.size ?? "4x6";
 
