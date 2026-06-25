@@ -41,10 +41,17 @@ export function designFromTemplate(t: Template): Design {
   } as Design;
 }
 
-/** Templates whose printed layout is a premium HTML layout (WYSIWYG preview). */
+/** Premium HTML print layouts (WYSIWYG preview + the only ones in the gallery). */
+export const HTML_LAYOUTS = [
+  "editorial",
+  "banner",
+  "service",
+  "split",
+  "minimal",
+  "collage",
+];
 export function isHtmlLayout(fields: DesignFields | null | undefined): boolean {
-  const l = fields?.layout;
-  return l === "editorial" || l === "banner" || l === "service";
+  return !!fields?.layout && HTML_LAYOUTS.includes(fields.layout);
 }
 
 /** Default accent per kind (templates can override via `accent`). */
@@ -462,6 +469,141 @@ export const TEMPLATES: Template[] = [
       agent_name: "Book online or call",
       agent_phone: "(123) 456-7890",
       body: "New clients get 15% off their first appointment. Scan to book your visit today.",
+    },
+  },
+  {
+    id: "tpl_listing_split",
+    name: "Just Listed · Split",
+    kind: "just_listed",
+    theme: "dark",
+    accent: "#4F46E5",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "split",
+      font: "geometric",
+      accent: "#4F46E5",
+      headline: "Just Listed",
+      subhead: "A standout home in your neighborhood",
+      price: "$525,000",
+      beds: "4",
+      baths: "3",
+      sqft: "2,650",
+      property_address: "118 Maple Ridge Dr",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80",
+      return_company: "Avery Realty Group",
+      agent_name: "Jordan Avery",
+      agent_phone: "(913) 555-0142",
+      body: "Just listed nearby — scan for the full gallery, details, and a private showing.",
+    },
+  },
+  {
+    id: "tpl_just_sold_split",
+    name: "Just Sold · Split",
+    kind: "just_sold",
+    theme: "dark",
+    accent: "#0F766E",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "split",
+      font: "geometric",
+      accent: "#0F766E",
+      headline: "Just Sold",
+      subhead: "Another home sold in your area",
+      price: "Sold over asking",
+      property_address: "84 Cedar Court",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      return_company: "Avery Realty Group",
+      agent_name: "Jordan Avery",
+      agent_phone: "(913) 555-0142",
+      body: "Curious what your home could sell for? The estimate is on me — just reach out.",
+    },
+  },
+  {
+    id: "tpl_minimal_for_sale",
+    name: "For Sale · Minimal",
+    kind: "just_listed",
+    theme: "light",
+    accent: "#111827",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "minimal",
+      font: "modern",
+      accent: "#111827",
+      eyebrow: "For Sale",
+      headline: "118 Maple Ridge Dr",
+      price: "$525,000",
+      property_address: "Any City, ST 12345",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=80",
+      return_company: "Avery Realty Group",
+      agent_name: "Jordan Avery",
+      agent_phone: "(913) 555-0142",
+      body: "Scan the code for the full listing, photos, and a private showing.",
+    },
+  },
+  {
+    id: "tpl_listing_collage",
+    name: "Listing · Collage",
+    kind: "just_listed",
+    theme: "light",
+    accent: "#4F46E5",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "collage",
+      font: "modern",
+      accent: "#4F46E5",
+      headline: "Featured Listing",
+      property_address: "123 Anywhere St., Any City, ST 12345",
+      price: "Asking $899,999",
+      beds: "2",
+      baths: "2",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=80",
+      property_photo_url_2:
+        "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=900&q=80",
+      property_photo_url_3:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80",
+      return_company: "Really Great Realty",
+      agent_name: "Avery Davis",
+      agent_phone: "(123) 456-7890",
+      agent_email: "www.reallygreatsite.com",
+      body: "Take a look at the highlights, then scan the code for the full gallery and details.",
+    },
+  },
+  {
+    id: "tpl_promo_split",
+    name: "Special Offer · Split",
+    kind: "neighbor_intro",
+    theme: "dark",
+    accent: "#9333EA",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "split",
+      font: "geometric",
+      accent: "#9333EA",
+      industry: "other",
+      eyebrow: "Special Offer",
+      headline: "Save 20% This Month",
+      subhead: "A little thank-you to our neighbors",
+      property_address: "123 Anywhere St., Any City",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80",
+      return_company: "Your Business",
+      agent_name: "Visit us today",
+      agent_phone: "(123) 456-7890",
+      body: "Bring this card in to claim your discount. We can't wait to see you!",
     },
   },
   {

@@ -57,21 +57,24 @@ function fieldVis(template: Template) {
   // Premium HTML print layouts gate fields to exactly what they render — plus
   // headshot + logo, which brokerages require for compliance.
   const printLayout = template.defaults?.layout;
-  if (
-    printLayout === "banner" ||
-    printLayout === "service" ||
-    printLayout === "editorial"
-  ) {
-    const isEditorial = printLayout === "editorial";
+  if (printLayout && isHtmlLayout(template.defaults)) {
+    const showProps =
+      printLayout === "editorial" ||
+      printLayout === "split" ||
+      printLayout === "minimal" ||
+      printLayout === "collage";
     return {
       photoMain: true,
       headshot: true,
       isIntro: false,
-      collage: false,
+      collage: printLayout === "collage",
       logo: true,
       eventDateTime: false,
-      price: isEditorial,
-      stats: isEditorial,
+      price: showProps,
+      stats:
+        printLayout === "editorial" ||
+        printLayout === "split" ||
+        printLayout === "collage",
       propertyAddress: true,
       features: printLayout === "service",
     };

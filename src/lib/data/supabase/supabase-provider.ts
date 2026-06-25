@@ -12,7 +12,7 @@ import type {
   Template,
 } from "@/lib/types";
 import { getSupabase } from "@/lib/supabase/client";
-import { TEMPLATES, findTemplate } from "@/lib/templates";
+import { TEMPLATES, findTemplate, isHtmlLayout } from "@/lib/templates";
 import { creditCost } from "@/lib/billing";
 import {
   AuthError,
@@ -281,7 +281,9 @@ export const supabaseProvider: DataProvider = {
   },
 
   async listTemplates(): Promise<Template[]> {
-    return TEMPLATES.filter((t) => t.active).map((t) => ({ ...t }));
+    return TEMPLATES.filter((t) => t.active && isHtmlLayout(t.defaults)).map(
+      (t) => ({ ...t })
+    );
   },
 
   async createDesignFromUpload(input: CreateUploadedDesignInput): Promise<Design> {

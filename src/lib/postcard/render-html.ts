@@ -188,10 +188,94 @@ function frontService(design: Design, accent: string): string {
     </div>`;
 }
 
+function statList(f: NonNullable<Design["fields"]>): string {
+  return [f.beds && `${esc(f.beds)} bd`, f.baths && `${esc(f.baths)} ba`, f.sqft && `${esc(f.sqft)} sqft`]
+    .filter(Boolean)
+    .join('<span style="opacity:.45;margin:0 7px">·</span>');
+}
+
+// Solid accent panel (left) + photo (right). Text never overlaps the photo.
+function frontSplit(design: Design, accent: string): string {
+  const f = design.fields!;
+  const eyebrow = eyebrowFor(design);
+  const stats = statList(f);
+  const PANEL = "3.05in";
+  return `
+    <div style="position:absolute;top:0;right:0;width:calc(6.25in - ${PANEL});height:100%;overflow:hidden">${sceneOrAccent(f.property_photo_url, accent)}</div>
+    <div class="bg-accent" style="position:absolute;left:0;top:0;width:${PANEL};height:100%;padding:0.42in 0.36in;color:#fff;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:8.5pt;font-weight:700;letter-spacing:.26em;text-transform:uppercase;opacity:.82">${esc(eyebrow)}</div>
+      <div class="disp" style="margin-top:0.12in;font-size:29pt;font-weight:900;line-height:0.98;letter-spacing:-.5px">${esc(f.headline) || esc(eyebrow)}</div>
+      <div style="width:50px;height:3px;background:rgba(255,255,255,.85);margin:0.16in 0 0.12in"></div>
+      ${f.subhead ? `<div style="font-size:10pt;line-height:1.45;opacity:.92">${esc(f.subhead)}</div>` : ""}
+      ${f.price ? `<div class="disp" style="font-size:21pt;font-weight:800;margin-top:0.14in">${esc(f.price)}</div>` : ""}
+      ${stats ? `<div style="margin-top:0.08in;font-size:9.5pt;font-weight:600;opacity:.92">${stats}</div>` : ""}
+      ${f.property_address ? `<div style="margin-top:0.04in;font-size:9pt;opacity:.8">${esc(f.property_address)}</div>` : ""}
+      <div style="margin-top:auto;display:flex;align-items:center;gap:0.12in;padding-top:0.2in">
+        ${headshotImg(f.headshot_url, "0.5in")}
+        <div style="min-width:0">
+          <div class="disp" style="font-size:9.5pt;font-weight:700">${esc(f.agent_name) || esc(f.return_company) || ""}</div>
+          <div style="font-size:8pt;opacity:.85">${[esc(f.agent_phone), esc(f.agent_email)].filter(Boolean).join("&nbsp;·&nbsp;")}</div>
+        </div>
+        ${f.logo_url ? `<div style="margin-left:auto">${logoImg(f.logo_url, "0.36in")}</div>` : ""}
+      </div>
+    </div>`;
+}
+
+// Photo on top, a clean white info band below. Two stacked regions.
+function frontMinimal(design: Design, accent: string): string {
+  const f = design.fields!;
+  const eyebrow = eyebrowFor(design);
+  const PH = "2.7in";
+  return `
+    <div style="position:absolute;top:0;left:0;right:0;height:${PH};overflow:hidden">${sceneOrAccent(f.property_photo_url, accent)}</div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:calc(4.25in - ${PH});background:#fff;padding:0.24in 0.4in;display:flex;align-items:center;justify-content:space-between;gap:0.3in">
+      <div style="min-width:0">
+        <div class="accent" style="font-size:8pt;font-weight:700;letter-spacing:.22em;text-transform:uppercase">${esc(eyebrow)}</div>
+        <div class="disp" style="font-size:21pt;font-weight:800;line-height:1.02;letter-spacing:-.4px;color:#15181e;margin-top:2px">${esc(f.headline) || esc(eyebrow)}</div>
+        ${f.property_address ? `<div style="font-size:9pt;color:#6b7280;margin-top:3px">${esc(f.property_address)}</div>` : ""}
+        ${f.price ? `<div class="disp accent" style="font-size:15pt;font-weight:800;margin-top:4px">${esc(f.price)}</div>` : ""}
+      </div>
+      <div style="display:flex;align-items:center;gap:0.12in;flex:0 0 auto;text-align:right">
+        <div>
+          <div class="disp" style="font-size:9.5pt;font-weight:700;color:#15181e">${esc(f.agent_name) || esc(f.return_company) || ""}</div>
+          <div style="font-size:8pt;color:#6b7280">${esc(f.agent_phone)}</div>
+          ${f.logo_url ? `<div style="margin-top:4px;display:flex;justify-content:flex-end">${logoImg(f.logo_url, "0.3in")}</div>` : ""}
+        </div>
+        ${headshotImg(f.headshot_url, "0.62in")}
+      </div>
+    </div>`;
+}
+
+// Listing collage: hero photo + a solid info card, then a 3-cell bottom row.
+function frontCollage(design: Design, accent: string): string {
+  const f = design.fields!;
+  const stats = statList(f);
+  return `
+    <div style="position:absolute;top:0;left:0;right:0;height:2.45in;overflow:hidden">${sceneOrAccent(f.property_photo_url, accent)}</div>
+    <div style="position:absolute;top:0.28in;left:0.28in;width:2.55in;background:#fff;padding:0.18in 0.2in;box-shadow:0 8px 22px rgba(0,0,0,.18)">
+      ${f.property_address ? `<div class="disp" style="font-size:13pt;font-weight:700;line-height:1.15;color:#15181e">${esc(f.property_address)}</div>` : ""}
+      ${stats ? `<div style="font-size:9.5pt;color:#52606d;margin-top:4px">${stats}</div>` : ""}
+      ${f.price ? `<div class="disp accent" style="font-size:15pt;font-weight:800;margin-top:5px">${esc(f.price)}</div>` : ""}
+    </div>
+    <div style="position:absolute;top:2.45in;left:0;right:0;bottom:0;display:flex">
+      <div style="flex:1;overflow:hidden;border-right:3px solid #fff">${sceneOrAccent(f.property_photo_url_2 || f.property_photo_url, accent)}</div>
+      <div style="flex:1;overflow:hidden;border-right:3px solid #fff">${sceneOrAccent(f.property_photo_url_3 || f.property_photo_url, accent)}</div>
+      <div style="flex:1;background:#fff;padding:0.16in;display:flex;flex-direction:column;justify-content:center">
+        ${headshotImg(f.headshot_url, "0.58in")}
+        <div class="disp" style="font-size:9.5pt;font-weight:700;margin-top:6px;color:#15181e">${esc(f.agent_name) || ""}</div>
+        <div style="font-size:8pt;color:#6b7280">${esc(f.agent_phone)}</div>
+        ${f.logo_url ? `<div style="margin-top:5px">${logoImg(f.logo_url, "0.3in")}</div>` : ""}
+      </div>
+    </div>`;
+}
+
 const FRONTS: Record<string, (d: Design, a: string) => string> = {
   editorial: frontEditorial,
   banner: frontBanner,
   service: frontService,
+  split: frontSplit,
+  minimal: frontMinimal,
+  collage: frontCollage,
 };
 
 export function postcardFrontHtml(design: Design): string | null {

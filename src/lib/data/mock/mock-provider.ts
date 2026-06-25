@@ -16,7 +16,7 @@ import type {
 } from "@/lib/types";
 import { creditCost, findCreditPack, findPlan } from "@/lib/billing";
 import { US_STATES } from "@/lib/profile";
-import { TEMPLATES, findTemplate } from "@/lib/templates";
+import { TEMPLATES, findTemplate, isHtmlLayout } from "@/lib/templates";
 import {
   AuthError,
   InsufficientCreditsError,
@@ -335,7 +335,11 @@ export const mockProvider: DataProvider = {
   },
 
   async listTemplates(): Promise<Template[]> {
-    return delay(TEMPLATES.filter((t) => t.active).map((t) => ({ ...t })));
+    return delay(
+      TEMPLATES.filter((t) => t.active && isHtmlLayout(t.defaults)).map((t) => ({
+        ...t,
+      }))
+    );
   },
 
   async createDesignFromUpload(

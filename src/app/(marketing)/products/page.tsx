@@ -49,7 +49,7 @@ export default function ProductsPage() {
           and details drop right in.
         </p>
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          {TEMPLATES.filter((t) => t.active).map((t) => (
+          {TEMPLATES.filter((t) => t.active && isHtmlLayout(t.defaults)).map((t) => (
             <div key={t.id} className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
               {isHtmlLayout(t.defaults) ? (
                 <PostcardHtmlPreview design={designFromTemplate(t)} side="front" />
