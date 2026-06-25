@@ -3,9 +3,10 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Services — Radiate",
+  title: "Services — self-service & done-for-you direct mail",
   description:
-    "Self-service and full-service postcard campaigns: design, list building, address verification, delivery and QR-scan tracking.",
+    "Self-service or full-service postcard campaigns for any local business: design, list building, USPS address verification, scheduling, and delivery + QR-scan tracking.",
+  alternates: { canonical: "/services" },
 };
 
 const SERVICES = [
@@ -19,7 +20,7 @@ const SERVICES = [
   },
   {
     title: "Design & personalization",
-    body: "Start from a Just Listed, Just Sold, or Open House template and drop in your photo, headshot, price, and details — or upload finished artwork.",
+    body: "Start from a professionally designed template — new listing, sale, open house, grand opening, or seasonal — and drop in your photo, logo, price, and details, or upload finished artwork.",
   },
   {
     title: "Address verification",
@@ -44,8 +45,13 @@ export default function ServicesPage() {
             Services
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-zinc-600">
-            Everything from a single postcard to a fully-managed neighborhood
-            farming program — pick how hands-on you want to be.
+            Everything from a single postcard to a fully-managed mailing program
+            — for agents, home-service pros, and local businesses. Pick how
+            hands-on you want to be, then check the{" "}
+            <Link href="/pricing" className="font-medium text-brand-600 hover:text-brand-700">
+              pricing
+            </Link>
+            .
           </p>
         </div>
       </section>

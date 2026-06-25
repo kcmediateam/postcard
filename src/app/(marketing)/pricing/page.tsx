@@ -10,9 +10,47 @@ import {
 } from "@/lib/billing";
 
 export const metadata: Metadata = {
-  title: "Pricing — Radiate",
+  title: "Pricing — one credit, one postcard",
   description:
-    "Subscribe monthly for the best per-credit rate, or buy one-time add-on packs. One credit sends one postcard.",
+    "Honest per-piece direct mail pricing: print and postage included, no minimums, no markup. Subscribe for the best rate with rollover credits, or buy one-time packs.",
+  alternates: { canonical: "/pricing" },
+};
+
+const FAQS = [
+  {
+    q: "How much does it cost to send a postcard?",
+    a: "One credit sends one postcard. Subscribe for the best per-credit rate (credits roll over), or buy one-time packs. Printing and postage are included — no markup.",
+  },
+  {
+    q: "Is there a minimum order?",
+    a: "No minimums. Mail as few as one postcard or as many as tens of thousands — the smallest test and the biggest campaign run on the same rails.",
+  },
+  {
+    q: "What's included in the price?",
+    a: "Printing, first-class postage, USPS address verification, a tracked QR code on every piece, and your live dashboard. What you see is what you send.",
+  },
+  {
+    q: "Do unused credits expire?",
+    a: "Subscription credits roll over month to month while your plan is active. One-time pack credits don't expire.",
+  },
+  {
+    q: "Can you build my mailing list?",
+    a: "Yes. With full-service, tell us the ZIP or neighborhood and how many homes to reach, and we source the list for you.",
+  },
+  {
+    q: "Who is Radiate for?",
+    a: "Any local business that mails — real-estate agents, home-service pros, and small businesses.",
+  },
+];
+
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
 };
 
 export default function PricingPage() {
@@ -146,6 +184,26 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="mx-auto w-full max-w-3xl px-6 py-16">
+        <h2 className="text-center text-2xl font-semibold tracking-tight text-zinc-900">
+          Frequently asked questions
+        </h2>
+        <div className="mt-8 divide-y divide-zinc-200 rounded-2xl border border-zinc-200 bg-white">
+          {FAQS.map((f) => (
+            <details key={f.q} className="group px-5 py-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-base font-semibold text-zinc-900">
+                {f.q}
+                <span className="text-brand-600 transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <section className="bg-radiate">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-6 py-14 text-center sm:flex-row sm:text-left">
           <h2 className="text-2xl font-semibold tracking-tight text-white">
@@ -158,6 +216,11 @@ export default function PricingPage() {
           </Link>
         </div>
       </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+      />
     </>
   );
 }
