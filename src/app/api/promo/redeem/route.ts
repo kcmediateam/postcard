@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 
 // The one promo. credits = free postcards granted on redemption.
 const PROMO = { code: "$100off", credits: 100 };
-// A 3rd account sharing the same return address is blocked (abuse guard).
-const MAX_ACCOUNTS_PER_ADDRESS = 2;
+// One redemption per return address — a 2nd account sharing it is blocked.
+const MAX_ACCOUNTS_PER_ADDRESS = 1;
 
 const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, "");
 
