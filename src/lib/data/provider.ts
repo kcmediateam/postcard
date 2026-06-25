@@ -165,6 +165,9 @@ export interface DataProvider {
   /** Public, read-only tracking link a client can use (no login). */
   getCampaignShareUrl(campaignId: string): Promise<string>;
 
+  /** Redeem a promo code for bonus credits. Returns the credits granted. */
+  redeemPromoCode(code: string): Promise<{ credits: number }>;
+
   /**
    * Demo convenience: populate a realistic completed campaign (with design,
    * verified list, delivered pieces, and scans) for the signed-in agent so the

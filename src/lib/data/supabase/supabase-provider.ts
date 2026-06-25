@@ -608,6 +608,26 @@ export const supabaseProvider: DataProvider = {
     if (error) throw new Error(error.message);
   },
 
+  async redeemPromoCode(code: string): Promise<{ credits: number }> {
+    const res = await fetch("/api/promo/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const messages: Record<string, string> = {
+        invalid_code: "That promo code isn't valid.",
+        no_return_address: "Add your return address (in Settings) first.",
+        already_redeemed: "You've already redeemed this code.",
+        address_limit:
+          "This offer has already been used for your address and can't be applied again.",
+      };
+      throw new Error(messages[json.error] || json.error || "Could not redeem code.");
+    }
+    return { credits: json.credits as number };
+  },
+
   async getCampaignShareUrl(campaignId: string): Promise<string> {
     const res = await fetch("/api/campaigns/share-link", {
       method: "POST",

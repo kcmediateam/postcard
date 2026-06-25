@@ -717,6 +717,21 @@ export const mockProvider: DataProvider = {
     return delay(`${origin}/track/${campaignId}.mock`);
   },
 
+  async redeemPromoCode(code: string): Promise<{ credits: number }> {
+    const db = loadDB();
+    const userId = requireUserId(db);
+    const n = code.trim().toLowerCase().replace(/\s+/g, "");
+    if (n !== "$100off" && n !== "100off")
+      throw new Error("That promo code isn't valid.");
+    const already = db.transactions.some(
+      (t) => t.profile_id === userId && t.reference_id === "promo:$100off"
+    );
+    if (already) throw new Error("You've already redeemed this code.");
+    applyLedger(db, userId, 100, "promo", "promo:$100off");
+    persist();
+    return delay({ credits: 100 });
+  },
+
   async deleteCampaign(campaignId: string): Promise<void> {
     const db = loadDB();
     const userId = requireUserId(db);

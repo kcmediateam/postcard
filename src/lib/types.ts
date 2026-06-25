@@ -14,7 +14,8 @@ export type CreditTransactionReason =
   | "rollover"
   | "campaign_send"
   | "refund"
-  | "adjustment";
+  | "adjustment"
+  | "promo";
 
 export type SubscriptionStatus =
   | "active"

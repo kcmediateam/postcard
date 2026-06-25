@@ -23,6 +23,7 @@ const REASON_LABELS: Record<CreditTransaction["reason"], string> = {
   campaign_send: "Campaign send",
   refund: "Refund",
   adjustment: "Adjustment",
+  promo: "Promo credit",
 };
 
 function formatDate(iso: string): string {
@@ -40,6 +41,9 @@ export default function BillingPage() {
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoErr, setPromoErr] = useState<string | null>(null);
+  const [redeeming, setRedeeming] = useState(false);
 
   const reload = useCallback(async () => {
     const [txns, sub] = await Promise.all([
@@ -99,6 +103,23 @@ export default function BillingPage() {
     }
   }
 
+  async function redeemPromo() {
+    setPromoErr(null);
+    if (!promoCode.trim()) return setPromoErr("Enter a promo code.");
+    setRedeeming(true);
+    try {
+      const { credits } = await db.redeemPromoCode(promoCode.trim());
+      setPromoCode("");
+      await refreshWallet();
+      await reload();
+      showFlash(`Promo applied — ${credits.toLocaleString()} credits added! 🎉`);
+    } catch (e) {
+      setPromoErr(e instanceof Error ? e.message : "Could not redeem code.");
+    } finally {
+      setRedeeming(false);
+    }
+  }
+
   async function openPortal() {
     setBusy("portal");
     try {
@@ -124,6 +145,30 @@ export default function BillingPage() {
           {flash}
         </div>
       )}
+
+      {/* Promo code */}
+      <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50/40 p-4">
+        <div className="text-sm font-medium text-zinc-800">
+          Have a promo code?
+        </div>
+        <div className="mt-2 flex flex-wrap items-start gap-2">
+          <input
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") redeemPromo();
+            }}
+            placeholder="Enter code"
+            className="h-10 min-w-[12rem] flex-1 rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+          />
+          <Button onClick={redeemPromo} loading={redeeming}>
+            Apply
+          </Button>
+        </div>
+        {promoErr && (
+          <div className="mt-2 text-xs text-red-600">{promoErr}</div>
+        )}
+      </div>
 
       {/* Balance + current plan */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
