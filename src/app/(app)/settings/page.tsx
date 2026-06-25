@@ -27,6 +27,29 @@ export default function SettingsPage() {
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [portalBusy, setPortalBusy] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwFlash, setPwFlash] = useState<string | null>(null);
+  const [pwError, setPwError] = useState<string | null>(null);
+
+  async function changePassword() {
+    setPwError(null);
+    setPwFlash(null);
+    if (newPassword.length < 8) {
+      setPwError("Use at least 8 characters.");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      await db.updatePassword(newPassword);
+      setNewPassword("");
+      setPwFlash("Password updated.");
+    } catch {
+      setPwError("Couldn't update your password. Please try again.");
+    } finally {
+      setPwBusy(false);
+    }
+  }
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -173,6 +196,31 @@ export default function SettingsPage() {
           <p className="mt-2 text-xs text-zinc-400">
             (This is the &ldquo;customer portal&rdquo; — your billing details, not your profile.)
           </p>
+        </div>
+      </Card>
+
+      <Card className="mt-8">
+        <CardHeader
+          title="Password"
+          description="Set a new password for signing in to Radiate."
+        />
+        <div className="space-y-3 px-5 py-5">
+          <div className="max-w-sm">
+            <TextField
+              label="New password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              hint="At least 8 characters."
+            />
+          </div>
+          {pwError && <div className="text-sm text-red-600">{pwError}</div>}
+          {pwFlash && <div className="text-sm text-green-700">{pwFlash}</div>}
+          <Button variant="secondary" loading={pwBusy} onClick={changePassword}>
+            Update password
+          </Button>
         </div>
       </Card>
     </div>
