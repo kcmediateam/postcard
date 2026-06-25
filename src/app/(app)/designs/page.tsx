@@ -35,8 +35,8 @@ const UPLOAD_SIZES: {
   maxDim: number;
 }[] = [
   { value: "4x6", label: "4 × 6", px: "1875 × 1275px", maxDim: 2100 },
-  { value: "6x9", label: "6 × 9", px: "1875 × 2775px", maxDim: 3000 },
-  { value: "6x11", label: "6 × 11", px: "1875 × 3375px", maxDim: 3600 },
+  { value: "6x9", label: "6 × 9", px: "2775 × 1875px", maxDim: 3000 },
+  { value: "6x11", label: "6 × 11", px: "3375 × 1875px", maxDim: 3600 },
 ];
 
 /**
