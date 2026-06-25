@@ -23,23 +23,23 @@ export default function HomePage() {
         {/* scrim so the headline always wins over the rings */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(101deg,rgba(13,12,46,0.78)_0%,rgba(13,12,46,0.45)_42%,transparent_74%)]" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-2 lg:py-28">
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-6 py-28 lg:py-36">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-gold backdrop-blur-sm">
               <span className="bg-signal size-2 rounded-full" />
               Targeted direct mail, done for you
             </span>
-            <h1 className="font-display mt-6 text-5xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-[4.5rem]">
+            <h1 className="font-display mt-6 max-w-3xl text-5xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-[5rem]">
               The mail that{" "}
               <span className="text-signal text-signal-glow">
                 reaches every door.
               </span>
             </h1>
-            <p className="mt-6 max-w-md text-xl leading-relaxed text-white/80">
+            <p className="mt-6 max-w-xl text-xl leading-relaxed text-white/80">
               Tracked postcards for real estate — design, send, and measure in
               minutes. No minimums, no markup.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/login?mode=signup">
                 <Button size="lg">Start sending</Button>
               </Link>
@@ -54,18 +54,6 @@ export default function HomePage() {
               </Link>
             </div>
           </Reveal>
-
-          {/* Fanned postcards — gently floating over the field */}
-          <div className="relative mx-auto hidden h-[400px] w-full max-w-md lg:block">
-            <HeroImageCard src="/hero/design-2.jpg" alt="Listing summary postcard" pos="left-0 top-12" base="rotate(-8deg)" floatClass="animate-float-slow" />
-            <HeroImageCard src="/hero/design-3.jpg" alt="Newly listed postcard" pos="right-0 top-16" base="rotate(8deg)" floatClass="animate-float" delay={1.2} />
-            <HeroImageCard src="/hero/design-1.jpg" alt="New listing postcard" pos="left-1/2 top-0 z-10" base="translateX(-50%)" floatClass="animate-float" delay={0.5} featured />
-          </div>
-          {/* mobile: single */}
-          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 lg:hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/hero/design-1.jpg" alt="New listing postcard" className="block w-full" />
-          </div>
         </div>
       </section>
 
@@ -255,38 +243,6 @@ export default function HomePage() {
         </div>
       </section>
     </>
-  );
-}
-
-function HeroImageCard({
-  src,
-  alt,
-  pos = "",
-  base = "translateY(0)",
-  floatClass = "animate-float",
-  delay = 0,
-  featured = false,
-}: {
-  src: string;
-  alt: string;
-  pos?: string;
-  base?: string;
-  floatClass?: string;
-  delay?: number;
-  featured?: boolean;
-}) {
-  return (
-    <div
-      className={`absolute w-64 overflow-hidden rounded-2xl ring-1 ring-black/5 ${
-        featured ? "shadow-2xl" : "shadow-xl"
-      } ${pos} ${floatClass}`}
-      style={
-        { "--float-base": base, animationDelay: `${delay}s` } as React.CSSProperties
-      }
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="block w-full" />
-    </div>
   );
 }
 

@@ -82,12 +82,12 @@ h3,
   );
 }
 
-/* Gradient text accent (warm signal). */
+/* Gradient text accent for LIGHT backgrounds — indigo (readable on paper).
+   Gold/warm highlights are for the dark field; use .text-signal there. */
 .text-radiate {
   background-image: linear-gradient(
     95deg,
-    var(--color-gold) 0%,
-    var(--color-orange) 55%,
+    var(--color-brand-600) 0%,
     var(--color-indigo-light) 100%
   );
   -webkit-background-clip: text;
