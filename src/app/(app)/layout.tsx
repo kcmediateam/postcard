@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { FullScreenLoader } from "@/components/ui/full-screen-loader";
+import { HelpBot } from "@/components/help-bot";
 import { useData } from "@/lib/data/data-context";
 import { hasReturnAddress } from "@/lib/profile";
 
@@ -269,6 +270,8 @@ export default function AppLayout({
 
         <main className="flex-1">{children}</main>
       </div>
+
+      <HelpBot />
     </div>
   );
 }

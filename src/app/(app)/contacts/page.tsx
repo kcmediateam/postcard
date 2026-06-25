@@ -384,6 +384,8 @@ function UploadModal({
 }) {
   const { db } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<"file" | "paste">("file");
+  const [pasteText, setPasteText] = useState("");
   const [name, setName] = useState("");
   const [parsed, setParsed] = useState<ParsedContacts | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -391,12 +393,30 @@ function UploadModal({
   const [busy, setBusy] = useState(false);
 
   function reset() {
+    setMode("file");
+    setPasteText("");
     setName("");
     setParsed(null);
     setFileName(null);
     setError(null);
     setBusy(false);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function onPaste(text: string) {
+    setPasteText(text);
+    setError(null);
+    if (!text.trim()) {
+      setParsed(null);
+      return;
+    }
+    const result = parseContactsCsv(text);
+    setParsed(result);
+    if (result.unmappedRequired.length > 0) {
+      setError(
+        `Missing required column(s): ${result.unmappedRequired.join(", ")}. Include a header row.`
+      );
+    }
   }
 
   function close() {
@@ -466,7 +486,39 @@ function UploadModal({
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-sm font-medium text-zinc-700">CSV file</span>
+            <div className="flex gap-1 rounded-lg bg-zinc-100 p-0.5 text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("file");
+                  setParsed(null);
+                  setError(null);
+                }}
+                className={`rounded-md px-2.5 py-1 ${
+                  mode === "file"
+                    ? "bg-white text-zinc-900 shadow-sm"
+                    : "text-zinc-500"
+                }`}
+              >
+                Upload file
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("paste");
+                  setParsed(null);
+                  setError(null);
+                  setFileName(null);
+                }}
+                className={`rounded-md px-2.5 py-1 ${
+                  mode === "paste"
+                    ? "bg-white text-zinc-900 shadow-sm"
+                    : "text-zinc-500"
+                }`}
+              >
+                Paste
+              </button>
+            </div>
             <button
               type="button"
               onClick={downloadSample}
@@ -475,14 +527,28 @@ function UploadModal({
               Download sample CSV
             </button>
           </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv,text/csv"
-            onChange={(e) => onFile(e.target.files?.[0])}
-            className="block w-full text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
-          />
+
+          {mode === "file" ? (
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => onFile(e.target.files?.[0])}
+              className="block w-full text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+            />
+          ) : (
+            <textarea
+              rows={6}
+              value={pasteText}
+              onChange={(e) => onPaste(e.target.value)}
+              placeholder={`full_name, address_line1, city, state, zip\nJane Doe, 123 Main St, Overland Park, KS, 66061`}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-xs text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            />
+          )}
           <p className="mt-1.5 text-xs text-zinc-500">
+            {mode === "paste"
+              ? "Paste rows from a spreadsheet or CSV — include a header row. "
+              : ""}
             Columns: full_name, address_line1, address_line2 (optional), city,
             state, zip.
           </p>
@@ -491,8 +557,9 @@ function UploadModal({
         {parsed && (
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm">
             <div className="font-medium text-zinc-800">
-              {fileName} — {parsed.contacts.length.toLocaleString()} valid
-              contact{parsed.contacts.length === 1 ? "" : "s"}
+              {fileName ?? "Pasted list"} —{" "}
+              {parsed.contacts.length.toLocaleString()} valid contact
+              {parsed.contacts.length === 1 ? "" : "s"}
             </div>
             {parsed.skipped > 0 && (
               <div className="mt-0.5 text-xs text-amber-700">

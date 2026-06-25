@@ -1,7 +1,7 @@
 import type { NewContactInput } from "./data/provider";
 
-/** Minimal CSV parser: handles quoted fields, escaped quotes, CRLF. */
-export function parseCsv(text: string): string[][] {
+/** Minimal CSV/TSV parser: handles quoted fields, escaped quotes, CRLF. */
+export function parseCsv(text: string, delimiter = ","): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -22,7 +22,7 @@ export function parseCsv(text: string): string[][] {
       }
     } else if (c === '"') {
       inQuotes = true;
-    } else if (c === ",") {
+    } else if (c === delimiter) {
       row.push(field);
       field = "";
     } else if (c === "\n" || c === "\r") {
@@ -76,7 +76,10 @@ const REQUIRED: (keyof NewContactInput)[] = [
 ];
 
 export function parseContactsCsv(text: string): ParsedContacts {
-  const rows = parseCsv(text);
+  // Auto-detect delimiter so pasting from a spreadsheet (tab-separated) works.
+  const firstLine = text.split(/\r?\n/).find((l) => l.trim() !== "") ?? "";
+  const delimiter = firstLine.includes("\t") ? "\t" : ",";
+  const rows = parseCsv(text, delimiter);
   if (rows.length === 0) {
     return {
       contacts: [],
