@@ -42,6 +42,30 @@ const UPLOAD_SIZES: {
   { value: "6x11", label: "6 × 11", w: 3375, h: 1875 },
 ];
 
+/** Compose a QR destination URL with UTM tags (skips empty values). */
+function buildTrackedUrl(
+  base: string,
+  utm: { source: string; medium: string; campaign: string }
+): string {
+  const b = base.trim();
+  if (!b) return "";
+  let url: URL;
+  try {
+    url = new URL(b.includes("://") ? b : `https://${b}`);
+  } catch {
+    return b;
+  }
+  const map: Record<string, string> = {
+    utm_source: utm.source,
+    utm_medium: utm.medium,
+    utm_campaign: utm.campaign,
+  };
+  for (const [k, v] of Object.entries(map)) {
+    if (v.trim()) url.searchParams.set(k, v.trim());
+  }
+  return url.toString();
+}
+
 /**
  * Which editor fields to show for a template — gated by the layout/kind that
  * actually renders them, so agents never fill in data that won't appear (and
@@ -1104,6 +1128,12 @@ function UploadModal({
     return_state: "",
     return_zip: "",
   });
+  const [qrBase, setQrBase] = useState("");
+  const [utm, setUtm] = useState({
+    source: "postcard",
+    medium: "direct_mail",
+    campaign: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -1111,6 +1141,9 @@ function UploadModal({
   const specPx = `${spec.w} × ${spec.h}px`;
   const setRetField = (k: keyof typeof ret) => (v: string) =>
     setRet((r) => ({ ...r, [k]: v }));
+  const setUtmField = (k: keyof typeof utm) => (v: string) =>
+    setUtm((u) => ({ ...u, [k]: v }));
+  const qrPreview = buildTrackedUrl(qrBase, utm);
 
   function resetAndClose() {
     setName("");
@@ -1125,6 +1158,8 @@ function UploadModal({
       return_state: "",
       return_zip: "",
     });
+    setQrBase("");
+    setUtm({ source: "postcard", medium: "direct_mail", campaign: "" });
     setError(null);
     setSaving(false);
     onClose();
@@ -1146,6 +1181,7 @@ function UploadModal({
         front_image_url: frontFit,
         back_image_url: backFit,
         size,
+        qr_url: qrPreview,
         return_fields: ret,
       });
       resetAndClose();
@@ -1206,6 +1242,60 @@ function UploadModal({
             maxDim={4000}
             hint="Landscape, high-res PNG/JPG"
           />
+        </div>
+
+        <div className="rounded-lg border border-zinc-200 p-3">
+          <div className="text-sm font-medium text-zinc-700">
+            QR code link
+          </div>
+          <p className="mt-0.5 mb-2.5 text-xs text-zinc-500">
+            Where the postcard&rsquo;s QR code sends people when scanned —
+            usually the client&rsquo;s website or a specific listing. Leave blank
+            to point at Radiate.
+          </p>
+          <TextField
+            label="Destination URL"
+            placeholder="https://janerealty.com/123-main-st"
+            value={qrBase}
+            onChange={(e) => setQrBase(e.target.value)}
+          />
+
+          <div className="mt-3 rounded-md bg-zinc-50 p-2.5">
+            <div className="text-xs font-medium text-zinc-700">
+              Campaign tracking tags (UTMs)
+            </div>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500">
+              UTMs are little labels added to the link so the client&rsquo;s
+              website analytics (e.g. Google Analytics) can see that a visitor
+              came from this postcard — and how many did.
+            </p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-3">
+              <TextField
+                label="Source"
+                placeholder="postcard"
+                value={utm.source}
+                onChange={(e) => setUtmField("source")(e.target.value)}
+              />
+              <TextField
+                label="Medium"
+                placeholder="direct_mail"
+                value={utm.medium}
+                onChange={(e) => setUtmField("medium")(e.target.value)}
+              />
+              <TextField
+                label="Campaign"
+                placeholder="spring-farm"
+                value={utm.campaign}
+                onChange={(e) => setUtmField("campaign")(e.target.value)}
+              />
+            </div>
+            {qrPreview && (
+              <p className="mt-2 break-all text-[11px] text-zinc-500">
+                <span className="font-medium text-zinc-600">QR opens:</span>{" "}
+                {qrPreview}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="rounded-lg border border-zinc-200 p-3">

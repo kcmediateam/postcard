@@ -228,6 +228,8 @@ export interface CreateUploadedDesignInput {
   front_image_url: string;
   back_image_url: string;
   size?: PostcardSize;
+  /** Where the printed QR code links (incl. any UTM params). */
+  qr_url?: string;
   /** Per-design return ("From") address — overrides the profile's at send. */
   return_fields?: {
     return_name?: string;

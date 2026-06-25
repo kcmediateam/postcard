@@ -349,6 +349,7 @@ export const mockProvider: DataProvider = {
     }
     const fieldsObj: Record<string, unknown> = {};
     if (input.size) fieldsObj.size = input.size;
+    if (input.qr_url?.trim()) fieldsObj.qr_url = input.qr_url.trim();
     for (const [k, v] of Object.entries(input.return_fields ?? {})) {
       if (typeof v === "string" && v.trim()) fieldsObj[k] = v.trim();
     }

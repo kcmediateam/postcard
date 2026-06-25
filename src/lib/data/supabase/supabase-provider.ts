@@ -98,6 +98,7 @@ function uploadedDesignFields(
 ): Record<string, unknown> | null {
   const out: Record<string, unknown> = {};
   if (input.size) out.size = input.size;
+  if (input.qr_url?.trim()) out.qr_url = input.qr_url.trim();
   for (const [k, v] of Object.entries(input.return_fields ?? {})) {
     if (typeof v === "string" && v.trim()) out[k] = v.trim();
   }
