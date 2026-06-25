@@ -162,6 +162,9 @@ export interface DataProvider {
    * at Lob are unaffected; spent credits are not refunded. */
   deleteCampaign(campaignId: string): Promise<void>;
 
+  /** Public, read-only tracking link a client can use (no login). */
+  getCampaignShareUrl(campaignId: string): Promise<string>;
+
   /**
    * Demo convenience: populate a realistic completed campaign (with design,
    * verified list, delivered pieces, and scans) for the signed-in agent so the

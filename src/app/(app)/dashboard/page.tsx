@@ -291,6 +291,7 @@ function CampaignDetail({
   const [loaded, setLoaded] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncNote, setSyncNote] = useState<string | null>(null);
+  const [shareNote, setShareNote] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [p, designs] = await Promise.all([
@@ -305,6 +306,21 @@ function CampaignDetail({
   useEffect(() => {
     load();
   }, [load]);
+
+  async function share() {
+    setShareNote("Generating link…");
+    try {
+      const url = await db.getCampaignShareUrl(campaign.id);
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareNote("Link copied to clipboard!");
+      } catch {
+        setShareNote(url);
+      }
+    } catch (e) {
+      setShareNote(e instanceof Error ? e.message : "Could not create link.");
+    }
+  }
 
   async function remove() {
     if (
@@ -360,12 +376,21 @@ function CampaignDetail({
             >
               {campaign.status.replace("_", " ")}
             </span>
+            <Button variant="secondary" onClick={share}>
+              Share with client
+            </Button>
             <Button variant="danger" onClick={remove}>
               Delete
             </Button>
           </div>
         }
       />
+
+      {shareNote && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm text-brand-800">
+          <span className="break-all">{shareNote}</span>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[18rem_1fr]">
         {/* design preview */}

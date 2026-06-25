@@ -710,6 +710,12 @@ export const mockProvider: DataProvider = {
     return delay({ total, updated: 0 });
   },
 
+  async getCampaignShareUrl(campaignId: string): Promise<string> {
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "";
+    return delay(`${origin}/track/${campaignId}.mock`);
+  },
+
   async deleteCampaign(campaignId: string): Promise<void> {
     const db = loadDB();
     const userId = requireUserId(db);

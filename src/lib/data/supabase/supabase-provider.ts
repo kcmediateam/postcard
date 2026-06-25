@@ -598,6 +598,18 @@ export const supabaseProvider: DataProvider = {
     if (error) throw new Error(error.message);
   },
 
+  async getCampaignShareUrl(campaignId: string): Promise<string> {
+    const res = await fetch("/api/campaigns/share-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ campaignId }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.url)
+      throw new Error(json.error || "Could not create share link.");
+    return json.url as string;
+  },
+
   async syncCampaignStatus(campaignId: string) {
     const res = await fetch("/api/campaigns/sync", {
       method: "POST",
