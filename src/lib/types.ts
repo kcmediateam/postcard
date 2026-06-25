@@ -105,6 +105,8 @@ export interface DesignFields {
   features: string;
   // Lob postcard size (uploaded designs). Absent → 4x6.
   size?: PostcardSize;
+  // Printed layout style: "editorial" | "banner" | "service". Absent → editorial.
+  layout?: string;
 }
 
 export type AddressVerificationStatus =

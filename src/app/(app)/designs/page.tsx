@@ -13,6 +13,7 @@ import {
   PostcardPreview,
   PostcardSide,
 } from "@/components/postcard/postcard-side";
+import { PostcardHtmlPreview } from "@/components/postcard/postcard-html-preview";
 import { useData } from "@/lib/data/data-context";
 import {
   ACCENT_PRESETS,
@@ -21,6 +22,8 @@ import {
   FONTS,
   emptyFields,
   findTemplate,
+  designFromTemplate,
+  isHtmlLayout,
 } from "@/lib/templates";
 import type {
   Design,
@@ -230,15 +233,19 @@ export default function DesignsPage() {
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {templates.map((t) => (
             <Card key={t.id} className="overflow-hidden">
-              <PostcardPreview
-                kind={t.kind}
-                theme={t.theme}
-                accent={t.accent}
-                layout={t.layout}
-                fields={t.defaults}
-                side="front"
-                profile={null}
-              />
+              {isHtmlLayout(t.defaults) ? (
+                <PostcardHtmlPreview design={designFromTemplate(t)} side="front" />
+              ) : (
+                <PostcardPreview
+                  kind={t.kind}
+                  theme={t.theme}
+                  accent={t.accent}
+                  layout={t.layout}
+                  fields={t.defaults}
+                  side="front"
+                  profile={null}
+                />
+              )}
               <div className="px-3 py-3">
                 <div className="text-sm font-medium text-zinc-900">
                   {t.name}
@@ -450,6 +457,7 @@ function DesignCard({
   onResync: () => void;
   onDelete: () => void;
 }) {
+  const { session } = useData();
   const [side, setSide] = useState<"front" | "back">("front");
   const hasTwoSides = Boolean(d.back_image_url || d.source === "template");
   return (
@@ -460,7 +468,15 @@ function DesignCard({
           className="block w-full"
           title="Preview front & back"
         >
-          <PostcardSide design={d} side={side} />
+          {isHtmlLayout(d.fields) ? (
+            <PostcardHtmlPreview
+              design={d}
+              profile={session?.profile ?? null}
+              side={side}
+            />
+          ) : (
+            <PostcardSide design={d} side={side} />
+          )}
         </button>
         {hasTwoSides && (
           <div className="absolute right-2 top-2 flex gap-0.5 rounded-md bg-white/85 p-0.5 text-[10px] font-medium shadow-sm backdrop-blur">
@@ -569,6 +585,7 @@ function PreviewModal({
   design: Design | null;
   onClose: () => void;
 }) {
+  const { session } = useData();
   return (
     <Modal
       open={Boolean(design)}
@@ -584,7 +601,15 @@ function PreviewModal({
                 {side}
               </div>
               <div className="overflow-hidden rounded-lg border border-zinc-200">
-                <PostcardSide design={design} side={side} />
+                {isHtmlLayout(design.fields) ? (
+                  <PostcardHtmlPreview
+                    design={design}
+                    profile={session?.profile ?? null}
+                    side={side}
+                  />
+                ) : (
+                  <PostcardSide design={design} side={side} />
+                )}
               </div>
             </div>
           ))}
@@ -1062,16 +1087,37 @@ function PersonalizeEditor({
             </div>
           </div>
           <div className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
-            <PostcardPreview
-              kind={template.kind}
-              theme={template.theme}
-              accent={fields.accent || template.accent}
-              font={fields.font || DEFAULT_FONT}
-              layout={template.layout}
-              fields={fields}
-              side={side}
-              profile={profile}
-            />
+            {isHtmlLayout(fields) ? (
+              <PostcardHtmlPreview
+                design={
+                  {
+                    id: template.id,
+                    profile_id: "preview",
+                    name: template.name,
+                    source: "template",
+                    front_image_url: null,
+                    back_image_url: null,
+                    template_id: template.id,
+                    template_kind: template.kind,
+                    fields,
+                    created_at: "",
+                  } as Design
+                }
+                profile={profile}
+                side={side}
+              />
+            ) : (
+              <PostcardPreview
+                kind={template.kind}
+                theme={template.theme}
+                accent={fields.accent || template.accent}
+                font={fields.font || DEFAULT_FONT}
+                layout={template.layout}
+                fields={fields}
+                side={side}
+                profile={profile}
+              />
+            )}
           </div>
           {error && (
             <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

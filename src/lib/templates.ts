@@ -25,6 +25,28 @@ export function layoutFor(
   return tpl?.layout ?? DEFAULT_LAYOUT[kind];
 }
 
+/** Build a preview Design from a template (for gallery WYSIWYG previews). */
+export function designFromTemplate(t: Template): Design {
+  return {
+    id: t.id,
+    profile_id: "preview",
+    name: t.name,
+    source: "template",
+    front_image_url: null,
+    back_image_url: null,
+    template_id: t.id,
+    template_kind: t.kind,
+    fields: { ...t.defaults, accent: t.defaults.accent || t.accent },
+    created_at: "",
+  } as Design;
+}
+
+/** Templates whose printed layout is a premium HTML layout (WYSIWYG preview). */
+export function isHtmlLayout(fields: DesignFields | null | undefined): boolean {
+  const l = fields?.layout;
+  return l === "editorial" || l === "banner" || l === "service";
+}
+
 /** Default accent per kind (templates can override via `accent`). */
 export const KIND_ACCENT: Record<TemplateKind, string> = {
   just_listed: "#2249c9",
@@ -111,6 +133,85 @@ export const ACCENT_PRESETS = [
 ];
 
 export const TEMPLATES: Template[] = [
+  {
+    id: "tpl_for_sale_bold",
+    name: "For Sale · Bold",
+    kind: "just_listed",
+    theme: "dark",
+    accent: "#4F46E5",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "banner",
+      font: "geometric",
+      accent: "#4F46E5",
+      headline: "For Sale",
+      subhead: "123 Anywhere St., Any City",
+      property_address: "123 Anywhere St., Any City, ST 12345",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80",
+      return_company: "Lopez Brown Realty",
+      agent_name: "Avery Davis",
+      agent_phone: "(123) 456-7890",
+      body: "Get the first look before it's public. Scan to be notified the moment it goes live.",
+    },
+  },
+  {
+    id: "tpl_home_services",
+    name: "Home Services · Checklist",
+    kind: "neighbor_intro",
+    theme: "light",
+    accent: "#15803D",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "service",
+      font: "geometric",
+      accent: "#15803D",
+      headline: "Professional Lawn Maintenance",
+      subhead:
+        "Keep your yard looking its best all year long with expert care you can rely on.",
+      features:
+        "Precise mowing and trimming\nWeed control and removal\nEdging for a sharp, neat finish\nSeasonal upkeep and cleanup",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1558904541-efa843a96f01?w=1200&q=80",
+      return_company: "Keithston & Partners",
+      agent_phone: "(123) 456-7890",
+      property_address: "123 Anywhere St., Any City",
+      body: "Thinking about your yard this season? Reach out for a free quote — we'd love to help.",
+    },
+  },
+  {
+    id: "tpl_listing_editorial",
+    name: "Listing · Editorial",
+    kind: "just_listed",
+    theme: "dark",
+    accent: "#4F46E5",
+    layout: "showcase",
+    active: true,
+    defaults: {
+      ...emptyFields(),
+      layout: "editorial",
+      font: "editorial",
+      accent: "#4F46E5",
+      headline: "Just hit the market",
+      subhead: "A standout home in your neighborhood",
+      price: "$439,000",
+      beds: "4",
+      baths: "3",
+      sqft: "2,480",
+      property_address: "118 Maple Ridge Dr",
+      property_photo_url:
+        "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=80",
+      agent_name: "Jordan Avery",
+      agent_phone: "(913) 555-0142",
+      agent_email: "jordan@averyrealty.com",
+      return_company: "Avery Realty Group",
+      body: "A beautiful new home just hit the market nearby. Curious what your home is worth today? Scan the code for a free, no-pressure estimate.",
+    },
+  },
   {
     id: "tpl_new_listing",
     name: "New Listing · Photo",

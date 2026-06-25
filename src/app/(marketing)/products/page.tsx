@@ -2,7 +2,13 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { PostcardPreview } from "@/components/postcard/postcard-side";
-import { TEMPLATES, KIND_LABEL } from "@/lib/templates";
+import { PostcardHtmlPreview } from "@/components/postcard/postcard-html-preview";
+import {
+  TEMPLATES,
+  KIND_LABEL,
+  designFromTemplate,
+  isHtmlLayout,
+} from "@/lib/templates";
 
 export const metadata: Metadata = {
   title: "Products — Radiate",
@@ -45,15 +51,19 @@ export default function ProductsPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {TEMPLATES.filter((t) => t.active).map((t) => (
             <div key={t.id} className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
-              <PostcardPreview
-                kind={t.kind}
-                theme={t.theme}
-                accent={t.accent}
-                layout={t.layout}
-                fields={t.defaults}
-                side="front"
-                profile={null}
-              />
+              {isHtmlLayout(t.defaults) ? (
+                <PostcardHtmlPreview design={designFromTemplate(t)} side="front" />
+              ) : (
+                <PostcardPreview
+                  kind={t.kind}
+                  theme={t.theme}
+                  accent={t.accent}
+                  layout={t.layout}
+                  fields={t.defaults}
+                  side="front"
+                  profile={null}
+                />
+              )}
               <div className="px-4 py-3">
                 <div className="text-sm font-semibold text-zinc-900">
                   {t.name}
