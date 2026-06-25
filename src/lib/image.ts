@@ -30,6 +30,34 @@ export async function fileToDownscaledDataUrl(
   );
 }
 
+/**
+ * Resize a data-URL image to EXACTLY targetW × targetH using cover-fit
+ * (scale to fill, center-crop the overflow). Postcards are printed with bleed
+ * that gets trimmed, so a small edge crop is expected and correct — this makes
+ * any reasonable upload match Lob's strict size/ratio requirement for a size.
+ */
+export async function fitImageToExactDataUrl(
+  dataUrl: string,
+  targetW: number,
+  targetH: number,
+  quality = 0.92
+): Promise<string> {
+  const img = await loadImage(dataUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  // cover: scale so the image fills the target, then center it (cropping overflow)
+  const scale = Math.max(targetW / img.width, targetH / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, targetW, targetH);
+  ctx.drawImage(img, (targetW - w) / 2, (targetH - h) / 2, w, h);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

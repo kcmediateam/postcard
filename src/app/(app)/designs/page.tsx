@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/modal";
 import { PageHeader } from "@/components/ui/page-header";
 import { TextField } from "@/components/ui/text-field";
 import { ImageDrop } from "@/components/ui/image-drop";
+import { fitImageToExactDataUrl } from "@/lib/image";
 import {
   PostcardPreview,
   PostcardSide,
@@ -27,16 +28,18 @@ import type {
   Template,
 } from "@/lib/types";
 
-/** Upload size options + the print resolution Lob needs for each. */
+/** Upload size options + the EXACT print resolution Lob needs for each
+ * (landscape width × height, including Lob's 0.125in bleed). Uploaded art is
+ * auto-resized to these exact dimensions, so any reasonable image works. */
 const UPLOAD_SIZES: {
   value: PostcardSize;
   label: string;
-  px: string;
-  maxDim: number;
+  w: number;
+  h: number;
 }[] = [
-  { value: "4x6", label: "4 × 6", px: "1875 × 1275px", maxDim: 2100 },
-  { value: "6x9", label: "6 × 9", px: "2775 × 1875px", maxDim: 3000 },
-  { value: "6x11", label: "6 × 11", px: "3375 × 1875px", maxDim: 3600 },
+  { value: "4x6", label: "4 × 6", w: 1875, h: 1275 },
+  { value: "6x9", label: "6 × 9", w: 2775, h: 1875 },
+  { value: "6x11", label: "6 × 11", w: 3375, h: 1875 },
 ];
 
 /**
@@ -1097,6 +1100,7 @@ function UploadModal({
   const [saving, setSaving] = useState(false);
 
   const spec = UPLOAD_SIZES.find((s) => s.value === size) ?? UPLOAD_SIZES[0];
+  const specPx = `${spec.w} × ${spec.h}px`;
 
   function resetAndClose() {
     setName("");
@@ -1114,10 +1118,15 @@ function UploadModal({
     if (!front || !back) return setError("Upload both a front and a back image.");
     setSaving(true);
     try {
+      // Auto-fit both sides to Lob's exact required dimensions for this size.
+      const [frontFit, backFit] = await Promise.all([
+        fitImageToExactDataUrl(front, spec.w, spec.h),
+        fitImageToExactDataUrl(back, spec.w, spec.h),
+      ]);
       await db.createDesignFromUpload({
         name,
-        front_image_url: front,
-        back_image_url: back,
+        front_image_url: frontFit,
+        back_image_url: backFit,
         size,
       });
       resetAndClose();
@@ -1154,12 +1163,13 @@ function UploadModal({
                 }`}
               >
                 <div className="font-medium text-zinc-800">{s.label}</div>
-                <div className="text-[11px] text-zinc-500">{s.px}</div>
+                <div className="text-[11px] text-zinc-500">{`${s.w} × ${s.h}px`}</div>
               </button>
             ))}
           </div>
           <p className="mt-1.5 text-xs text-zinc-500">
-            Upload art at least {spec.px} (300 DPI). Lob rejects anything smaller.
+            We auto-fit your art to {specPx} (landscape) for Lob — upload a
+            high-resolution image and we handle the exact sizing.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1167,15 +1177,15 @@ function UploadModal({
             label="Front"
             value={front}
             onChange={setFront}
-            maxDim={spec.maxDim}
-            hint={`≥ ${spec.px} (PNG/JPG)`}
+            maxDim={4000}
+            hint="Landscape, high-res PNG/JPG"
           />
           <ImageDrop
             label="Back"
             value={back}
             onChange={setBack}
-            maxDim={spec.maxDim}
-            hint={`≥ ${spec.px} (PNG/JPG)`}
+            maxDim={4000}
+            hint="Landscape, high-res PNG/JPG"
           />
         </div>
         {error && (
