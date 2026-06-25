@@ -21,6 +21,15 @@ function pct(n: number, d: number): number {
   return d > 0 ? Math.round((n / d) * 100) : 0;
 }
 
+// Per-piece (mail_piece) status → friendly label + chip color.
+const PIECE_STATUS: Record<string, { label: string; cls: string }> = {
+  created: { label: "Printing", cls: "bg-amber-100 text-amber-700" },
+  in_transit: { label: "In transit", cls: "bg-brand-50 text-brand-700" },
+  delivered: { label: "Delivered", cls: "bg-green-100 text-green-700" },
+  returned: { label: "Returned", cls: "bg-red-100 text-red-700" },
+  failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
+};
+
 const STATUS_STYLES: Record<CampaignStatus, string> = {
   draft: "bg-zinc-100 text-zinc-600",
   scheduled: "bg-brand-50 text-brand-700",
@@ -368,8 +377,14 @@ function CampaignDetail({
                         {p.contact_name}
                       </td>
                       <td className="px-5 py-3">
-                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium capitalize text-zinc-600">
-                          {p.status.replace("_", " ")}
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            PIECE_STATUS[p.status]?.cls ??
+                            "bg-zinc-100 text-zinc-600"
+                          }`}
+                        >
+                          {PIECE_STATUS[p.status]?.label ??
+                            p.status.replace("_", " ")}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right tabular-nums text-zinc-700">

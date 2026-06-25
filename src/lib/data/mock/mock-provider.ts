@@ -347,6 +347,11 @@ export const mockProvider: DataProvider = {
     if (!input.front_image_url || !input.back_image_url) {
       throw new Error("Both front and back images are required.");
     }
+    const fieldsObj: Record<string, unknown> = {};
+    if (input.size) fieldsObj.size = input.size;
+    for (const [k, v] of Object.entries(input.return_fields ?? {})) {
+      if (typeof v === "string" && v.trim()) fieldsObj[k] = v.trim();
+    }
     const design: Design = {
       id: uid("design"),
       profile_id: userId,
@@ -356,7 +361,9 @@ export const mockProvider: DataProvider = {
       back_image_url: input.back_image_url,
       template_id: null,
       template_kind: null,
-      fields: input.size ? ({ size: input.size } as Design["fields"]) : null,
+      fields: Object.keys(fieldsObj).length
+        ? (fieldsObj as unknown as Design["fields"])
+        : null,
       external_edit_url: null,
       created_at: nowIso(),
     };

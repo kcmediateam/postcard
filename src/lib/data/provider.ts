@@ -218,6 +218,15 @@ export interface CreateUploadedDesignInput {
   front_image_url: string;
   back_image_url: string;
   size?: PostcardSize;
+  /** Per-design return ("From") address — overrides the profile's at send. */
+  return_fields?: {
+    return_name?: string;
+    return_company?: string;
+    return_line1?: string;
+    return_city?: string;
+    return_state?: string;
+    return_zip?: string;
+  };
 }
 
 export interface CreateTemplateDesignInput {

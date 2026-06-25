@@ -1096,17 +1096,35 @@ function UploadModal({
   const [size, setSize] = useState<PostcardSize>("4x6");
   const [front, setFront] = useState<string | null>(null);
   const [back, setBack] = useState<string | null>(null);
+  const [ret, setRet] = useState({
+    return_name: "",
+    return_company: "",
+    return_line1: "",
+    return_city: "",
+    return_state: "",
+    return_zip: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const spec = UPLOAD_SIZES.find((s) => s.value === size) ?? UPLOAD_SIZES[0];
   const specPx = `${spec.w} × ${spec.h}px`;
+  const setRetField = (k: keyof typeof ret) => (v: string) =>
+    setRet((r) => ({ ...r, [k]: v }));
 
   function resetAndClose() {
     setName("");
     setSize("4x6");
     setFront(null);
     setBack(null);
+    setRet({
+      return_name: "",
+      return_company: "",
+      return_line1: "",
+      return_city: "",
+      return_state: "",
+      return_zip: "",
+    });
     setError(null);
     setSaving(false);
     onClose();
@@ -1128,6 +1146,7 @@ function UploadModal({
         front_image_url: frontFit,
         back_image_url: backFit,
         size,
+        return_fields: ret,
       });
       resetAndClose();
       await onCreated();
@@ -1188,6 +1207,60 @@ function UploadModal({
             hint="Landscape, high-res PNG/JPG"
           />
         </div>
+
+        <div className="rounded-lg border border-zinc-200 p-3">
+          <div className="text-sm font-medium text-zinc-700">
+            Return (“From”) address
+          </div>
+          <p className="mt-0.5 mb-2.5 text-xs text-zinc-500">
+            Printed as the sender on every card for this design. Set your
+            client&rsquo;s address here. Leave blank to use your profile&rsquo;s
+            return address.
+          </p>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            <TextField
+              label="Name"
+              placeholder="Jane Agent"
+              value={ret.return_name}
+              onChange={(e) => setRetField("return_name")(e.target.value)}
+            />
+            <TextField
+              label="Company (optional)"
+              placeholder="Jane Realty"
+              value={ret.return_company}
+              onChange={(e) => setRetField("return_company")(e.target.value)}
+            />
+            <div className="sm:col-span-2">
+              <TextField
+                label="Street address"
+                placeholder="123 Main St"
+                value={ret.return_line1}
+                onChange={(e) => setRetField("return_line1")(e.target.value)}
+              />
+            </div>
+            <TextField
+              label="City"
+              placeholder="Overland Park"
+              value={ret.return_city}
+              onChange={(e) => setRetField("return_city")(e.target.value)}
+            />
+            <div className="grid grid-cols-2 gap-2.5">
+              <TextField
+                label="State"
+                placeholder="KS"
+                value={ret.return_state}
+                onChange={(e) => setRetField("return_state")(e.target.value)}
+              />
+              <TextField
+                label="ZIP"
+                placeholder="66061"
+                value={ret.return_zip}
+                onChange={(e) => setRetField("return_zip")(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}

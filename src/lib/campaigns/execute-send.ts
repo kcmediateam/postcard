@@ -172,7 +172,9 @@ export async function executeCampaignSend(campaignId: string): Promise<SendOutco
       contact_id: r.value.contact.id,
       profile_id: uid,
       lob_id: r.value.lobId,
-      status: "in_transit",
+      // Just created at Lob — it prints first, then Lob webhooks advance it
+      // to in_transit → delivered.
+      status: "created",
       scan_count: 0,
     }));
   const failed = results.length - newPieces.length;

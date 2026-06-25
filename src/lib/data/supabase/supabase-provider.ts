@@ -92,6 +92,18 @@ async function uploadImage(dataUrl: string, uid: string): Promise<string> {
   return sb().storage.from("designs").getPublicUrl(path).data.publicUrl;
 }
 
+/** Build the jsonb `fields` for an uploaded design (size + return address). */
+function uploadedDesignFields(
+  input: CreateUploadedDesignInput
+): Record<string, unknown> | null {
+  const out: Record<string, unknown> = {};
+  if (input.size) out.size = input.size;
+  for (const [k, v] of Object.entries(input.return_fields ?? {})) {
+    if (typeof v === "string" && v.trim()) out[k] = v.trim();
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 /** Upload any data-URL photos inside design fields, returning URL-only fields. */
 async function persistFieldImages(
   fields: DesignFields,
@@ -288,7 +300,7 @@ export const supabaseProvider: DataProvider = {
         back_image_url: back,
         template_id: null,
         template_kind: null,
-        fields: input.size ? { size: input.size } : null,
+        fields: uploadedDesignFields(input),
       })
       .select("*")
       .single();
